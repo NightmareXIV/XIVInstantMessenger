@@ -36,6 +36,10 @@ namespace Messenger.Gui
 
         public override void Draw()
         {
+            if (P.config.QuickOpenButtonOnTop)
+            {
+                Native.igBringWindowToDisplayFront(Native.igGetCurrentWindow());
+            }
             ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);

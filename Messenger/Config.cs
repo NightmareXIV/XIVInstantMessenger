@@ -59,5 +59,6 @@ namespace Messenger
         public string AddonName = "_NaviMap";
         public bool CycleChatHotkey = false;
         public bool SuppressDMs = true;
+        public bool QuickOpenButtonOnTop = true;
     }
 }
