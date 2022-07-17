@@ -1,0 +1,12 @@
+﻿{
+  "Author": "Eternita",
+  "Name": "XIV Instant Messenger",
+  "InternalName": "Messenger",
+  "AssemblyVersion": "9.0.0.0",
+  "Description": "",
+  "ApplicableVersion": "any",
+  "DalamudApiLevel": 6,
+  "LoadPriority": 0,
+  "ImageUrls": [],
+  "Punchline": "A direct message manager made in fashion of WoW Instant Messenger."
+}

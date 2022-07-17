@@ -1,0 +1,72 @@
+﻿using System.IO;
+
+namespace Messenger.Gui.Settings;
+
+internal static class TabHistory
+{
+    internal static volatile bool LoadingFinished = false;
+    internal static volatile bool LoadingRequested = true;
+    static List<Sender> fileChatList = new();
+    static string search = "";
+
+    internal static void Draw()
+    {
+        if (LoadingRequested)
+        {
+            LoadingRequested = false;
+            PluginLog.Information("Loading chats from files");
+            Task.Run(delegate
+            {
+                Safe(delegate
+                {
+                    var files = Directory.GetFiles(Svc.PluginInterface.GetPluginConfigDirectory());
+                    foreach (var file in files)
+                    {
+                        var fileInfo = new FileInfo(file);
+                        if (file.EndsWith(".txt") && file.Contains("@") && fileInfo.Length > 0)
+                        {
+                            var t = fileInfo.Name.Replace(".txt", "").Split("@");
+                            if (TryGetWorldByName(t[1], out var world))
+                            {
+                                fileChatList.Add(new() { Name = t[0], HomeWorld = world.RowId });
+                            }
+                        }
+                    }
+                });
+                LoadingFinished = true;
+            });
+        }
+
+        if (!LoadingFinished)
+        {
+            ImGuiEx.Text("Loading...");
+        }
+        else
+        {
+            ImGuiEx.SetNextItemFullWidth();
+            ImGui.InputTextWithHint("##fltr", "Filter...", ref search, 50);
+            foreach (var x in P.Chats)
+            {
+                if (search.Length > 0 && !x.Key.GetPlayerName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
+                if (ImGui.Selectable($"{x.Key.GetPlayerName()} ({x.Value.Messages.Count(x => !x.IsSystem)} messages)"))
+                {
+                    P.OpenMessenger(x.Key, true);
+                    P.Chats[x.Key].SetFocus = true;
+                }
+            }
+            ImGuiEx.WithTextColor(ImGuiColors.DalamudGrey2, delegate
+            {
+                foreach (var x in fileChatList)
+                {
+                    if (search.Length > 0 && !x.GetPlayerName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!P.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetPlayerName()} (unloaded)"))
+                    {
+                        P.OpenMessenger(x, true);
+                        P.Chats[x].SetFocus = true;
+                    }
+                }
+            });
+
+        }
+    }
+}
