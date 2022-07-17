@@ -45,7 +45,6 @@ namespace Messenger
             ECommons.ECommons.Init(pi);
             new TickScheduler(delegate
             {
-
                 config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
                 Svc.Chat.ChatMessage += OnChatMessage;
                 gameFunctions = new();
@@ -83,6 +82,10 @@ namespace Messenger
                 if (P.config.FontType == FontType.Game)
                 {
                     Svc.PluginInterface.UiBuilder.GetGameFontHandle(new(P.config.Font));
+                }
+                if(P.config.SuppressDMs && (Svc.PluginInterface.Reason == PluginLoadReason.Installer || Svc.PluginInterface.Reason == PluginLoadReason.Update))
+                {
+                    DuoLog.Warning("XIM is currently configured to hide DMs from normal game chat. You may change this behavior in settings.\n/xim - open settings.");
                 }
             });
         }
@@ -317,6 +320,10 @@ namespace Messenger
                             History = history,
                             Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {message.ToString()}"
                         });
+                        if (P.config.SuppressDMs)
+                        {
+                            isHandled = true;
+                        }
                     }
                     RecentReceiver = null;
                 }
@@ -362,6 +369,10 @@ namespace Messenger
                             History = Chats[s],
                             Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {(type == XivChatType.TellIncoming? s.GetPlayerName():Svc.ClientState.LocalPlayer?.GetPlayerName())}: {message.ToString()}"
                         });
+                        if (P.config.SuppressDMs)
+                        {
+                            isHandled = true;
+                        }
                     }
                     var idx = gameFunctions.GetCurrentChatLogEntryIndex();
                     if (idx != null)

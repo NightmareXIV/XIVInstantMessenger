@@ -8,5 +8,6 @@
   "DalamudApiLevel": 6,
   "LoadPriority": 0,
   "ImageUrls": [],
-  "Punchline": "A direct message manager made in fashion of WoW Instant Messenger."
+  "Punchline": "A direct message manager made in fashion of WoW Instant Messenger.",
+  "RepoUrl": "https://github.com/Eternita-S/XIVInstantMessenger"
 }

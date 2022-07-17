@@ -21,6 +21,7 @@
             {
                 ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref P.config.AutoFocusTellOutgoing);
             }
+            ImGui.Checkbox("Hide DMs from in-game chat", ref P.config.SuppressDMs);
             ImGui.Checkbox("Display quick open button", ref P.config.QuickOpenButton);
             if (P.config.QuickOpenButton)
             {
