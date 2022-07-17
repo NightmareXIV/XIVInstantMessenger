@@ -59,7 +59,7 @@ internal sealed unsafe class PartyFunctions : IDisposable
         fixed (byte* namePtr = name.ToTerminatedBytes())
         {
             // this only works if target is on the same world
-            InviteToPartyDetour(a1, contentId, namePtr, world);
+            InviteToPartyHook.Original(a1, contentId, namePtr, world);
         }
     }
     internal void InviteOtherWorld(ulong contentId, ushort world)
@@ -73,7 +73,7 @@ internal sealed unsafe class PartyFunctions : IDisposable
             // pass 0 and it will work on any world EXCEPT for the world the
             // current player is on
             // but maybe actually don't do such a thing and do it like game does?
-            InviteToPartyCrossWorldDetour(a1, contentId, world);
+            InviteToPartyCrossWorldHook.Original(a1, contentId, world);
         }
     }
 }
