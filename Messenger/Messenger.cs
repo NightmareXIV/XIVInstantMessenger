@@ -17,7 +17,7 @@ namespace Messenger
 {
     public unsafe class Messenger : IDalamudPlugin
     {
-        public string Name => "FFXIV Instant Messenger";
+        public string Name => "XIV Instant Messenger";
         internal static Messenger P;
         internal GameFunctions gameFunctions;
         internal WindowSystem ws;
@@ -56,7 +56,7 @@ namespace Messenger
                 Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { guiSettings.IsOpen = true; };
                 Svc.Commands.AddHandler("/xim", new(OnCommand)
                 {
-                    HelpMessage = "open main control window\n/msg h|hide → temporarily hide/show all message windows\n/msg c|close → close all active windows and reset cascading positions",
+                    HelpMessage = "open main control window\n/xim h|hide → temporarily hide/show all message windows\n/xim c|close → close all active windows and reset cascading positions\n/xim <partial player name> - attempt to open chat history with specified player",
                 });
                 Svc.Commands.AddHandler("/msg", new(OnCommand) { HelpMessage = "Alias" });
                 chat = new();
