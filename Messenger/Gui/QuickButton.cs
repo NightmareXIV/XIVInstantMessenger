@@ -9,6 +9,7 @@ namespace Messenger.Gui
             , true)
         {
             this.IsOpen = true;
+            this.RespectCloseHotkey = false;
         }
 
         public override bool DrawConditions()

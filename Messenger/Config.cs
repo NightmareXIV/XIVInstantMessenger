@@ -49,7 +49,7 @@ namespace Messenger
         public bool ClickToOpenLink = true;
         public bool NoBringWindowToFrontIfTyping = true;
         public bool AutoTarget = true;
-        public Sounds IncomingTellSound = Sounds.None;
+        public Sounds IncomingTellSound = Sounds.Sound01;
         public FontType FontType = FontType.Game;
         public GameFontFamilyAndSize Font = GameFontFamilyAndSize.Axis14;
         public ExtraGlyphRanges ExtraGlyphRanges;

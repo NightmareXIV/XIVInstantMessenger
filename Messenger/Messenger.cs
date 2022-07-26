@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
 using ECommons.Automation;
+using ExposedObject;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
@@ -38,6 +39,7 @@ namespace Messenger
         internal Dictionary<float, string> whitespaceForLen = new();
         internal GameFontHandle CustomAxis;
         internal Sender LastReceivedMessage;
+        internal static dynamic ImGuiExposed;
 
         public Messenger(DalamudPluginInterface pi)
         {
@@ -45,6 +47,7 @@ namespace Messenger
             ECommons.ECommons.Init(pi);
             new TickScheduler(delegate
             {
+                ImGuiExposed = Exposed.From(typeof(ImGui));
                 config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
                 Svc.Chat.ChatMessage += OnChatMessage;
                 gameFunctions = new();
@@ -235,7 +238,7 @@ namespace Messenger
         {
             if (P.config.EnableKey)
             {
-                if ((ImGui.IsKeyPressed((int)P.config.Key, false) || Svc.KeyState.GetRawValue(P.config.Key) != 0) 
+                if ((ImGuiExposed.IsKeyPressed((int)P.config.Key, false) || Svc.KeyState.GetRawValue(P.config.Key) != 0) 
                     && ModifierKeyMatch(P.config.ModifierKey))
                 {
                     Svc.KeyState.SetRawValue(P.config.Key, 0);
