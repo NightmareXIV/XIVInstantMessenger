@@ -60,5 +60,6 @@ namespace Messenger
         public bool CycleChatHotkey = false;
         public bool SuppressDMs = true;
         public bool QuickOpenButtonOnTop = true;
+        public bool Tabs = false;
     }
 }

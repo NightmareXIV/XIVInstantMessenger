@@ -12,6 +12,7 @@ using Messenger.FriendListManager;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 
 namespace Messenger
@@ -22,6 +23,7 @@ namespace Messenger
         internal static Messenger P;
         internal GameFunctions gameFunctions;
         internal WindowSystem ws;
+        internal WindowSystem wsChats;
         internal GuiSettings guiSettings;
         internal Chat chat;
         internal Dictionary<Sender, MessageHistory> Chats = new();
@@ -40,6 +42,7 @@ namespace Messenger
         internal GameFontHandle CustomAxis;
         internal Sender LastReceivedMessage;
         internal static dynamic ImGuiExposed;
+        internal TabSystem tabSystem;
 
         public Messenger(DalamudPluginInterface pi)
         {
@@ -52,6 +55,7 @@ namespace Messenger
                 Svc.Chat.ChatMessage += OnChatMessage;
                 gameFunctions = new();
                 ws = new();
+                wsChats = new();
                 guiSettings = new();
                 ws.AddWindow(guiSettings);
                 Svc.PluginInterface.UiBuilder.Draw += ws.Draw;
@@ -90,6 +94,9 @@ namespace Messenger
                 {
                     DuoLog.Warning("XIM is currently configured to hide DMs from normal game chat. You may change this behavior in settings.\n/xim - open settings.");
                 }
+                tabSystem = new();
+                ws.AddWindow(tabSystem);
+                Tabs(P.config.Tabs);
             });
         }
 
@@ -99,6 +106,7 @@ namespace Messenger
             Safe(() => Svc.PluginInterface.SavePluginConfig(config));
             Svc.Chat.ChatMessage -= OnChatMessage;
             Svc.PluginInterface.UiBuilder.Draw -= ws.Draw;
+            Svc.PluginInterface.UiBuilder.Draw -= wsChats.Draw;
             Svc.Commands.RemoveHandler("/msg");
             Svc.Commands.RemoveHandler("/xim");
             Safe(gameFunctions.Dispose);
@@ -108,6 +116,18 @@ namespace Messenger
             Safe(partyFunctions.Dispose);
             if(fontManager != null) Safe(fontManager.Dispose);
             ECommons.ECommons.Dispose();
+        }
+
+        internal void Tabs(bool useTabs)
+        {
+            if (useTabs)
+            {
+                Svc.PluginInterface.UiBuilder.Draw -= wsChats.Draw;
+            }
+            else
+            {
+                Svc.PluginInterface.UiBuilder.Draw += wsChats.Draw;
+            }
         }
 
         internal MessageHistory GetPreviousMessageHistory(MessageHistory current)

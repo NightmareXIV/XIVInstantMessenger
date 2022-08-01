@@ -9,7 +9,7 @@ namespace Messenger.Gui
     internal unsafe class ChatWindow : Window
     {
         static int CascadingPosition = 0;
-        MessageHistory messageHistory;
+        internal MessageHistory messageHistory;
         float fieldHeight = 0;
         float afterInputWidth = 0;
         string msg = "";
@@ -18,7 +18,7 @@ namespace Messenger.Gui
         bool TitleColored = false;
         float Transparency = P.config.TransMax;
         bool IsTransparent = true;
-        bool SetPosition = false;
+        internal bool SetPosition = false;
         internal bool BringToFront = false;
         bool fontPushed;
 

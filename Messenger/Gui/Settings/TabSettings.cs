@@ -12,6 +12,10 @@
                         ShellStart(Svc.PluginInterface.GetPluginConfigDirectory());
                     }
                     ImGui.Checkbox("Enable context menu integration", ref P.config.ContextMenuEnable);
+                    if(ImGui.Checkbox("Enable tabs", ref P.config.Tabs))
+                    {
+                        P.Tabs(P.config.Tabs);
+                    }
                 }, null, true),
                 ("Behavior", delegate
                 {

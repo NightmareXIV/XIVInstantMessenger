@@ -32,7 +32,7 @@ namespace Messenger
         void Init()
         {
             chatWindow = new(this);
-            P.ws.AddWindow(chatWindow);
+            P.wsChats.AddWindow(chatWindow);
 
             LogFile = Path.Combine(Svc.PluginInterface.GetPluginConfigDirectory(), Player.GetPlayerName() + ".txt");
             var subject = Player.GetPlayerName();
