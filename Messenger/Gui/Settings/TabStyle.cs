@@ -5,12 +5,12 @@
 
         internal static void Draw()
         {
-            ImGui.ColorEdit4("Generic text color", ref P.config.ColorGeneric, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
-            ImGui.ColorEdit4("Incoming messages: sender color", ref P.config.ColorFromTitle, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
-            ImGui.ColorEdit4("Incoming messages: message color", ref P.config.ColorFromMessage, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
-            ImGui.ColorEdit4("Outgoing messages: sender color", ref P.config.ColorToTitle, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
-            ImGui.ColorEdit4("Outgoing messages: message color", ref P.config.ColorToMessage, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
-            ImGui.ColorEdit4("Unread message flashing title color", ref P.config.ColorTitleFlash, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
+            ImGui.ColorEdit4("Generic text color", ref P.config.ColorGeneric, ImGuiColorEditFlags.NoInputs);
+            ImGui.ColorEdit4("Incoming messages: sender color", ref P.config.ColorFromTitle, ImGuiColorEditFlags.NoInputs);
+            ImGui.ColorEdit4("Incoming messages: message color", ref P.config.ColorFromMessage, ImGuiColorEditFlags.NoInputs);
+            ImGui.ColorEdit4("Outgoing messages: sender color", ref P.config.ColorToTitle, ImGuiColorEditFlags.NoInputs);
+            ImGui.ColorEdit4("Outgoing messages: message color", ref P.config.ColorToMessage, ImGuiColorEditFlags.NoInputs);
+            ImGui.ColorEdit4("Unread message flashing title color", ref P.config.ColorTitleFlash, ImGuiColorEditFlags.NoInputs);
             ImGui.Checkbox("IRC-style chat", ref P.config.IRCStyle);
             ImGui.Checkbox("Print date when new day of messages starts", ref P.config.PrintDate);
             ImGui.Separator();

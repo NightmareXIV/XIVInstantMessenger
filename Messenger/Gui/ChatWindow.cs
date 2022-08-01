@@ -87,10 +87,10 @@ namespace Messenger.Gui
             if (Unread && Environment.TickCount % 1000 > 500)
             {
                 TitleColored = true;
-                ImGuiTrans.PushStyleColor(ImGuiCol.TitleBg, P.config.ColorTitleFlash);
-                ImGuiTrans.PushStyleColor(ImGuiCol.TitleBgCollapsed, P.config.ColorTitleFlash);
+                ImGui.PushStyleColor(ImGuiCol.TitleBg, P.config.ColorTitleFlash);
+                ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, P.config.ColorTitleFlash);
             }
-            if(IsTransparent) ImGuiTrans.PushTransparency(Transparency);
+            if(IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
             if (SetPosition)
             {
                 SetPosition = false;
@@ -108,26 +108,7 @@ namespace Messenger.Gui
                     }
                 }
             }
-            fontPushed = false;
-            if (P.config.FontType == FontType.Game)
-            {
-                var font = Svc.PluginInterface.UiBuilder.GetGameFontHandle(new(P.config.Font));
-                if (font != null && font.Available)
-                {
-                    ImGui.PushFont(font.ImFont);
-                    fontPushed = true;
-                }
-            }
-            else if (P.config.FontType == FontType.System && P.fontManager != null && P.fontManager.CustomFont != null)
-            {
-                ImGui.PushFont(P.fontManager.CustomFont.Value);
-                fontPushed = true;
-            }
-            else if (P.config.FontType == FontType.Game_with_custom_size && P.CustomAxis != null && P.CustomAxis.Available)
-            {
-                ImGui.PushFont(P.CustomAxis.ImFont);
-                fontPushed = true;
-            }
+            fontPushed = FontPusher.PushConfiguredFont();
         }
 
         public override void Draw()
@@ -143,7 +124,7 @@ namespace Messenger.Gui
             }
             else
             {
-                if (ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows))
+                if (ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
                 {
                     Transparency = Math.Min(P.config.TransMax, Transparency + P.config.TransDelta);
                 }
@@ -180,7 +161,7 @@ namespace Messenger.Gui
             {
                 if (x.IsSystem)
                 {
-                    ImGuiTrans.TextWrapped(P.config.ColorGeneric, $"{x.Message}");
+                    ImGuiEx.TextWrapped(P.config.ColorGeneric, $"{x.Message}");
                 }
                 else
                 {
@@ -189,7 +170,7 @@ namespace Messenger.Gui
                     {
                         if (!(time.DayOfYear == currentDay.day && time.Year == currentDay.year))
                         {
-                            ImGuiTrans.Text(P.config.ColorGeneric, $"[{time.ToString(P.config.DateFormat)}]");
+                            ImGuiEx.Text(P.config.ColorGeneric, $"[{time.ToString(P.config.DateFormat)}]");
                             currentDay = (time.Year, time.DayOfYear);
                         }
                     }
@@ -201,17 +182,17 @@ namespace Messenger.Gui
                         var cur1 = ImGui.GetCursorPos();
                         var wdt = ImGuiEx.Measure(delegate
                         {
-                            ImGuiTrans.Text(P.config.ColorGeneric, $"{timestamp} ");
+                            ImGuiEx.Text(P.config.ColorGeneric, $"{timestamp} ");
                             ImGui.SameLine(0, 0);
-                            ImGuiTrans.Text(messageColor, $"[");
+                            ImGuiEx.Text(messageColor, $"[");
                             ImGui.SameLine(0, 0);
-                            ImGuiTrans.Text(subjectColor, $"{x.OverrideName?.Split("@")[0] ?? (x.IsIncoming ? subjectNoWorld : me)}");
+                            ImGuiEx.Text(subjectColor, $"{x.OverrideName?.Split("@")[0] ?? (x.IsIncoming ? subjectNoWorld : me)}");
                             ImGui.SameLine(0, 0);
-                            ImGuiTrans.Text(messageColor, $"] ");
+                            ImGuiEx.Text(messageColor, $"] ");
                         }, false);
                         
                         var spaces = P.GetWhitespacesForLen(wdt);
-                        ImGuiTrans.PushStyleColor(ImGuiCol.Text, messageColor);
+                        ImGui.PushStyleColor(ImGuiCol.Text, messageColor);
                         ImGui.SetCursorPos(cur1);
                         ImGuiEx.TextWrapped($"{spaces} {x.Message}");
                         PostMessageFunctions(x);
@@ -224,16 +205,16 @@ namespace Messenger.Gui
                             isIncoming = x.IsIncoming;
                             if (x.IsIncoming)
                             {
-                                ImGuiTrans.TextWrapped(P.config.ColorFromTitle, $"From {x.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
+                                ImGuiEx.TextWrapped(P.config.ColorFromTitle, $"From {x.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
                             }
                             else
                             {
-                                ImGuiTrans.TextWrapped(P.config.ColorToTitle, $"From {x.OverrideName?.Split("@")[0] ?? me}");
+                                ImGuiEx.TextWrapped(P.config.ColorToTitle, $"From {x.OverrideName?.Split("@")[0] ?? me}");
                             }
                         }
                         ImGuiHelpers.ScaledDummy(new Vector2(20f, 1f));
                         ImGui.SameLine(0, 0);
-                        ImGuiTrans.TextWrapped(x.IsIncoming ? P.config.ColorFromMessage : P.config.ColorToMessage, $"[{timestamp}] {x.Message}");
+                        ImGuiEx.TextWrapped(x.IsIncoming ? P.config.ColorFromMessage : P.config.ColorToMessage, $"[{timestamp}] {x.Message}");
                         PostMessageFunctions(x);
                     }
                 }
@@ -251,7 +232,7 @@ namespace Messenger.Gui
             if (isCmd)
             {
                 inputCol = true;
-                ImGuiTrans.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.TitleBgActive] with { W = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg].W });
+                ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.TitleBgActive] with { W = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg].W });
             }
             var cur = ImGui.GetCursorPosY();
             if (ImGui.InputText("##outgoing", ref msg, 500, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -411,7 +392,7 @@ namespace Messenger.Gui
             ImGui.Dummy(Vector2.Zero);
             var bytes = P.GetLength(subject, msg);
             var fraction = (float)bytes.current / (float)bytes.max;
-            ImGuiTrans.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f?ImGuiColors.DalamudRed:P.config.ColorGeneric);
+            ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f?ImGuiColors.DalamudRed:P.config.ColorGeneric);
             ImGui.ProgressBar(fraction, new Vector2(ImGui.GetContentRegionAvail().X, 3f), "");
             ImGui.PopStyleColor();
             fieldHeight = ImGui.GetCursorPosY() - cursor;
@@ -446,7 +427,7 @@ namespace Messenger.Gui
             if (ImGui.BeginPopup($"MessageDetail{x.GUID}"))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, P.config.ColorGeneric);
-                this.SetTransparency(false);
+                //this.SetTransparency(false);
                 ImGui.SetNextItemWidth(400f);
                 var msg = x.Message;
                 ImGui.InputText("##copyTextMsg", ref msg, 10000);
@@ -483,7 +464,7 @@ namespace Messenger.Gui
             {
                 ImGui.PopFont();
             }
-            if (IsTransparent) ImGuiTrans.PopTransparency();
+            if (IsTransparent) ImGui.PopStyleVar();
             if (TitleColored)
             {
                 ImGui.PopStyleColor(2);

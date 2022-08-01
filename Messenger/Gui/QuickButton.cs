@@ -47,7 +47,7 @@ namespace Messenger.Gui
             var col = false;
             if(P.Hidden && Environment.TickCount % 1000 > 500)
             {
-                ImGuiTrans.PushStyleColor(ImGuiCol.Text, P.config.ColorTitleFlash);
+                ImGui.PushStyleColor(ImGuiCol.Text, P.config.ColorTitleFlash);
                 col = true;
             }
             if (ImGuiEx.IconButton(FontAwesomeIcon.MailBulk))
