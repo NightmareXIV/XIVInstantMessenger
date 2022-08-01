@@ -61,5 +61,6 @@ namespace Messenger
         public bool SuppressDMs = true;
         public bool QuickOpenButtonOnTop = true;
         public bool Tabs = false;
+        public bool ColorTitleFlashTab = true;
     }
 }

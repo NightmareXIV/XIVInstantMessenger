@@ -11,6 +11,7 @@
             ImGui.ColorEdit4("Outgoing messages: sender color", ref P.config.ColorToTitle, ImGuiColorEditFlags.NoInputs);
             ImGui.ColorEdit4("Outgoing messages: message color", ref P.config.ColorToMessage, ImGuiColorEditFlags.NoInputs);
             ImGui.ColorEdit4("Unread message flashing title color", ref P.config.ColorTitleFlash, ImGuiColorEditFlags.NoInputs);
+            ImGui.Checkbox("Flash title in addition to tab when using tabbed mode", ref P.config.ColorTitleFlashTab);
             ImGui.Checkbox("IRC-style chat", ref P.config.IRCStyle);
             ImGui.Checkbox("Print date when new day of messages starts", ref P.config.PrintDate);
             ImGui.Separator();

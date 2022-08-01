@@ -14,10 +14,16 @@ namespace Messenger.Gui
         bool fontPushed = false;
         float Transparency = P.config.TransMax;
         bool IsTransparent = true;
+        bool IsTitleColored = false;
         public TabSystem() : base("XIV Instant Messenger")
         {
             this.RespectCloseHotkey = false;
             this.IsOpen = true;
+            this.SizeConstraints = new()
+            {
+                MinimumSize = new(300, 200),
+                MaximumSize = new(9999, 9999)
+            };
         }
 
         internal void SetTransparency(bool isTransparent)
@@ -44,6 +50,13 @@ namespace Messenger.Gui
             IsTransparent = Transparency < 1f;
             if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
             fontPushed = FontPusher.PushConfiguredFont();
+            if(P.config.ColorTitleFlashTab && Environment.TickCount % 1000 > 500 && P.wsChats.Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
+            {
+                this.IsTitleColored = true;
+                ImGui.PushStyleColor(ImGuiCol.TitleBg, P.config.ColorTitleFlash);
+                ImGui.PushStyleColor(ImGuiCol.TitleBgActive, P.config.ColorTitleFlash);
+                ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, P.config.ColorTitleFlash);
+            }
         }
 
         public override void Draw()
@@ -119,6 +132,11 @@ namespace Messenger.Gui
                 ImGui.PopFont();
             }
             if (IsTransparent) ImGui.PopStyleVar();
+            if (this.IsTitleColored)
+            {
+                ImGui.PopStyleColor(3);
+                this.IsTitleColored = false;
+            }
         }
     }
 }
