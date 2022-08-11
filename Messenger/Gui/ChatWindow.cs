@@ -1,4 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.GameFunctions;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -29,7 +31,7 @@ namespace Messenger.Gui
             this.messageHistory = messageHistory;
             this.SizeConstraints = new()
             {
-                MinimumSize = new(300, 200),
+                MinimumSize = new(200, 200),
                 MaximumSize = new(9999, 9999)
             };
         }
@@ -82,6 +84,16 @@ namespace Messenger.Gui
 
         public override void PreDraw()
         {
+            if(P.config.NoResize && !ImGui.GetIO().KeyCtrl)
+            {
+                this.Flags |= ImGuiWindowFlags.NoResize;
+            }
+            else
+            {
+                this.Flags &= ~ImGuiWindowFlags.NoResize;
+            }
+            this.Size = P.config.DefaultSize;
+            this.SizeCondition = P.config.ResetSizeOnAppearing ? ImGuiCond.Appearing : ImGuiCond.FirstUseEver;
             IsTransparent = Transparency < 1f;
             TitleColored = false;
             if (Unread && Environment.TickCount % 1000 > 500)
@@ -252,141 +264,159 @@ namespace Messenger.Gui
                 messageHistory.SetFocus = false;
             }
             ImGui.SetWindowFontScale(ImGui.CalcTextSize(" ").Y / ImGuiEx.CalcIconSize(FontAwesomeIcon.ArrowRight).Y);
-            ImGui.SameLine(0, 2);
+            ImGui.SameLine(0, 0);
             var icur1 = ImGui.GetCursorPos();
-            if (isCmd)
-            {
-                if (ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command"))
-                {
-                    SendMessage(subject);
-                }
-                ImGuiEx.Tooltip("Execute command");
-            }
-            else
-            {
-                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send"))
-                {
-                    SendMessage(subject);
-                }
-                ImGuiEx.Tooltip("Send message");
-            }
-            //PluginLog.Information($"{ButtonScale}");
-            ImGui.SameLine(0, 2);
-            if (ImGuiEx.IconButton(FontAwesomeIcon.DoorOpen, "InviteToParty"))
-            {
-                if (Svc.Objects.Any(c => c is PlayerCharacter pc
-                    && pc.HomeWorld.Id == this.messageHistory.Player.HomeWorld && pc.Name.ToString() == this.messageHistory.Player.Name))
-                {
-                    var result = P.InviteToParty(this.messageHistory.Player, true);
-                    if(result != null)
-                    {
-                        Notify.Error(result);
-                    }
-                    else
-                    {
-                        Notify.Info($"Inviting through World");
-                    }
-                }
-                else {
-                    var flSuccess = false;
-                    foreach (var x in FriendList.Get())
-                    {
-                        if (flSuccess) break;
-                        if (x->Name.ToString() == this.messageHistory.Player.Name && x->HomeWorld == this.messageHistory.Player.HomeWorld)
-                        {
-                            flSuccess = true;
-                            if (x->IsOnline)
-                            {
-                                var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x->CurrentWorld;
-                                var result = P.InviteToParty(this.messageHistory.Player, sameWorld, x->ContentId);
-                                if (result != null)
-                                {
-                                    Notify.Error(result);
-                                }
-                                else
-                                {
-                                    Notify.Info($"Inviting through FrieldList ({(sameWorld ? "same world" : "different world")})");
-                                }
-                            }
-                            else if(P.CIDlist.ContainsValue(x->ContentId))
-                            {
-                                var result = P.InviteToParty(this.messageHistory.Player, true);
-                                if (result != null)
-                                {
-                                    Notify.Error(result);
-                                }
-                                else
-                                {
-                                    Notify.Info($"Inviting through Chat History");
-                                }
-                            }
-                            else
-                            {
-                                Notify.Error("Target appears to be offline.");
-                            }
-                        }
-                    }
-                    if (!flSuccess)
-                    {
-                        {
-                            ImGui.OpenPopup("Invite");
-                        }
-                    }
-                }
-            }
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-            {
-                ImGui.OpenPopup("Invite");
-            }
-            ImGuiEx.Tooltip("Invite to party (right click for extra options)");
-            if (ImGui.BeginPopup("Invite"))
-            {
-                ImGuiEx.Text("Unable to determine player's current world.");
-                if(ImGui.Selectable("Same world"))
-                {
-                    P.InviteToParty(this.messageHistory.Player, true);
-                }
-                if(ImGui.Selectable("Different world"))
-                {
-                    if (P.IsFriend(this.messageHistory.Player))
-                    {
-                        P.InviteToParty(this.messageHistory.Player, false);
-                    }
-                    else
-                    {
-                        Notify.Error("This action is only possible for your friends.");
-                    }
-                }
-                ImGui.EndPopup();
-            }
-            if (!P.IsFriend(this.messageHistory.Player))
+            ImGui.Dummy(Vector2.Zero);
+            if (P.config.ButtonSend)
             {
                 ImGui.SameLine(0, 2);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Smile, "AddFriend"))
+                if (isCmd)
                 {
-                    P.gameFunctions.SendFriendRequest(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
-                }
-                ImGuiEx.Tooltip("Add to friend list");
-                ImGui.SameLine(0, 2);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Frown, "AddBlacklist"))
-                {
-                    P.gameFunctions.AddToBlacklist(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
-                }
-                ImGuiEx.Tooltip("Add to blacklist");
-            }
-            ImGui.SameLine(0, 2);
-            if (ImGuiEx.IconButton(FontAwesomeIcon.Book, "Log"))
-            {
-                if (File.Exists(this.messageHistory.LogFile))
-                {
-                    ShellStart(this.messageHistory.LogFile);
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command"))
+                    {
+                        SendMessage(subject);
+                    }
+                    ImGuiEx.Tooltip("Execute command");
                 }
                 else
                 {
-                    Notify.Error("No log exist yet");
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send"))
+                    {
+                        SendMessage(subject);
+                    }
+                    ImGuiEx.Tooltip("Send message");
                 }
             }
-            ImGuiEx.Tooltip("Open text log");
+            if (P.config.ButtonInvite)
+            {
+                ImGui.SameLine(0, 2);
+                if (ImGuiEx.IconButton(FontAwesomeIcon.DoorOpen, "InviteToParty"))
+                {
+                    if (Svc.Objects.Any(c => c is PlayerCharacter pc
+                        && pc.HomeWorld.Id == this.messageHistory.Player.HomeWorld && pc.Name.ToString() == this.messageHistory.Player.Name))
+                    {
+                        var result = P.InviteToParty(this.messageHistory.Player, true);
+                        if (result != null)
+                        {
+                            Notify.Error(result);
+                        }
+                        else
+                        {
+                            Notify.Info($"Inviting through World");
+                        }
+                    }
+                    else
+                    {
+                        var flSuccess = false;
+                        foreach (var x in FriendList.Get())
+                        {
+                            if (flSuccess) break;
+                            if (x->Name.ToString() == this.messageHistory.Player.Name && x->HomeWorld == this.messageHistory.Player.HomeWorld)
+                            {
+                                flSuccess = true;
+                                if (x->IsOnline)
+                                {
+                                    var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x->CurrentWorld;
+                                    var result = P.InviteToParty(this.messageHistory.Player, sameWorld, x->ContentId);
+                                    if (result != null)
+                                    {
+                                        Notify.Error(result);
+                                    }
+                                    else
+                                    {
+                                        Notify.Info($"Inviting through FrieldList ({(sameWorld ? "same world" : "different world")})");
+                                    }
+                                }
+                                else if (P.CIDlist.ContainsValue(x->ContentId))
+                                {
+                                    var result = P.InviteToParty(this.messageHistory.Player, true);
+                                    if (result != null)
+                                    {
+                                        Notify.Error(result);
+                                    }
+                                    else
+                                    {
+                                        Notify.Info($"Inviting through Chat History");
+                                    }
+                                }
+                                else
+                                {
+                                    Notify.Error("Target appears to be offline.");
+                                }
+                            }
+                        }
+                        if (!flSuccess)
+                        {
+                            {
+                                ImGui.OpenPopup("Invite");
+                            }
+                        }
+                    }
+                }
+                if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                {
+                    ImGui.OpenPopup("Invite");
+                }
+                ImGuiEx.Tooltip("Invite to party (right click for extra options)");
+                if (ImGui.BeginPopup("Invite"))
+                {
+                    ImGuiEx.Text("Unable to determine player's current world.");
+                    if (ImGui.Selectable("Same world"))
+                    {
+                        P.InviteToParty(this.messageHistory.Player, true);
+                    }
+                    if (ImGui.Selectable("Different world"))
+                    {
+                        if (P.IsFriend(this.messageHistory.Player))
+                        {
+                            P.InviteToParty(this.messageHistory.Player, false);
+                        }
+                        else
+                        {
+                            Notify.Error("This action is only possible for your friends.");
+                        }
+                    }
+                    ImGui.EndPopup();
+                }
+            }
+            
+            if (!P.IsFriend(this.messageHistory.Player))
+            {
+                if (P.config.ButtonFriend)
+                {
+                    ImGui.SameLine(0, 2);
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.Smile, "AddFriend"))
+                    {
+                        P.gameFunctions.SendFriendRequest(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
+                    }
+                    ImGuiEx.Tooltip("Add to friend list");
+                }
+                if (P.config.ButtonBlack)
+                {
+                    ImGui.SameLine(0, 2);
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.Frown, "AddBlacklist"))
+                    {
+                        P.gameFunctions.AddToBlacklist(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
+                    }
+                    ImGuiEx.Tooltip("Add to blacklist");
+                }
+            }
+            if (P.config.ButtonLog)
+            {
+                ImGui.SameLine(0, 2);
+                if (ImGuiEx.IconButton(FontAwesomeIcon.Book, "Log"))
+                {
+                    if (File.Exists(this.messageHistory.LogFile))
+                    {
+                        ShellStart(this.messageHistory.LogFile);
+                    }
+                    else
+                    {
+                        Notify.Error("No log exist yet");
+                    }
+                }
+                ImGuiEx.Tooltip("Open text log");
+            }
             ImGui.SameLine(0, 0);
             afterInputWidth = ImGui.GetCursorPosX() - icur1.X;
             ImGui.Dummy(Vector2.Zero);
@@ -451,6 +481,26 @@ namespace Messenger.Gui
                         {
                             ShellStart(s);
                         }
+                    }
+                }
+                if (x.MapPayload != null)
+                {
+                    if (ImGui.Selectable("Open map link"))
+                    {
+                        Safe(delegate
+                        {
+                            Svc.GameGui.OpenMapWithMapLink(x.MapPayload);
+                        });
+                    }
+                }
+                if (x.Item != null)
+                {
+                    if (ImGui.Selectable("Print item details"))
+                    {
+                        Safe(delegate
+                        {
+                            Svc.Chat.Print(new SeStringBuilder().Add(Extensions.GetItemPayload(x.Item.Item, x.Item.IsHQ)).BuiltString);
+                        });
                     }
                 }
                 ImGui.EndPopup();

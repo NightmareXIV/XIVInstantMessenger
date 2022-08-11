@@ -55,6 +55,10 @@ namespace Messenger.Gui.Settings
             {
                 ImGuiEx.Text($"{x.Key} => {x.Value.Length}x");
             }
+            if(ImGui.Button("Fire logout event"))
+            {
+                P.ClientState_Logout(null, null);
+            }
         }
     }
 }

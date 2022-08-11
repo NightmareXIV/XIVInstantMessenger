@@ -45,6 +45,7 @@
                             P.gameFunctions.PlaySound(P.config.IncomingTellSound);
                         }
                     }
+                    ImGui.Checkbox("Auto-close all chat windows on logout", ref P.config.CloseLogout);
                 }, null, true),
                 ("Quick button", delegate
                 {

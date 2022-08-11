@@ -51,6 +51,11 @@
             ImGui.DragFloat("Transparency change delta, per frame", ref P.config.TransDelta, 0.001f, 0f, 1f);
             P.config.TransDelta.ValidateRange(0f, 1f);
 
+            ImGui.SetNextItemWidth(120f);
+            ImGui.DragFloat2("Default window size", ref P.config.DefaultSize, 1f, 200f, 2000f);
+            ImGui.Checkbox("Don't remember individual windows sizes", ref P.config.ResetSizeOnAppearing);
+            ImGui.Checkbox("Disable window resizing (hold CTRL to override)", ref P.config.NoResize);
+
             ImGui.Separator();
             ImGui.Checkbox("Enable window cascading", ref P.config.WindowCascading);
             if (P.config.WindowCascading)
@@ -79,6 +84,13 @@
                 ImGui.SetNextItemWidth(50f);
                 ImGui.DragInt("Maximum columns", ref P.config.WindowCascadingReset, 1f, 1, 100);
             }
+            ImGui.Separator();
+            ImGuiEx.Text("Display following buttons in chat windows:");
+            ImGui.Checkbox("Send message", ref P.config.ButtonSend);
+            ImGui.Checkbox("Invite to party", ref P.config.ButtonInvite);
+            ImGui.Checkbox("Add to friendlist", ref P.config.ButtonFriend);
+            ImGui.Checkbox("Add to blacklist", ref P.config.ButtonBlack);
+            ImGui.Checkbox("Open chat log", ref P.config.ButtonLog);
         }
     }
 }

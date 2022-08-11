@@ -62,5 +62,15 @@ namespace Messenger
         public bool QuickOpenButtonOnTop = true;
         public bool Tabs = false;
         public bool ColorTitleFlashTab = true;
+        public bool ButtonSend = true;
+        public bool ButtonInvite = true;
+        public bool ButtonFriend = true;
+        public bool ButtonBlack = true;
+        public bool ButtonLog = true;
+        public bool LockWindowSize = true;
+        public Vector2 DefaultSize = new(300, 200);
+        public bool ResetSizeOnAppearing = false;
+        public bool NoResize = false;
+        public bool CloseLogout = false;
     }
 }

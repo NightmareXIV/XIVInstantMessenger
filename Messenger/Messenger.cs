@@ -4,7 +4,6 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
 using ECommons.Automation;
-using ExposedObject;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
@@ -41,7 +40,6 @@ namespace Messenger
         internal Dictionary<float, string> whitespaceForLen = new();
         internal GameFontHandle CustomAxis;
         internal Sender LastReceivedMessage;
-        internal static dynamic ImGuiExposed;
         internal TabSystem tabSystem;
 
         public Messenger(DalamudPluginInterface pi)
@@ -50,7 +48,6 @@ namespace Messenger
             ECommons.ECommons.Init(pi);
             new TickScheduler(delegate
             {
-                ImGuiExposed = Exposed.From(typeof(ImGui));
                 config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
                 Svc.Chat.ChatMessage += OnChatMessage;
                 gameFunctions = new();
@@ -90,14 +87,26 @@ namespace Messenger
                 {
                     Svc.PluginInterface.UiBuilder.GetGameFontHandle(new(P.config.Font));
                 }
-                if(P.config.SuppressDMs && (Svc.PluginInterface.Reason == PluginLoadReason.Installer || Svc.PluginInterface.Reason == PluginLoadReason.Update))
+                if(P.config.SuppressDMs)
                 {
                     DuoLog.Warning("XIM is currently configured to hide DMs from normal game chat. You may change this behavior in settings.\n/xim - open settings.");
                 }
                 tabSystem = new();
                 ws.AddWindow(tabSystem);
                 Tabs(P.config.Tabs);
+                Svc.ClientState.Logout += ClientState_Logout;
             });
+        }
+
+        internal void ClientState_Logout(object sender, EventArgs e)
+        {
+            if (P.config.CloseLogout)
+            {
+                foreach(var x in Chats)
+                {
+                    x.Value.chatWindow.IsOpen = false;
+                }
+            }
         }
 
         public void Dispose()
@@ -115,6 +124,7 @@ namespace Messenger
             Safe(logger.Dispose);
             Safe(partyFunctions.Dispose);
             if(fontManager != null) Safe(fontManager.Dispose);
+            Svc.ClientState.Logout -= ClientState_Logout;
             ECommons.ECommons.Dispose();
         }
 
@@ -258,7 +268,7 @@ namespace Messenger
         {
             if (P.config.EnableKey)
             {
-                if ((ImGuiExposed.IsKeyPressed((int)P.config.Key, false) || Svc.KeyState.GetRawValue(P.config.Key) != 0) 
+                if ((ImGuiEx.IsKeyPressed((int)P.config.Key, false) || Svc.KeyState.GetRawValue(P.config.Key) != 0) 
                     && ModifierKeyMatch(P.config.ModifierKey))
                 {
                     Svc.KeyState.SetRawValue(P.config.Key, 0);
@@ -292,7 +302,7 @@ namespace Messenger
             }
         }
 
-        bool ModifierKeyMatch(ModifierKey k)
+        static bool ModifierKeyMatch(ModifierKey k)
         {
             if(k == ModifierKey.None)
             {
@@ -361,12 +371,24 @@ namespace Messenger
                             || (config.AutoOpenTellOutgoing && type == XivChatType.TellOutgoing)
                             )
                             );
-                        Chats[s].Messages.Add(new()
+                        var addedMessage = new SavedMessage()
                         {
                             IsIncoming = type == XivChatType.TellIncoming,
                             Message = message.ToString(),
                             OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null
-                        }) ;
+                        };
+                        foreach (var payload in message.Payloads)
+                        {
+                            if(payload.Type == PayloadType.MapLink)
+                            {
+                                addedMessage.MapPayload = (MapLinkPayload)payload;
+                            }
+                            if(payload.Type == PayloadType.Item)
+                            {
+                                addedMessage.Item = (ItemPayload)payload;
+                            }
+                        }
+                        Chats[s].Messages.Add(addedMessage) ;
                         lastHistory = Chats[s];
                         Chats[s].Scroll();
                         if (type == XivChatType.TellOutgoing)

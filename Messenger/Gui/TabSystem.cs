@@ -47,6 +47,14 @@ namespace Messenger.Gui
 
         public override void PreDraw()
         {
+            if (P.config.NoResize && !ImGui.GetIO().KeyCtrl)
+            {
+                this.Flags |= ImGuiWindowFlags.NoResize;
+            }
+            else
+            {
+                this.Flags &= ~ImGuiWindowFlags.NoResize;
+            }
             IsTransparent = Transparency < 1f;
             if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
             fontPushed = FontPusher.PushConfiguredFont();

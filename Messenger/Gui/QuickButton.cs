@@ -101,7 +101,7 @@ namespace Messenger.Gui
                     }
                     if (toRem != null)
                     {
-                        P.ws.RemoveWindow(P.Chats[toRem.Value].chatWindow);
+                        P.wsChats.RemoveWindow(P.Chats[toRem.Value].chatWindow);
                         P.Chats.Remove(toRem.Value);
                         toRem = null;
                     }
