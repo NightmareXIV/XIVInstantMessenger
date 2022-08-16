@@ -46,6 +46,7 @@
                         }
                     }
                     ImGui.Checkbox("Auto-close all chat windows on logout", ref P.config.CloseLogout);
+                    ImGui.Checkbox("Refocus message input after sending message with enter key", ref P.config.RefocusInputAfterSending);
                 }, null, true),
                 ("Quick button", delegate
                 {

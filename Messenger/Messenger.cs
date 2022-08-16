@@ -364,6 +364,7 @@ namespace Messenger
                 {
                     if (type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
                     {
+                        var isOpen = Chats.TryGetValue(s, out var sHist) && sHist.chatWindow.IsOpen;
                         OpenMessenger(s,
                             (!Svc.Condition[ConditionFlag.InCombat] || config.AutoReopenAfterCombat) && 
                             (
@@ -393,7 +394,7 @@ namespace Messenger
                         Chats[s].Scroll();
                         if (type == XivChatType.TellOutgoing)
                         {
-                            if (P.config.AutoFocusTellOutgoing)
+                            if (P.config.AutoFocusTellOutgoing && !isOpen)
                             {
                                 Chats[s].SetFocus = true;
                             }

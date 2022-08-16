@@ -72,5 +72,6 @@ namespace Messenger
         public bool ResetSizeOnAppearing = false;
         public bool NoResize = false;
         public bool CloseLogout = false;
+        public bool RefocusInputAfterSending = true;
     }
 }

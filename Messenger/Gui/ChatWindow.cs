@@ -250,7 +250,6 @@ namespace Messenger.Gui
             if (ImGui.InputText("##outgoing", ref msg, 500, ImGuiInputTextFlags.EnterReturnsTrue))
             {
                 SendMessage(subject);
-                ImGui.SetKeyboardFocusHere(-1);
             }
             if (inputCol)
             {
@@ -560,6 +559,14 @@ namespace Messenger.Gui
                 {
                     Notify.Error(msg);
                 }
+            }
+            if (P.config.RefocusInputAfterSending)
+            {
+                messageHistory.SetFocus = true;
+            }
+            else
+            {
+
             }
         }
     }
