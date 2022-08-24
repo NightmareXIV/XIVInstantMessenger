@@ -24,7 +24,7 @@ namespace Messenger
         };
 
         GameObjectContextMenuItem openMessenger;
-        DalamudContextMenuBase contextMenu;
+        DalamudContextMenu contextMenu;
 
         internal ContextMenuManager()
         {
@@ -34,7 +34,7 @@ namespace Messenger
                 {
                     new TextPayload("Messenger"),
                 }), OpenMessenger);
-            contextMenu.Functions.ContextMenu.OnOpenGameObjectContextMenu += OpenContextMenu;
+            contextMenu.OnOpenGameObjectContextMenu += OpenContextMenu;
         }
 
         private void OpenContextMenu(GameObjectContextMenuOpenArgs args)

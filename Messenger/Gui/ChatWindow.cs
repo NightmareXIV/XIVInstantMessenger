@@ -286,7 +286,7 @@ namespace Messenger.Gui
                     ImGuiEx.Tooltip("Send message");
                 }
             }
-            if (P.config.ButtonInvite)
+            if (false /*P.config.ButtonInvite*/)
             {
                 ImGui.SameLine(0, 2);
                 if (ImGuiEx.IconButton(FontAwesomeIcon.DoorOpen, "InviteToParty"))
@@ -563,10 +563,6 @@ namespace Messenger.Gui
             if (P.config.RefocusInputAfterSending)
             {
                 messageHistory.SetFocus = true;
-            }
-            else
-            {
-
             }
         }
     }

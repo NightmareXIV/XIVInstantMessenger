@@ -7,6 +7,7 @@
 using Dalamud.Hooking;
 using Dalamud.Memory;
 using Dalamud.Utility.Signatures;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -25,9 +26,6 @@ namespace Messenger
 
         [Signature("E8 ?? ?? ?? ?? 8B FD 8B CD")]
         delegate* unmanaged<IntPtr, uint, IntPtr> _getInfoProxyByIndex;
-
-        [Signature("E8 ?? ?? ?? ?? 84 C0 49 8B DE")]
-        delegate* unmanaged<byte> _inInstance;
 
         [Signature("4C 8B 81 ?? ?? ?? ?? 4D 85 C0 74 17")]
         delegate* unmanaged<RaptureLogModule*, uint, ulong> _getContentIdForChatEntry;
@@ -123,12 +121,7 @@ namespace Messenger
 
         internal bool IsInInstance()
         {
-            if (this._inInstance == null)
-            {
-                return false;
-            }
-
-            return this._inInstance() != 0;
+            return GameMain.Instance()->IsInInstanceArea();
         }
 
         void ListCommand(string name, ushort world, string commandName)
