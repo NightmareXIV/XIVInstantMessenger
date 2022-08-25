@@ -139,12 +139,28 @@ namespace Messenger
 
         internal void SendFriendRequest(string name, ushort world)
         {
-            this.ListCommand(name, world, "friendlist");
+            if (Svc.ClientState.LocalPlayer?.CurrentWorld.GameData.DataCenter.Value.RowId !=
+                Svc.Data.GetExcelSheet<World>().GetRow(world).DataCenter.Value.RowId)
+            {
+                Notify.Error("Target is located in different data center");
+            }
+            else
+            {
+                this.ListCommand(name, world, "friendlist");
+            }
         }
 
         internal void AddToBlacklist(string name, ushort world)
         {
-            this.ListCommand(name, world, "blist");
+            if (Svc.ClientState.LocalPlayer?.CurrentWorld.GameData.DataCenter.Value.RowId !=
+                Svc.Data.GetExcelSheet<World>().GetRow(world).DataCenter.Value.RowId)
+            {
+                Notify.Error("Target is located in different data center");
+            }
+            else
+            {
+                this.ListCommand(name, world, "blist");
+            }
         }
 
         internal ulong? GetContentIdForEntry(uint index)

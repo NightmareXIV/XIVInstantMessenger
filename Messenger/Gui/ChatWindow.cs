@@ -286,7 +286,7 @@ namespace Messenger.Gui
                     ImGuiEx.Tooltip("Send message");
                 }
             }
-            if (false /*P.config.ButtonInvite*/)
+            if (P.config.ButtonInvite)
             {
                 ImGui.SameLine(0, 2);
                 if (ImGuiEx.IconButton(FontAwesomeIcon.DoorOpen, "InviteToParty"))

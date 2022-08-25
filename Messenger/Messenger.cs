@@ -420,7 +420,7 @@ namespace Messenger
                             isHandled = true;
                         }
                     }
-                    var idx = gameFunctions.GetCurrentChatLogEntryIndex();
+                    /*var idx = gameFunctions.GetCurrentChatLogEntryIndex();
                     if (idx != null)
                     {
                         var cid = gameFunctions.GetContentIdForEntry(idx.Value - 1);
@@ -429,7 +429,7 @@ namespace Messenger
                             PluginLog.Debug($"Player {s.GetPlayerName()} CID={cid:X16}");
                             CIDlist[s] = cid.Value;
                         }
-                    }
+                    }*/
                 }
             }
             catch (Exception e)
@@ -553,6 +553,8 @@ namespace Messenger
 
         internal string InviteToParty(Sender player, bool sameWorld, ulong? cidOverride = null)
         {
+            Notify.Error("Invite to party is temporarily disabled");
+            return "Invite to party is temporarily disabled";
             if (Svc.ClientState.LocalPlayer == null)
             {
                 return "Not logged in";
