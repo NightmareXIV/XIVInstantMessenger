@@ -7,6 +7,7 @@ namespace Messenger.Gui.Settings
     {
         internal static void Draw()
         {
+            ImGuiEx.Text($"Is in instance: {P.gameFunctions.IsInInstance()}");
             ImGuiEx.Text($"Last received message: {P.LastReceivedMessage.GetPlayerName()}");
             if(ImGui.Button("Mark all as unread"))
             {

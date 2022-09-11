@@ -15,6 +15,8 @@ internal sealed unsafe class PartyFunctions : IDisposable
     delegate byte InviteToPartyCrossWorldDelegate(IntPtr a1, ulong cid, ushort world);
     [Signature("48 83 EC 38 41 B1 09", DetourName = "InviteToPartyCrossWorldDetour")]
     Hook<InviteToPartyCrossWorldDelegate> InviteToPartyCrossWorldHook;
+
+    bool LogInvites = false;
     
     internal PartyFunctions()
     {
@@ -31,17 +33,18 @@ internal sealed unsafe class PartyFunctions : IDisposable
         {
             InviteToPartyCrossWorldHook.Enable();
         }
+        LogInvites = true;
     }
 
     private byte InviteToPartyDetour(IntPtr a1, ulong cid, byte* namePtr, ushort world)
     {
-        DuoLog.Debug($"Invite to party: {MemoryHelper.ReadStringNullTerminated((IntPtr)namePtr)}@{world} 0x{cid:X16}");
+        if(LogInvites) DuoLog.Debug($"Invite to party: {MemoryHelper.ReadStringNullTerminated((IntPtr)namePtr)}@{world} 0x{cid:X16}");
         return InviteToPartyHook.Original(a1, cid, namePtr, world);
     }
 
     private byte InviteToPartyCrossWorldDetour(IntPtr a1, ulong cid, ushort world)
     {
-        DuoLog.Debug($"Invite to party cross world: {world} 0x{cid:X16}");
+        if (LogInvites) DuoLog.Debug($"Invite to party cross world: {world} 0x{cid:X16}");
         return InviteToPartyCrossWorldHook.Original(a1, cid, world);
     }
 
@@ -55,17 +58,17 @@ internal sealed unsafe class PartyFunctions : IDisposable
 
     internal void InviteSameWorld(string name, ushort world, ulong contentId)
     {
-        var a1 = P.gameFunctions.GetInfoProxyByIndex(1);
+        var a1 = P.gameFunctions.GetInfoProxyByIndex(2);
         fixed (byte* namePtr = name.ToTerminatedBytes())
         {
             // this only works if target is on the same world
-            InviteToPartyHook.Original(a1, contentId, namePtr, world);
+            InviteToPartyDetour(a1, contentId, namePtr, world);
         }
     }
     internal void InviteOtherWorld(ulong contentId, ushort world)
     {
         // 6.11: 214A55
-        var a1 = P.gameFunctions.GetInfoProxyByIndex(1);
+        var a1 = P.gameFunctions.GetInfoProxyByIndex(2);
         if (contentId != 0)
         {
             // third param is world, but it requires a specific world
@@ -73,7 +76,7 @@ internal sealed unsafe class PartyFunctions : IDisposable
             // pass 0 and it will work on any world EXCEPT for the world the
             // current player is on
             // but maybe actually don't do such a thing and do it like game does?
-            InviteToPartyCrossWorldHook.Original(a1, contentId, world);
+            InviteToPartyCrossWorldDetour(a1, contentId, world);
         }
     }
 }

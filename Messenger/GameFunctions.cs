@@ -24,30 +24,29 @@ namespace Messenger
         /*[Signature("44 8B 89 ?? ?? ?? ?? 4C 8B C1 45 85 C9")]
         delegate* unmanaged<void*, int, IntPtr> _getTellHistory;*/
 
-        [Signature("E8 ?? ?? ?? ?? 8B FD 8B CD")]
+        [Signature("E8 ?? ?? ?? ?? 8B FD 8B CD", Fallibility = Fallibility.Infallible)]
         delegate* unmanaged<IntPtr, uint, IntPtr> _getInfoProxyByIndex;
 
-        [Signature("4C 8B 81 ?? ?? ?? ?? 4D 85 C0 74 17")]
+        [Signature("4C 8B 81 ?? ?? ?? ?? 4D 85 C0 74 17", Fallibility = Fallibility.Infallible)]
         delegate* unmanaged<RaptureLogModule*, uint, ulong> _getContentIdForChatEntry;
 
-        [Signature("8B 77 ?? 8D 46 01 89 47 14 81 FE ?? ?? ?? ?? 72 03 FF 47", Offset = 2)]
+        [Signature("8B 77 ?? 8D 46 01 89 47 14 81 FE ?? ?? ?? ?? 72 03 FF 47", Offset = 2, Fallibility = Fallibility.Infallible)]
         byte? _currentChatEntryOffset;
 
         delegate IntPtr ResolveTextCommandPlaceholderDelegate(IntPtr a1, byte* placeholderText, byte a3, byte a4);
 
-        [Signature("E8 ?? ?? ?? ?? 49 8D 4F 18 4C 8B E0", DetourName = nameof(ResolveTextCommandPlaceholderDetour))]
+        [Signature("E8 ?? ?? ?? ?? 49 8D 4F 18 4C 8B E0", DetourName = nameof(ResolveTextCommandPlaceholderDetour), Fallibility = Fallibility.Infallible)]
         Hook<ResolveTextCommandPlaceholderDelegate>? ResolveTextCommandPlaceholderHook { get; init; }
 
         delegate ulong PlaySoundDelegate(int id, ulong unk1, ulong unk2);
-        [Signature("E8 ?? ?? ?? ?? 4D 39 BE")]
+        [Signature("E8 ?? ?? ?? ?? 4D 39 BE", Fallibility = Fallibility.Infallible)]
         PlaySoundDelegate PlaySoundFunction;
 
-        /*delegate byte SendTellDelegate(IntPtr a1, ulong cid, ushort world, Utf8String* name, Utf8String* message, byte reason, ulong world2);
-        [Signature("E8 ?? ?? ?? ?? 48 8D 4C 24 ?? E8 ?? ?? ?? ?? 48 8D 8C 24 ?? ?? ?? ?? E8 ?? ?? ?? ?? B0 01", DetourName = "SendTellDetour")]
-        Hook<SendTellDelegate> SendTellHook;
+        [Signature("FF 90 ?? ?? ?? ?? 48 8B C8 BA ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B F0 48 85 C0 0F 84 ?? ?? ?? ?? 48 8B 10 33 ED", Offset = 2, Fallibility = Fallibility.Infallible)]
+        private readonly int? _infoModuleVfunc;
 
-        [Signature("E8 ?? ?? ?? ?? F6 43 0A 40")]
-        delegate* unmanaged<Framework*, IntPtr> _getNetworkModule;*/
+        [Signature("E8 ?? ?? ?? ?? 41 8D 4F 08 84 C0", Fallibility = Fallibility.Infallible)]
+        private readonly delegate* unmanaged<byte> InInstance = null;
 
         internal GameFunctions()
         {
@@ -121,7 +120,7 @@ namespace Messenger
 
         internal bool IsInInstance()
         {
-            return GameMain.Instance()->IsInInstanceArea();
+            return InInstance() != 0;
         }
 
         void ListCommand(string name, ushort world, string commandName)
@@ -185,10 +184,15 @@ namespace Messenger
             return *(uint*)(log + this._currentChatEntryOffset.Value);
         }
 
-        static IntPtr GetInfoModule()
+        IntPtr GetInfoModule()
         {
+            if (this._infoModuleVfunc is not { } vfunc)
+            {
+                return IntPtr.Zero;
+            }
+
             var uiModule = Framework.Instance()->GetUiModule();
-            var getInfoModule = (delegate* unmanaged<UIModule*, IntPtr>)uiModule->vfunc[33];
+            var getInfoModule = (delegate* unmanaged<UIModule*, IntPtr>)uiModule->vfunc[vfunc / 8];
             return getInfoModule(uiModule);
         }
 
