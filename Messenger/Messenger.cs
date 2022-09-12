@@ -4,7 +4,6 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
 using ECommons.Automation;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -485,7 +484,7 @@ namespace Messenger
                 {
                     return "Not logged in";
                 }
-                if (TryGetAddonByName<AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
+                if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
                 {
                     if(Svc.Condition[ConditionFlag.UsingPartyFinder] && destination == P.LastReceivedMessage.GetPlayerName())
                     {
@@ -568,7 +567,7 @@ namespace Messenger
             {
                 return "Target is located in different data center";
             }
-            if (TryGetAddonByName<AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
+            if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
             {
                 var party = Svc.Party;
                 var leader = (ulong?)party[(int)party.PartyLeaderIndex]?.ContentId;
