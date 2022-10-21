@@ -58,7 +58,7 @@ namespace Messenger.Gui
             IsTransparent = Transparency < 1f;
             if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
             fontPushed = FontPusher.PushConfiguredFont();
-            if(P.config.ColorTitleFlashTab && Environment.TickCount % 1000 > 500 && P.wsChats.Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
+            if(P.config.ColorTitleFlashTab && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing) && P.wsChats.Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
             {
                 this.IsTitleColored = true;
                 ImGui.PushStyleColor(ImGuiCol.TitleBg, P.config.ColorTitleFlash);
@@ -97,7 +97,7 @@ namespace Messenger.Gui
                             flags = ImGuiTabItemFlags.SetSelected;
                         }
                         var titleColored = false;
-                        if (w.Unread && Environment.TickCount % 1000 > 500)
+                        if (w.Unread && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing))
                         {
                             titleColored = true;
                             ImGui.PushStyleColor(ImGuiCol.TabActive, P.config.ColorTitleFlash);

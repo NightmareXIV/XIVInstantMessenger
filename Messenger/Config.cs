@@ -75,5 +75,6 @@ namespace Messenger
         public bool RefocusInputAfterSending = true;
         public bool NoWarningWhenOpenLinks = false;
         public string LogStorageFolder = "";
+        public bool NoFlashing = false;
     }
 }

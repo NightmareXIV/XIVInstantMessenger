@@ -29,7 +29,7 @@ namespace Messenger.Gui
 
         public override void PreDraw()
         {
-            flash = Environment.TickCount % 2000 > 1000;
+            flash = (Environment.TickCount % 2000 > 1000 || P.config.NoFlashing);
             if (flash)
             {
                 ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiColors.DalamudRed);

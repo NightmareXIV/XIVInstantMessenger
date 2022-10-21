@@ -1,4 +1,6 @@
-﻿namespace Messenger.Gui.Settings
+﻿using System.Collections.Generic;
+
+namespace Messenger.Gui.Settings
 {
     internal static class TabSettings
     {
@@ -117,9 +119,22 @@
                     }
                     P.config.HistoryAmount.ValidateRange(0, 10000);
                     ImGuiEx.Text("Log storage folder:");
-                    ImGui.SameLine();
-                    ImGuiEx.SetNextItemFullWidth();
-                    ImGui.InputTextWithHint("##logstor", "%appdata%\\XIVLauncher\\pluginConfigs\\Messenger\\", ref P.config.LogStorageFolder, 1000);
+                    ImGuiEx.InputWithRightButtonsArea("logstr", delegate
+                    {
+                        ImGui.InputTextWithHint("##logstor", "%appdata%\\XIVLauncher\\pluginConfigs\\Messenger\\", ref P.config.LogStorageFolder, 1000);
+                    }, delegate
+                    {
+                        if (ImGui.Button("Apply"))
+                        {
+                            foreach (var x in P.Chats)
+                            {
+                                P.wsChats.RemoveWindow(x.Value.chatWindow);
+                            }
+                            P.Chats.Clear();
+                        }
+                        ImGuiEx.Tooltip("All chats will be closed");
+                    });
+                    
                 }, null, true),
                 ("Hotkey", delegate
                 {

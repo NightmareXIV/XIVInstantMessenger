@@ -1,4 +1,6 @@
-﻿namespace Messenger.Gui.Settings
+﻿using Dalamud.Interface.Components;
+
+namespace Messenger.Gui.Settings
 {
     internal static class TabStyle
     {
@@ -55,6 +57,9 @@
             ImGui.DragFloat2("Default window size", ref P.config.DefaultSize, 1f, 200f, 2000f);
             ImGui.Checkbox("Don't remember individual windows sizes", ref P.config.ResetSizeOnAppearing);
             ImGui.Checkbox("Disable window resizing (hold CTRL to override)", ref P.config.NoResize);
+            ImGui.Checkbox("Disable flashing", ref P.config.NoFlashing);
+            ImGuiComponents.HelpMarker("Makes normally flashing elements solid color, resulting them being less noticeable but also less disturbing");
+
 
             ImGui.Separator();
             ImGui.Checkbox("Enable window cascading", ref P.config.WindowCascading);

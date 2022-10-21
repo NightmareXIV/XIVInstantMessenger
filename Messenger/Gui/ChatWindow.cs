@@ -96,7 +96,7 @@ namespace Messenger.Gui
             this.SizeCondition = P.config.ResetSizeOnAppearing ? ImGuiCond.Appearing : ImGuiCond.FirstUseEver;
             IsTransparent = Transparency < 1f;
             TitleColored = false;
-            if (Unread && Environment.TickCount % 1000 > 500)
+            if (Unread && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing))
             {
                 TitleColored = true;
                 ImGui.PushStyleColor(ImGuiCol.TitleBg, P.config.ColorTitleFlash);

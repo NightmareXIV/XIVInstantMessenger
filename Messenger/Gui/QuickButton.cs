@@ -45,7 +45,7 @@ namespace Messenger.Gui
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
             var col = false;
-            if(P.Hidden && Environment.TickCount % 1000 > 500)
+            if(P.Hidden && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, P.config.ColorTitleFlash);
                 col = true;
