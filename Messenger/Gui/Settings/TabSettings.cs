@@ -9,7 +9,8 @@
                 {
                     if (ImGui.Button("Open logs folder"))
                     {
-                        ShellStart(Svc.PluginInterface.GetPluginConfigDirectory());
+                        var logFolder = P.config.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : P.config.LogStorageFolder;
+                        ShellStart(logFolder);
                     }
                     ImGui.Checkbox("Enable context menu integration", ref P.config.ContextMenuEnable);
                     if(ImGui.Checkbox("Tabs instead of windows (beta)", ref P.config.Tabs))
@@ -47,6 +48,7 @@
                     }
                     ImGui.Checkbox("Auto-close all chat windows on logout", ref P.config.CloseLogout);
                     ImGui.Checkbox("Refocus text input after sending message", ref P.config.RefocusInputAfterSending);
+                    ImGui.Checkbox("Skip link opening confirmation", ref P.config.NoWarningWhenOpenLinks);
                 }, null, true),
                 ("Quick button", delegate
                 {
@@ -114,6 +116,10 @@
                         ImGuiEx.Text(ImGuiColors.DalamudRed, "This setting may cause issues");
                     }
                     P.config.HistoryAmount.ValidateRange(0, 10000);
+                    ImGuiEx.Text("Log storage folder:");
+                    ImGui.SameLine();
+                    ImGuiEx.SetNextItemFullWidth();
+                    ImGui.InputTextWithHint("##logstor", "%appdata%\\XIVLauncher\\pluginConfigs\\Messenger\\", ref P.config.LogStorageFolder, 1000);
                 }, null, true),
                 ("Hotkey", delegate
                 {

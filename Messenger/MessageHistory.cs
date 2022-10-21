@@ -34,7 +34,9 @@ namespace Messenger
             chatWindow = new(this);
             P.wsChats.AddWindow(chatWindow);
 
-            LogFile = Path.Combine(Svc.PluginInterface.GetPluginConfigDirectory(), Player.GetPlayerName() + ".txt");
+            var logFolder = P.config.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : P.config.LogStorageFolder;
+
+            LogFile = Path.Combine(logFolder, Player.GetPlayerName() + ".txt");
             var subject = Player.GetPlayerName();
             Task.Run(delegate
             {

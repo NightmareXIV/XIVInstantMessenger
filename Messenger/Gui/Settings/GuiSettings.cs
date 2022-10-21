@@ -18,7 +18,8 @@
                 ("Settings", TabSettings.Draw, null, true),
                 ("Style", TabStyle.Draw, null, true),
                 ("Fonts", TabFonts.Draw, null, true),
-                ("Debug", TabDebug.Draw, null, true)
+                ("Log", InternalLog.PrintImgui, ImGuiColors.DalamudGrey3, false),
+                ("Debug", TabDebug.Draw, ImGuiColors.DalamudGrey3, true)
                 );
         }
 

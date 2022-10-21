@@ -44,7 +44,7 @@ namespace Messenger
         public Messenger(DalamudPluginInterface pi)
         {
             P = this;
-            ECommons.ECommons.Init(pi);
+            ECommons.ECommons.Init(pi, this);
             new TickScheduler(delegate
             {
                 config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
@@ -237,7 +237,8 @@ namespace Messenger
                 {
                     Safe(delegate
                     {
-                        var files = Directory.GetFiles(Svc.PluginInterface.GetPluginConfigDirectory());
+                        var logFolder = P.config.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : P.config.LogStorageFolder;
+                        var files = Directory.GetFiles(logFolder);
                         foreach (var file in files)
                         {
                             var fileInfo = new FileInfo(file);

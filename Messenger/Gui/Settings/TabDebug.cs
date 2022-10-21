@@ -25,7 +25,7 @@ namespace Messenger.Gui.Settings
             ImGuiEx.Text("Friend list: ");
             foreach(var x in FriendList.Get())
             {
-                ImGuiEx.Text(x->IsOnline ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudWhite,
+                ImGuiEx.TextCopy(x->IsOnline ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudWhite,
                     $"{x->Name} home world={x->HomeWorld} current world={x->CurrentWorld} CID {x->ContentId:X16}") ;
                 var sb = new List<string>();
                 sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x + 8, 14).Select(x => $"{x:X2}"));
@@ -33,7 +33,7 @@ namespace Messenger.Gui.Settings
                 sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x + 25, 8).Select(x => $"{x:X2}"));
                 sb.Add("|");
                 sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x + 71, 25).Select(x => $"{x:X2}"));
-                ImGuiEx.Text(sb.Join(" "));
+                ImGuiEx.TextCopy(sb.Join(" "));
             }
             if (ImGui.Button("Install invite to party hook"))
             {

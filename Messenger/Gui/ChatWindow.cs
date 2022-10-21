@@ -443,7 +443,7 @@ namespace Messenger.Gui
                         ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
                         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                         {
-                            ShellStart(s);
+                            new OpenLinkWindow(s);
                         }
                         break;
                     }
@@ -478,7 +478,7 @@ namespace Messenger.Gui
                         }
                         if (ImGui.Selectable($"{s}"))
                         {
-                            ShellStart(s);
+                            new OpenLinkWindow(s);
                         }
                     }
                 }
