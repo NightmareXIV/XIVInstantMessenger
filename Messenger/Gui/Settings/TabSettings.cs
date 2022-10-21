@@ -131,6 +131,7 @@ namespace Messenger.Gui.Settings
                                 P.wsChats.RemoveWindow(x.Value.chatWindow);
                             }
                             P.Chats.Clear();
+                            TabHistory.Reload();
                         }
                         ImGuiEx.Tooltip("All chats will be closed");
                     });

@@ -9,6 +9,13 @@ internal static class TabHistory
     static List<Sender> fileChatList = new();
     static string search = "";
 
+    internal static void Reload()
+    {
+        LoadingFinished = false;
+        LoadingRequested = true;
+        fileChatList = new();
+    }
+
     internal static void Draw()
     {
         if (LoadingRequested)
