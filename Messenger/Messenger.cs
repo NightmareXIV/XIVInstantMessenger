@@ -487,7 +487,7 @@ namespace Messenger
                 }
                 if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
                 {
-                    if(Svc.Condition[ConditionFlag.UsingPartyFinder] && destination == P.LastReceivedMessage.GetPlayerName())
+                    if(destination == P.LastReceivedMessage.GetPlayerName())
                     {
                         PluginLog.Debug("Sending via reply");
                         P.chat.SendMessage($"/r {message}");
