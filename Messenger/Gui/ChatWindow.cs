@@ -95,11 +95,11 @@ internal unsafe class ChatWindow : Window
         this.SizeCondition = P.config.ResetSizeOnAppearing ? ImGuiCond.Appearing : ImGuiCond.FirstUseEver;
         IsTransparent = Transparency < 1f;
         TitleColored = false;
-        if (Unread && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing))
+        if (Unread)
         {
             TitleColored = true;
-            ImGui.PushStyleColor(ImGuiCol.TitleBg, P.config.ColorTitleFlash);
-            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, P.config.ColorTitleFlash);
+            ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor());
+            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiCol.TitleBgCollapsed.GetFlashColor());
         }
         if(IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
         if (SetPosition)

@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
+using ECommons.Configuration;
 
 namespace Messenger;
 
@@ -94,4 +95,9 @@ internal static class Extensions
         ExtraGlyphRanges.Vietnamese => ImGui.GetIO().Fonts.GetGlyphRangesVietnamese(),
         _ => throw new ArgumentOutOfRangeException(nameof(ranges), ranges, null),
     };
+
+    internal static Vector4 GetFlashColor(this ImGuiCol col)
+    {
+        return P.config.NoFlashing ? P.config.ColorTitleFlash : GradientColor.Get(ImGui.GetStyle().Colors[(int)col], P.config.ColorTitleFlash, 500);
+    }
 }

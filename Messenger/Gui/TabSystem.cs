@@ -51,12 +51,12 @@ internal class TabSystem : Window
         IsTransparent = Transparency < 1f;
         if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
         fontPushed = FontPusher.PushConfiguredFont();
-        if(P.config.ColorTitleFlashTab && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing) && P.wsChats.Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
+        if(P.config.ColorTitleFlashTab && P.wsChats.Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
         {
             this.IsTitleColored = true;
-            ImGui.PushStyleColor(ImGuiCol.TitleBg, P.config.ColorTitleFlash);
-            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, P.config.ColorTitleFlash);
-            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, P.config.ColorTitleFlash);
+            ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor());
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ImGuiCol.TitleBgActive.GetFlashColor());
+            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiCol.TitleBgCollapsed.GetFlashColor());
         }
     }
 
@@ -90,12 +90,12 @@ internal class TabSystem : Window
                         flags = ImGuiTabItemFlags.SetSelected;
                     }
                     var titleColored = false;
-                    if (w.Unread && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing))
+                    if (w.Unread)
                     {
                         titleColored = true;
-                        ImGui.PushStyleColor(ImGuiCol.TabActive, P.config.ColorTitleFlash);
-                        ImGui.PushStyleColor(ImGuiCol.Tab, P.config.ColorTitleFlash);
-                        ImGui.PushStyleColor(ImGuiCol.TabHovered, P.config.ColorTitleFlash);
+                        ImGui.PushStyleColor(ImGuiCol.TabActive, ImGuiCol.TabActive.GetFlashColor());
+                        ImGui.PushStyleColor(ImGuiCol.Tab, ImGuiCol.Tab.GetFlashColor());
+                        ImGui.PushStyleColor(ImGuiCol.TabHovered, ImGuiCol.TabHovered.GetFlashColor());
                     }
                     if (isOpen && ImGui.BeginTabItem(w.messageHistory.Player.Name + $"###{w.WindowName}", ref isOpen, flags))
                     {

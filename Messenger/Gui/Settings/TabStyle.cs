@@ -45,7 +45,7 @@ internal static class TabStyle
         ImGuiEx.Text("Configure transparency: ");
         ImGui.SetNextItemWidth(50f);
         ImGui.DragFloat("Non-focused non-hovered windown transparency", ref P.config.TransMin, 0.01f, 0f, 1f);
-        P.config.TransMin.ValidateRange(0f, 1f);
+        P.config.TransMin.ValidateRange(0.05f, 1f);
         ImGui.SetNextItemWidth(50f);
         ImGui.DragFloat("Focused or hovered windown transparency", ref P.config.TransMax, 0.01f, 0f, 1f);
         P.config.TransMax.ValidateRange(P.config.TransMin, 1f);

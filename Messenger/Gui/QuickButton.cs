@@ -45,9 +45,9 @@ internal unsafe class QuickButton : Window
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
         var col = false;
-        if(P.Hidden && (Environment.TickCount % 1000 > 500 || P.config.NoFlashing))
+        if(P.Hidden)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, P.config.ColorTitleFlash);
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiCol.Text.GetFlashColor());
             col = true;
         }
         if (ImGuiEx.IconButton(FontAwesomeIcon.MailBulk))

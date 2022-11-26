@@ -36,7 +36,7 @@ internal static class TabSettings
                 }
                 ImGui.Checkbox("Left click on message to open first web link in it", ref P.config.ClickToOpenLink);
                 ImGui.Checkbox("Don't bring appearing chat window to front if text input is active", ref P.config.NoBringWindowToFrontIfTyping);
-                ImGuiEx.Text("Incoming tell sound:");
+                ImGuiEx.TextV("Incoming tell sound:");
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
                 if (ImGuiEx.EnumCombo("##incsound", ref P.config.IncomingTellSound))
