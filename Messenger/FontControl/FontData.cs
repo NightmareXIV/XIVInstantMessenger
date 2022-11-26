@@ -1,12 +1,11 @@
-﻿namespace Messenger.FontControl
-{
-    internal sealed class FontData
-    {
-        internal FaceData Regular { get; }
+﻿namespace Messenger.FontControl;
 
-        internal FontData(FaceData regular)
-        {
-            this.Regular = regular;
-        }
+internal sealed class FontData
+{
+    internal FaceData Regular { get; }
+
+    internal FontData(FaceData regular)
+    {
+        this.Regular = regular;
     }
 }

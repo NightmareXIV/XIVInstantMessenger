@@ -1,76 +1,69 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Messenger.Gui;
 
-namespace Messenger.Gui
+internal class OpenLinkWindow : Window
 {
-    internal class OpenLinkWindow : Window
+    string Link = "";
+    bool flash = false;
+    public OpenLinkWindow(string link) : base($"XIVInstantMessenger: warning##{ImGui.GetFrameCount()}", ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.AlwaysAutoResize)
     {
-        string Link = "";
-        bool flash = false;
-        public OpenLinkWindow(string link) : base($"XIVInstantMessenger: warning##{ImGui.GetFrameCount()}", ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.AlwaysAutoResize)
+        if (P.config.NoWarningWhenOpenLinks)
         {
-            if (P.config.NoWarningWhenOpenLinks)
+            ShellStart(Link);
+            return;
+        }
+        this.IsOpen = true;
+        this.SizeConstraints = new()
+        {
+            MinimumSize = new(300, 200),
+            MaximumSize = new(600, 400)
+        };
+        this.Link = link;
+        P.ws.AddWindow(this);
+    }
+
+    public override void PreDraw()
+    {
+        flash = (Environment.TickCount % 2000 > 1000 || P.config.NoFlashing);
+        if (flash)
+        {
+            ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiColors.DalamudRed);
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ImGuiColors.DalamudRed);
+            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiColors.DalamudRed);
+        }
+    }
+
+    public override void Draw()
+    {
+        ImGuiEx.Text("You are about to open link:");
+        ImGuiEx.Text(ImGuiColors.DalamudGrey, Link);
+        ImGuiEx.Text("Do you want to continue?");
+        ImGuiEx.Text(ImGuiColors.DalamudRed, "Never enter your FFXIV, Discord, Steam or E-mail account data on this website.");
+        ImGui.Separator();
+        ImGuiEx.ImGuiLineCentered($"openlink{Link}", delegate
+        {
+            if(ImGui.Button("Open link"))
             {
                 ShellStart(Link);
-                return;
+                this.IsOpen = false;
             }
-            this.IsOpen = true;
-            this.SizeConstraints = new()
+            ImGui.SameLine();
+            if (ImGui.Button("Cancel"))
             {
-                MinimumSize = new(300, 200),
-                MaximumSize = new(600, 400)
-            };
-            this.Link = link;
-            P.ws.AddWindow(this);
-        }
-
-        public override void PreDraw()
-        {
-            flash = (Environment.TickCount % 2000 > 1000 || P.config.NoFlashing);
-            if (flash)
-            {
-                ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiColors.DalamudRed);
-                ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ImGuiColors.DalamudRed);
-                ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiColors.DalamudRed);
+                this.IsOpen = false;
             }
-        }
+        });
+    }
 
-        public override void Draw()
+    public override void PostDraw()
+    {
+        if (flash)
         {
-            ImGuiEx.Text("You are about to open link:");
-            ImGuiEx.Text(ImGuiColors.DalamudGrey, Link);
-            ImGuiEx.Text("Do you want to continue?");
-            ImGuiEx.Text(ImGuiColors.DalamudRed, "Never enter your FFXIV, Discord, Steam or E-mail account data on this website.");
-            ImGui.Separator();
-            ImGuiEx.ImGuiLineCentered($"openlink{Link}", delegate
-            {
-                if(ImGui.Button("Open link"))
-                {
-                    ShellStart(Link);
-                    this.IsOpen = false;
-                }
-                ImGui.SameLine();
-                if (ImGui.Button("Cancel"))
-                {
-                    this.IsOpen = false;
-                }
-            });
+            ImGui.PopStyleColor(3);
         }
+    }
 
-        public override void PostDraw()
-        {
-            if (flash)
-            {
-                ImGui.PopStyleColor(3);
-            }
-        }
-
-        public override void OnClose()
-        {
-            P.ws.RemoveWindow(this);
-        }
+    public override void OnClose()
+    {
+        P.ws.RemoveWindow(this);
     }
 }

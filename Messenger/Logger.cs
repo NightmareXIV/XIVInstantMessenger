@@ -2,51 +2,50 @@
 using System.IO;
 using System.Threading;
 
-namespace Messenger
+namespace Messenger;
+
+internal class Logger : IDisposable
 {
-    internal class Logger : IDisposable
+    BlockingCollection<LogTask> Tasks = new();
+    internal Logger()
     {
-        BlockingCollection<LogTask> Tasks = new();
-        internal Logger()
+        new Thread(() =>
         {
-            new Thread(() =>
-            {
-                try { 
-                    while (!Tasks.IsCompleted)
+            try { 
+                while (!Tasks.IsCompleted)
+                {
+                    var task = Tasks.Take();
+                    while (!task.History.LogLoaded)
                     {
-                        var task = Tasks.Take();
-                        while (!task.History.LogLoaded)
-                        {
-                            PluginLog.Debug("Waiting for log to be loaded first...");
-                            Thread.Sleep(200);
-                        }
-                        Safe(delegate
-                        {
-                            File.AppendAllLines(task.History.LogFile, new string[] { task.Line });
-                        });
+                        PluginLog.Debug("Waiting for log to be loaded first...");
+                        Thread.Sleep(200);
                     }
+                    Safe(delegate
+                    {
+                        File.AppendAllLines(task.History.LogFile, new string[] { task.Line });
+                    });
                 }
-                catch (InvalidOperationException)
-                {
-                }
-                catch(Exception e)
-                {
-                    e.Log();
-                }
-            }).Start();
-        }
-
-        internal void Log(LogTask task)
-        {
-            if (!Tasks.TryAdd(task))
-            {
-                Task.Run(() => Tasks.Add(task));
             }
-        }
+            catch (InvalidOperationException)
+            {
+            }
+            catch(Exception e)
+            {
+                e.Log();
+            }
+        }).Start();
+    }
 
-        public void Dispose()
+    internal void Log(LogTask task)
+    {
+        if (!Tasks.TryAdd(task))
         {
-            Tasks.CompleteAdding();
+            Task.Run(() => Tasks.Add(task));
         }
+    }
+
+    public void Dispose()
+    {
+        Tasks.CompleteAdding();
     }
 }

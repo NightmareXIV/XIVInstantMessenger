@@ -1,7 +1,6 @@
-﻿namespace Messenger
+﻿namespace Messenger;
+
+public enum ModifierKey
 {
-    public enum ModifierKey
-    {
-        None, Alt, Shift, Ctrl
-    }
+    None, Alt, Shift, Ctrl
 }

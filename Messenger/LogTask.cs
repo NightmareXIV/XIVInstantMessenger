@@ -1,8 +1,7 @@
-﻿namespace Messenger
+﻿namespace Messenger;
+
+internal class LogTask
 {
-    internal class LogTask
-    {
-        internal string Line;
-        internal MessageHistory History;
-    }
+    internal string Line;
+    internal MessageHistory History;
 }

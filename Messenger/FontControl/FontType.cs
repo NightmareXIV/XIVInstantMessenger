@@ -1,7 +1,6 @@
-﻿namespace Messenger.FontControl
+﻿namespace Messenger.FontControl;
+
+public enum FontType
 {
-    public enum FontType
-    {
-        ImGui, Game, Game_with_custom_size, System
-    }
+    ImGui, Game, Game_with_custom_size, System
 }

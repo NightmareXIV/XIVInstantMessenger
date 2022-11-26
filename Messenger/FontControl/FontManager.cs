@@ -4,151 +4,150 @@
 using Dalamud.Interface.GameFonts;
 
 #pragma warning disable CS8632
-namespace Messenger.FontControl
+namespace Messenger.FontControl;
+
+internal class FontManager
 {
-    internal class FontManager
+    internal GameFontHandle? SourceAxisFont { get; set; }
+
+    internal ImFontPtr? CustomFont { get; set; }
+
+    ImFontConfigPtr FontConfig;
+    (GCHandle , int, float) customFontHandle;
+    ImVector ranges;
+    GCHandle symbolsRange = GCHandle.Alloc(new ushort[] {0xE020, 0xE0DB, 0}, GCHandleType.Pinned);
+
+    internal unsafe FontManager()
     {
-        internal GameFontHandle? SourceAxisFont { get; set; }
-
-        internal ImFontPtr? CustomFont { get; set; }
-
-        ImFontConfigPtr FontConfig;
-        (GCHandle , int, float) customFontHandle;
-        ImVector ranges;
-        GCHandle symbolsRange = GCHandle.Alloc(new ushort[] {0xE020, 0xE0DB, 0}, GCHandleType.Pinned);
-
-        internal unsafe FontManager()
+        FontConfig = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig())
         {
-            FontConfig = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig())
-            {
-                FontDataOwnedByAtlas = false,
-            };
-            SetUpRanges();
-            SetUpUserFonts();
-            Svc.PluginInterface.UiBuilder.BuildFonts += BuildFonts;
-            Svc.PluginInterface.UiBuilder.RebuildFonts();
-            P.whitespaceForLen.Clear();
+            FontDataOwnedByAtlas = false,
+        };
+        SetUpRanges();
+        SetUpUserFonts();
+        Svc.PluginInterface.UiBuilder.BuildFonts += BuildFonts;
+        Svc.PluginInterface.UiBuilder.RebuildFonts();
+        P.whitespaceForLen.Clear();
+    }
+
+    public void Dispose()
+    {
+        Svc.PluginInterface.UiBuilder.BuildFonts -= BuildFonts;
+        if (customFontHandle.Item1.IsAllocated)
+        {
+            customFontHandle.Item1.Free();
         }
-
-        public void Dispose()
+        if (symbolsRange.IsAllocated)
         {
-            Svc.PluginInterface.UiBuilder.BuildFonts -= BuildFonts;
-            if (customFontHandle.Item1.IsAllocated)
-            {
-                customFontHandle.Item1.Free();
-            }
-            if (symbolsRange.IsAllocated)
-            {
-                symbolsRange.Free();
-            }
-            FontConfig.Destroy();
+            symbolsRange.Free();
         }
+        FontConfig.Destroy();
+    }
 
-        unsafe void SetUpRanges()
+    unsafe void SetUpRanges()
+    {
+        ImVector BuildRange(IReadOnlyList<ushort> chars, params IntPtr[] ranges)
         {
-            ImVector BuildRange(IReadOnlyList<ushort> chars, params IntPtr[] ranges)
+            var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+            foreach (var range in ranges)
             {
-                var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
-                foreach (var range in ranges)
+                builder.AddRanges(range);
+            }
+            if (chars != null)
+            {
+                for (var i = 0; i < chars.Count; i += 2)
                 {
-                    builder.AddRanges(range);
-                }
-                if (chars != null)
-                {
-                    for (var i = 0; i < chars.Count; i += 2)
+                    if (chars[i] == 0)
                     {
-                        if (chars[i] == 0)
-                        {
-                            break;
-                        }
+                        break;
+                    }
 
-                        for (var j = (uint)chars[i]; j <= chars[i + 1]; j++)
-                        {
-                            builder.AddChar((ushort)j);
-                        }
+                    for (var j = (uint)chars[i]; j <= chars[i + 1]; j++)
+                    {
+                        builder.AddChar((ushort)j);
                     }
                 }
-
-                // various symbols
-                builder.AddText("←→↑↓《》■※☀★★☆♥♡ヅツッシ☀☁☂℃℉°♀♂♠♣♦♣♧®©™€$£♯♭♪✓√◎◆◇♦■□〇●△▽▼▲‹›≤≥<«“”─＼～");
-                // French
-                builder.AddText("Œœ");
-                // Romanian
-                builder.AddText("ĂăÂâÎîȘșȚț");
-
-                // "Enclosed Alphanumerics" (partial) https://www.compart.com/en/unicode/block/U+2460
-                for (var i = 0x2460; i <= 0x24B5; i++)
-                {
-                    builder.AddChar((char)i);
-                }
-
-                builder.AddChar('⓪');
-
-                var result = new ImVector();
-                builder.BuildRanges(out result);
-                builder.Destroy();
-
-                return result;
             }
 
-            var ranges = new List<IntPtr> {
-                ImGui.GetIO().Fonts.GetGlyphRangesDefault(),
-            };
+            // various symbols
+            builder.AddText("←→↑↓《》■※☀★★☆♥♡ヅツッシ☀☁☂℃℉°♀♂♠♣♦♣♧®©™€$£♯♭♪✓√◎◆◇♦■□〇●△▽▼▲‹›≤≥<«“”─＼～");
+            // French
+            builder.AddText("Œœ");
+            // Romanian
+            builder.AddText("ĂăÂâÎîȘșȚț");
 
-            foreach (var extraRange in Enum.GetValues<ExtraGlyphRanges>())
+            // "Enclosed Alphanumerics" (partial) https://www.compart.com/en/unicode/block/U+2460
+            for (var i = 0x2460; i <= 0x24B5; i++)
             {
-                if (P.config.ExtraGlyphRanges.HasFlag(extraRange))
-                {
-                    ranges.Add(extraRange.Range());
-                }
+                builder.AddChar((char)i);
             }
 
-            this.ranges = BuildRange(null, ranges.ToArray());
+            builder.AddChar('⓪');
+
+            var result = new ImVector();
+            builder.BuildRanges(out result);
+            builder.Destroy();
+
+            return result;
         }
 
-        void SetUpUserFonts()
+        var ranges = new List<IntPtr> {
+            ImGui.GetIO().Fonts.GetGlyphRangesDefault(),
+        };
+
+        foreach (var extraRange in Enum.GetValues<ExtraGlyphRanges>())
         {
-            FontData fontData = Fonts.GetFont(P.config.GlobalFont);
-
-            if (fontData == null)
+            if (P.config.ExtraGlyphRanges.HasFlag(extraRange))
             {
-                PluginLog.Error($"Font not found: {P.config.GlobalFont}");
-                return;
+                ranges.Add(extraRange.Range());
             }
-
-            if (customFontHandle.Item1.IsAllocated)
-            {
-                customFontHandle.Item1.Free();
-            }
-
-            customFontHandle = (
-                GCHandle.Alloc(fontData.Regular.Data, GCHandleType.Pinned),
-                fontData.Regular.Data.Length,
-                fontData.Regular.Ratio
-            );
         }
 
-        void BuildFonts()
+        this.ranges = BuildRange(null, ranges.ToArray());
+    }
+
+    void SetUpUserFonts()
+    {
+        FontData fontData = Fonts.GetFont(P.config.GlobalFont);
+
+        if (fontData == null)
         {
-            CustomFont = null;
-
-            SetUpRanges();
-            SetUpUserFonts();
-
-            CustomFont = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(
-                customFontHandle.Item1.AddrOfPinnedObject(),
-                customFontHandle.Item2,
-                P.config.FontSize,
-                FontConfig,
-                ranges.Data
-            );
-
-            SourceAxisFont = Svc.PluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis, P.config.FontSize));
-
-            new TickScheduler(delegate
-            {
-                ImGuiHelpers.CopyGlyphsAcrossFonts(SourceAxisFont.ImFont, CustomFont, true, true);
-            });
+            PluginLog.Error($"Font not found: {P.config.GlobalFont}");
+            return;
         }
+
+        if (customFontHandle.Item1.IsAllocated)
+        {
+            customFontHandle.Item1.Free();
+        }
+
+        customFontHandle = (
+            GCHandle.Alloc(fontData.Regular.Data, GCHandleType.Pinned),
+            fontData.Regular.Data.Length,
+            fontData.Regular.Ratio
+        );
+    }
+
+    void BuildFonts()
+    {
+        CustomFont = null;
+
+        SetUpRanges();
+        SetUpUserFonts();
+
+        CustomFont = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(
+            customFontHandle.Item1.AddrOfPinnedObject(),
+            customFontHandle.Item2,
+            P.config.FontSize,
+            FontConfig,
+            ranges.Data
+        );
+
+        SourceAxisFont = Svc.PluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis, P.config.FontSize));
+
+        new TickScheduler(delegate
+        {
+            ImGuiHelpers.CopyGlyphsAcrossFonts(SourceAxisFont.ImFont, CustomFont, true, true);
+        });
     }
 }
