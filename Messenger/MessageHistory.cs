@@ -76,7 +76,8 @@ internal class MessageHistory
                                         IsIncoming = name == subject,
                                         Message = matches[4].ToString(),
                                         Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
-                                        OverrideName = name
+                                        OverrideName = name,
+                                        IgnoreTranslation = true
                                     }) ;
                                 }
                             }, PluginLog.Warning);
@@ -98,7 +99,8 @@ internal class MessageHistory
                                         IsIncoming = false,
                                         Message = matches[2].ToString(),
                                         Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
-                                        IsSystem = true
+                                        IsSystem = true,
+                                        IgnoreTranslation = true
                                     });
                                 }
                             }, PluginLog.Warning);
@@ -112,7 +114,8 @@ internal class MessageHistory
                     LoadedMessages.Insert(0, new()
                     {
                         IsSystem = true,
-                        Message = $"Loaded {LoadedMessages.Count} messages from history."
+                        Message = $"Loaded {LoadedMessages.Count} messages from history.",
+                        IgnoreTranslation = true
                     });
                     reader2.Dispose();
                     reader.Dispose();

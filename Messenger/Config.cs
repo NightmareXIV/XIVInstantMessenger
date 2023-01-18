@@ -76,4 +76,8 @@ internal class Config : IPluginConfiguration
     public bool NoWarningWhenOpenLinks = false;
     public string LogStorageFolder = "";
     public bool NoFlashing = false;
+
+    public string TranslationProvider = "Do not use translation";
+    public bool TranslatorLowercase = false;
+    public bool TranslateSelf = false;
 }

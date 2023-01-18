@@ -205,7 +205,7 @@ internal unsafe class ChatWindow : Window
                     var spaces = P.GetWhitespacesForLen(wdt);
                     ImGui.PushStyleColor(ImGuiCol.Text, messageColor);
                     ImGui.SetCursorPos(cur1);
-                    ImGuiEx.TextWrapped($"{spaces} {x.Message}");
+                    ImGuiEx.TextWrapped($"{spaces} {x.TranslatedMessage ?? x.Message}");
                     PostMessageFunctions(x);
                     ImGui.PopStyleColor();
                 }
@@ -225,7 +225,7 @@ internal unsafe class ChatWindow : Window
                     }
                     ImGuiHelpers.ScaledDummy(new Vector2(20f, 1f));
                     ImGui.SameLine(0, 0);
-                    ImGuiEx.TextWrapped(x.IsIncoming ? P.config.ColorFromMessage : P.config.ColorToMessage, $"[{timestamp}] {x.Message}");
+                    ImGuiEx.TextWrapped(x.IsIncoming ? P.config.ColorFromMessage : P.config.ColorToMessage, $"[{timestamp}] {x.TranslatedMessage ?? x.Message}");
                     PostMessageFunctions(x);
                 }
             }
@@ -429,6 +429,23 @@ internal unsafe class ChatWindow : Window
 
     void PostMessageFunctions(SavedMessage x)
     {
+        if(P.Translator.CurrentProvider != null)
+        {
+            if (x.AwaitingTranslation)
+            {
+                if (P.Translator.TranslationResults.TryGetValue(x.Message, out var tm))
+                {
+                    x.TranslatedMessage = tm;
+                    x.AwaitingTranslation = false;
+                }
+            }
+            if (!x.IgnoreTranslation)
+            {
+                x.AwaitingTranslation = true;
+                x.IgnoreTranslation = true;
+                P.Translator.EnqueueTranslation(x.Message);
+            }
+        }
         if (P.config.ClickToOpenLink && ImGui.IsItemHovered())
         {
             foreach (var s in x.Message.Split(" "))
@@ -499,6 +516,14 @@ internal unsafe class ChatWindow : Window
                     {
                         Svc.Chat.Print(new SeStringBuilder().Add(Extensions.GetItemPayload(x.Item.Item, x.Item.IsHQ)).BuiltString);
                     });
+                }
+            }
+            if(P.Translator.CurrentProvider != null)
+            {
+                if(ImGui.Selectable(x.TranslatedMessage == null? "Translate" : "Translate again"))
+                {
+                    x.AwaitingTranslation = false;
+                    x.IgnoreTranslation = false;
                 }
             }
             ImGui.EndPopup();

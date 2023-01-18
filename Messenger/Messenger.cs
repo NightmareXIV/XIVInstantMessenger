@@ -9,6 +9,7 @@ using Messenger.FontControl;
 using Messenger.FriendListManager;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
+using Messenger.Translation;
 using System.IO;
 
 namespace Messenger;
@@ -38,6 +39,7 @@ public unsafe class Messenger : IDalamudPlugin
     internal GameFontHandle CustomAxis;
     internal Sender LastReceivedMessage;
     internal TabSystem tabSystem;
+    internal Translator Translator;
 
     public Messenger(DalamudPluginInterface pi)
     {
@@ -92,6 +94,7 @@ public unsafe class Messenger : IDalamudPlugin
             ws.AddWindow(tabSystem);
             Tabs(P.config.Tabs);
             Svc.ClientState.Logout += ClientState_Logout;
+            Translator = new();
         });
     }
 
@@ -122,6 +125,7 @@ public unsafe class Messenger : IDalamudPlugin
         Safe(partyFunctions.Dispose);
         if(fontManager != null) Safe(fontManager.Dispose);
         Svc.ClientState.Logout -= ClientState_Logout;
+        Translator.Dispose();
         ECommonsMain.Dispose();
     }
 
@@ -343,7 +347,8 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         IsIncoming = false,
                         Message = message.ToString(),
-                        IsSystem = true
+                        IsSystem = true,
+                        IgnoreTranslation = true
                     });
                     history.Scroll();
                     logger.Log(new()
@@ -374,7 +379,8 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         IsIncoming = type == XivChatType.TellIncoming,
                         Message = message.ToString(),
-                        OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null
+                        OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
+                        IgnoreTranslation = type == XivChatType.TellOutgoing || P.config.TranslateSelf
                     };
                     foreach (var payload in message.Payloads)
                     {

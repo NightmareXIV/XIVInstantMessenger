@@ -11,5 +11,10 @@ internal class SavedMessage
     public bool IsSystem = false;
     public MapLinkPayload MapPayload = null;
     public ItemPayload Item = null;
+
+    public string TranslatedMessage = null;
+    public bool IgnoreTranslation = false;
+    public bool AwaitingTranslation = false;
+
     public string GUID { get; } = Guid.NewGuid().ToString();
 }
