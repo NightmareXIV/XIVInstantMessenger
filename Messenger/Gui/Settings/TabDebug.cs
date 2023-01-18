@@ -1,12 +1,37 @@
-﻿using Dalamud.Memory;
+﻿using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Memory;
 using Messenger.FriendListManager;
 
 namespace Messenger.Gui.Settings;
 
 internal unsafe static class TabDebug
 {
+    static XivChatType MType = XivChatType.TellIncoming;
+    static string MName = "";
+    static int MWorld = 0;
+    static string MMessage = "";
     internal static void Draw()
     {
+        ImGuiEx.Text($"Fake event:");
+        ImGuiEx.EnumCombo("XivChatType", ref MType);
+        ImGui.InputText("Sender's name", ref MName, 50);
+        ImGui.InputInt("Sender's world", ref MWorld);
+        if (MWorld <= 0) MWorld = (int)(Svc.ClientState.LocalPlayer?.HomeWorld.Id ?? 0);
+        ImGui.InputText($"Message", ref MMessage, 500);
+        if(ImGui.Button("Fire event"))
+        {
+            var s = SeString.Empty;
+            if(MName != "")
+            {
+                s = new SeStringBuilder().Add(new PlayerPayload(MName, (uint)MWorld)).Build();
+            }
+            var n = false;
+            var m = new SeStringBuilder().AddText(MMessage).Build();
+            P.OnChatMessage(MType, 0, ref s, ref m, ref n);
+        }
+        ImGui.Separator();
         ImGuiEx.Text($"Is in instance: {P.gameFunctions.IsInInstance()}");
         ImGuiEx.Text($"Last received message: {P.LastReceivedMessage.GetPlayerName()}");
         if(ImGui.Button("Mark all as unread"))

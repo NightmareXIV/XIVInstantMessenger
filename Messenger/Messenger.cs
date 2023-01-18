@@ -330,7 +330,7 @@ public unsafe class Messenger : IDalamudPlugin
         CIDlist.Clear();
     }
 
-    private void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
+    internal void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
     {
         try
         {
@@ -380,7 +380,7 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = type == XivChatType.TellIncoming,
                         Message = message.ToString(),
                         OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
-                        IgnoreTranslation = type == XivChatType.TellOutgoing || P.config.TranslateSelf
+                        IgnoreTranslation = type == XivChatType.TellOutgoing && P.config.TranslateSelf
                     };
                     foreach (var payload in message.Payloads)
                     {

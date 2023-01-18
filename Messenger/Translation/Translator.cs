@@ -30,6 +30,11 @@ namespace Messenger.Translation
 
         internal void EnqueueTranslation(string s)
         {
+            if (TranslationResults.ContainsKey(s))
+            {
+                PluginLog.Verbose($"Message {s} already translated, ignoring");
+                return;
+            }
             TranslationQueue.Enqueue(s);
             if (!IsRunning)
             {

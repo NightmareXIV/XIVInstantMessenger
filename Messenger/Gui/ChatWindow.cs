@@ -437,6 +437,7 @@ internal unsafe class ChatWindow : Window
                 {
                     x.TranslatedMessage = tm;
                     x.AwaitingTranslation = false;
+                    PluginLog.Verbose($"Message {x.Message} translation found {x.TranslatedMessage}");
                 }
             }
             if (!x.IgnoreTranslation)
@@ -444,6 +445,7 @@ internal unsafe class ChatWindow : Window
                 x.AwaitingTranslation = true;
                 x.IgnoreTranslation = true;
                 P.Translator.EnqueueTranslation(x.Message);
+                PluginLog.Verbose($"Message {x.Message} translation enqueued");
             }
         }
         if (P.config.ClickToOpenLink && ImGui.IsItemHovered())

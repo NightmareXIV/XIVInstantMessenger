@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Messenger.Translation.Providers
@@ -38,6 +39,7 @@ namespace Messenger.Translation.Providers
 
         public string TranslateSynchronous(string sourceText)
         {
+            Thread.Sleep(500);
             return P.config.TranslatorLowercase ? sourceText.ToLower() : sourceText.ToUpper();
         }
     }
