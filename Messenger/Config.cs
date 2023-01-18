@@ -1,6 +1,7 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.GameFonts;
+using GTranslatorAPI;
 using Messenger.FontControl;
 
 namespace Messenger;
@@ -80,4 +81,7 @@ internal class Config : IPluginConfiguration
     public string TranslationProvider = "Do not use translation";
     public bool TranslatorLowercase = false;
     public bool TranslateSelf = false;
+
+    public Languages GTranslateSourceLang = Languages.auto;
+    public Languages GTranslateTargetLang = Languages.en;
 }

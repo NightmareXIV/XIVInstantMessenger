@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Messenger", "Messenger\Mess
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{DD411D86-4A40-4C7B-8283-7314FDB53A99}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GTranslatorAPI", "GTranslatorAPI\GTranslatorAPI\GTranslatorAPI.csproj", "{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{DD411D86-4A40-4C7B-8283-7314FDB53A99}.Release|Any CPU.Build.0 = Release|x64
 		{DD411D86-4A40-4C7B-8283-7314FDB53A99}.Release|x64.ActiveCfg = Release|x64
 		{DD411D86-4A40-4C7B-8283-7314FDB53A99}.Release|x64.Build.0 = Release|x64
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Debug|x64.Build.0 = Debug|Any CPU
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Release|x64.ActiveCfg = Release|Any CPU
+		{2A720D2B-EC1D-4F9A-A249-02EF49E71A56}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

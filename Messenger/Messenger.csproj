@@ -83,5 +83,6 @@
 	
 	<ItemGroup>
 	  <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+	  <ProjectReference Include="..\GTranslatorAPI\GTranslatorAPI\GTranslatorAPI.csproj" />
 	</ItemGroup>
 </Project>

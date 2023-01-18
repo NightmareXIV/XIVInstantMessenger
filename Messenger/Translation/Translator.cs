@@ -23,9 +23,11 @@ namespace Messenger.Translation
         {
             RegisteredProviders = new()
             {
-                new DummyProvider()
+                new DummyProvider(),
+                new GTranslator()
             };
             CurrentProvider = RegisteredProviders.FirstOrDefault(x => x.DisplayName == P.config.TranslationProvider);
+            CurrentProvider?.Initialize();
         }
 
         internal void EnqueueTranslation(string s)
