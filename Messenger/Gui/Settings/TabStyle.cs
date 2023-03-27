@@ -7,12 +7,12 @@ internal static class TabStyle
 
     internal static void Draw()
     {
-        ImGui.ColorEdit4("Generic text color", ref P.config.ColorGeneric, ImGuiColorEditFlags.NoInputs);
-        ImGui.ColorEdit4("Incoming messages: sender color", ref P.config.ColorFromTitle, ImGuiColorEditFlags.NoInputs);
-        ImGui.ColorEdit4("Incoming messages: message color", ref P.config.ColorFromMessage, ImGuiColorEditFlags.NoInputs);
-        ImGui.ColorEdit4("Outgoing messages: sender color", ref P.config.ColorToTitle, ImGuiColorEditFlags.NoInputs);
-        ImGui.ColorEdit4("Outgoing messages: message color", ref P.config.ColorToMessage, ImGuiColorEditFlags.NoInputs);
-        ImGui.ColorEdit4("Unread message flashing title color", ref P.config.ColorTitleFlash, ImGuiColorEditFlags.NoInputs);
+        ImGui.ColorEdit4("Generic text color", ref P.config.DefaultChannelCustomization.ColorGeneric, ImGuiColorEditFlags.NoInputs);
+        ImGui.ColorEdit4("Incoming messages: sender color", ref P.config.DefaultChannelCustomization.ColorFromTitle, ImGuiColorEditFlags.NoInputs);
+        ImGui.ColorEdit4("Incoming messages: message color", ref P.config.DefaultChannelCustomization.ColorFromMessage, ImGuiColorEditFlags.NoInputs);
+        ImGui.ColorEdit4("Outgoing messages: sender color", ref P.config.DefaultChannelCustomization.ColorToTitle, ImGuiColorEditFlags.NoInputs);
+        ImGui.ColorEdit4("Outgoing messages: message color", ref P.config.DefaultChannelCustomization.ColorToMessage, ImGuiColorEditFlags.NoInputs);
+        ImGui.ColorEdit4("Unread message flashing title color", ref P.config.DefaultChannelCustomization.ColorTitleFlash, ImGuiColorEditFlags.NoInputs);
         ImGui.Checkbox("Flash title in addition to tab when using tabbed mode", ref P.config.ColorTitleFlashTab);
         ImGui.Checkbox("IRC-style chat", ref P.config.IRCStyle);
         ImGui.Checkbox("Print date when new day of messages starts", ref P.config.PrintDate);
@@ -57,6 +57,7 @@ internal static class TabStyle
         ImGui.DragFloat2("Default window size", ref P.config.DefaultSize, 1f, 200f, 2000f);
         ImGui.Checkbox("Don't remember individual windows sizes", ref P.config.ResetSizeOnAppearing);
         ImGui.Checkbox("Disable window resizing (hold CTRL to override)", ref P.config.NoResize);
+        ImGui.Checkbox("Disable window moving (hold CTRL to override)", ref P.config.NoMove);
         ImGui.Checkbox("Disable flashing", ref P.config.NoFlashing);
         ImGuiComponents.HelpMarker("Makes normally flashing elements solid color, resulting them being less noticeable but also less disturbing");
 

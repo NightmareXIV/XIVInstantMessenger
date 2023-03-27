@@ -20,11 +20,11 @@ internal static class TabSettings
             }, null, true),
             ("Behavior", delegate
             {
-                ImGui.Checkbox("Open direct message window on incoming tell", ref P.config.AutoOpenTellIncoming);
-                ImGui.Checkbox("Open direct message window on outgoing tell", ref P.config.AutoOpenTellOutgoing);
-                if (P.config.AutoOpenTellOutgoing)
+                ImGui.Checkbox("Open direct message window on incoming tell", ref P.config.DefaultChannelCustomization.AutoOpenTellIncoming);
+                ImGui.Checkbox("Open direct message window on outgoing tell", ref P.config.DefaultChannelCustomization.AutoOpenTellOutgoing);
+                if (P.config.DefaultChannelCustomization.AutoOpenTellOutgoing)
                 {
-                    ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref P.config.AutoFocusTellOutgoing);
+                    ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref P.config.DefaultChannelCustomization.AutoFocusTellOutgoing);
                 }
                 ImGui.Checkbox("Hide DMs from in-game chat", ref P.config.SuppressDMs);
                 ImGui.Checkbox("Auto-hide chat windows in combat", ref P.config.AutoHideCombat);

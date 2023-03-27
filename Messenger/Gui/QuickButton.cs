@@ -47,7 +47,7 @@ internal unsafe class QuickButton : Window
         var col = false;
         if(P.Hidden)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiCol.Text.GetFlashColor());
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiCol.Text.GetFlashColor(P.config.DefaultChannelCustomization));
             col = true;
         }
         if (ImGuiEx.IconButton(FontAwesomeIcon.MailBulk))
@@ -80,7 +80,7 @@ internal unsafe class QuickButton : Window
                 foreach (var x in P.Chats)
                 {
                     var cur = ImGui.GetCursorPos();
-                    if (ImGui.Selectable($"{x.Key.GetPlayerName()} ({x.Value.Messages.Count})", false, ImGuiSelectableFlags.None, new Vector2(200f.Scale(), tsize.Y)))
+                    if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count})", false, ImGuiSelectableFlags.None, new Vector2(200f.Scale(), tsize.Y)))
                     {
                         P.Hidden = false;
                         x.Value.chatWindow.IsOpen = true;
@@ -93,7 +93,7 @@ internal unsafe class QuickButton : Window
                     }
                     ImGui.SameLine(0, 0);
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
-                    if (ImGui.Selectable($"   ##{x.Key.GetPlayerName()}", false, ImGuiSelectableFlags.DontClosePopups))
+                    if (ImGui.Selectable($"   ##{x.Key.GetChannelName()}", false, ImGuiSelectableFlags.DontClosePopups))
                     {
                         toRem = x.Key;
                     }

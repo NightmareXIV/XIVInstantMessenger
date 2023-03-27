@@ -14,6 +14,13 @@ internal unsafe static class TabDebug
     static string MMessage = "";
     internal static void Draw()
     {
+        if (ImGui.CollapsingHeader("Senders"))
+        {
+            foreach(var x in P.Chats)
+            {
+                ImGuiEx.Text($"{x.Key.Name}@{x.Key.HomeWorld}, {x.Key.IsGenericChannel()}");
+            }
+        }
         ImGuiEx.Text($"Fake event:");
         ImGuiEx.EnumCombo("XivChatType", ref MType);
         ImGui.InputText("Sender's name", ref MName, 50);

@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using ECommons.GameFunctions;
 using Messenger.FontControl;
@@ -20,11 +21,13 @@ internal unsafe class ChatWindow : Window
     float Transparency = P.config.TransMax;
     bool IsTransparent = true;
     internal bool SetPosition = false;
-    internal bool BringToFront = false;
+    internal new bool BringToFront = false;
     bool fontPushed;
 
+    internal ChannelCustomization Cust => this.messageHistory.Player.GetCustomization();
+
     public ChatWindow(MessageHistory messageHistory) : 
-        base($"Chat with {messageHistory.Player.GetPlayerName()}###Messenger - {messageHistory.Player.Name}{messageHistory.Player.HomeWorld}"
+        base($"Chat with {messageHistory.Player.GetChannelName()}###Messenger - {messageHistory.Player.Name}{messageHistory.Player.HomeWorld}"
             , ImGuiWindowFlags.NoFocusOnAppearing)
     {
         this.messageHistory = messageHistory;
@@ -83,13 +86,21 @@ internal unsafe class ChatWindow : Window
 
     public override void PreDraw()
     {
-        if(P.config.NoResize && !ImGui.GetIO().KeyCtrl)
+        if (P.config.NoResize && !ImGui.GetIO().KeyCtrl)
         {
             this.Flags |= ImGuiWindowFlags.NoResize;
         }
         else
         {
             this.Flags &= ~ImGuiWindowFlags.NoResize;
+        }
+        if (P.config.NoMove && !ImGui.GetIO().KeyCtrl)
+        {
+            this.Flags |= ImGuiWindowFlags.NoMove;
+        }
+        else
+        {
+            this.Flags &= ~ImGuiWindowFlags.NoMove;
         }
         this.Size = P.config.DefaultSize;
         this.SizeCondition = P.config.ResetSizeOnAppearing ? ImGuiCond.Appearing : ImGuiCond.FirstUseEver;
@@ -98,8 +109,8 @@ internal unsafe class ChatWindow : Window
         if (Unread)
         {
             TitleColored = true;
-            ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor());
-            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiCol.TitleBgCollapsed.GetFlashColor());
+            ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor(Cust));
+            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiCol.TitleBgCollapsed.GetFlashColor(Cust));
         }
         if(IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
         if (SetPosition)
@@ -149,7 +160,7 @@ internal unsafe class ChatWindow : Window
             BringToFront = false;
             Native.igBringWindowToDisplayFront(Native.igGetCurrentWindow());
         }
-        var subject = messageHistory.Player.GetPlayerName();
+        var subject = messageHistory.Player.IsGenericChannel()? Enum.GetValues<XivChatType>().First(x => x.ToString() == messageHistory.Player.Name).GetCommand() : messageHistory.Player.GetPlayerName();
         var subjectNoWorld = messageHistory.Player.GetPlayerName().Split("@")[0];
         var me = Svc.ClientState.LocalPlayer?.Name.ToString().Split("@")[0] ?? "Me";
         ImGui.BeginChild($"##ChatChild{subject}", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - fieldHeight));
@@ -172,7 +183,7 @@ internal unsafe class ChatWindow : Window
         {
             if (x.IsSystem)
             {
-                ImGuiEx.TextWrapped(P.config.ColorGeneric, $"{x.Message}");
+                ImGuiEx.TextWrapped(Cust.ColorGeneric, $"{x.Message}");
             }
             else
             {
@@ -181,19 +192,19 @@ internal unsafe class ChatWindow : Window
                 {
                     if (!(time.DayOfYear == currentDay.day && time.Year == currentDay.year))
                     {
-                        ImGuiEx.Text(P.config.ColorGeneric, $"[{time.ToString(P.config.DateFormat)}]");
+                        ImGuiEx.Text(Cust.ColorGeneric, $"[{time.ToString(P.config.DateFormat)}]");
                         currentDay = (time.Year, time.DayOfYear);
                     }
                 }
                 var timestamp = time.ToString(P.config.MessageTimestampFormat);
                 if (P.config.IRCStyle)
                 {
-                    var messageColor = x.IsIncoming ? P.config.ColorFromMessage : P.config.ColorToMessage;
-                    var subjectColor = x.IsIncoming ? P.config.ColorFromTitle : P.config.ColorToTitle;
+                    var messageColor = x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage;
+                    var subjectColor = x.IsIncoming ? Cust.ColorFromTitle : Cust.ColorToTitle;
                     var cur1 = ImGui.GetCursorPos();
                     var wdt = ImGuiEx.Measure(delegate
                     {
-                        ImGuiEx.Text(P.config.ColorGeneric, $"{timestamp} ");
+                        ImGuiEx.Text(Cust.ColorGeneric, $"{timestamp} ");
                         ImGui.SameLine(0, 0);
                         ImGuiEx.Text(messageColor, $"[");
                         ImGui.SameLine(0, 0);
@@ -216,16 +227,16 @@ internal unsafe class ChatWindow : Window
                         isIncoming = x.IsIncoming;
                         if (x.IsIncoming)
                         {
-                            ImGuiEx.TextWrapped(P.config.ColorFromTitle, $"From {x.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
+                            ImGuiEx.TextWrapped(Cust.ColorFromTitle, $"From {x.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
                         }
                         else
                         {
-                            ImGuiEx.TextWrapped(P.config.ColorToTitle, $"From {x.OverrideName?.Split("@")[0] ?? me}");
+                            ImGuiEx.TextWrapped(Cust.ColorToTitle, $"From {x.OverrideName?.Split("@")[0] ?? me}");
                         }
                     }
                     ImGuiHelpers.ScaledDummy(new Vector2(20f, 1f));
                     ImGui.SameLine(0, 0);
-                    ImGuiEx.TextWrapped(x.IsIncoming ? P.config.ColorFromMessage : P.config.ColorToMessage, $"[{timestamp}] {x.TranslatedMessage ?? x.Message}");
+                    ImGuiEx.TextWrapped(x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage, $"[{timestamp}] {x.TranslatedMessage ?? x.Message}");
                     PostMessageFunctions(x);
                 }
             }
@@ -248,7 +259,7 @@ internal unsafe class ChatWindow : Window
         var cur = ImGui.GetCursorPosY();
         if (ImGui.InputText("##outgoing", ref msg, 500, ImGuiInputTextFlags.EnterReturnsTrue))
         {
-            SendMessage(subject);
+            SendMessage(subject, messageHistory.Player.IsGenericChannel());
         }
         if (inputCol)
         {
@@ -272,7 +283,7 @@ internal unsafe class ChatWindow : Window
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command"))
                 {
-                    SendMessage(subject);
+                    SendMessage(subject, messageHistory.Player.IsGenericChannel());
                 }
                 ImGuiEx.Tooltip("Execute command");
             }
@@ -280,12 +291,12 @@ internal unsafe class ChatWindow : Window
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send"))
                 {
-                    SendMessage(subject);
+                    SendMessage(subject, messageHistory.Player.IsGenericChannel());
                 }
                 ImGuiEx.Tooltip("Send message");
             }
         }
-        if (P.config.ButtonInvite)
+        if (P.config.ButtonInvite && !this.messageHistory.Player.IsGenericChannel())
         {
             ImGui.SameLine(0, 2);
             if (ImGuiEx.IconButton(FontAwesomeIcon.DoorOpen, "InviteToParty"))
@@ -378,7 +389,7 @@ internal unsafe class ChatWindow : Window
             }
         }
         
-        if (!P.IsFriend(this.messageHistory.Player))
+        if (!this.messageHistory.Player.IsGenericChannel() && !P.IsFriend(this.messageHistory.Player))
         {
             if (P.config.ButtonFriend)
             {
@@ -420,7 +431,7 @@ internal unsafe class ChatWindow : Window
         ImGui.Dummy(Vector2.Zero);
         var bytes = P.GetLength(subject, msg);
         var fraction = (float)bytes.current / (float)bytes.max;
-        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f?ImGuiColors.DalamudRed:P.config.ColorGeneric);
+        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f?ImGuiColors.DalamudRed: Cust.ColorGeneric);
         ImGui.ProgressBar(fraction, new Vector2(ImGui.GetContentRegionAvail().X, 3f), "");
         ImGui.PopStyleColor();
         fieldHeight = ImGui.GetCursorPosY() - cursor;
@@ -455,7 +466,7 @@ internal unsafe class ChatWindow : Window
                 if (s.StartsWith("http://", StringComparison.OrdinalIgnoreCase) 
                     || s.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, P.config.ColorGeneric);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
                     ImGuiEx.SetTooltip($"Link found:\n{s}\nClick to open");
                     ImGui.PopStyleColor();
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -473,7 +484,7 @@ internal unsafe class ChatWindow : Window
         }
         if (ImGui.BeginPopup($"MessageDetail{x.GUID}"))
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, P.config.ColorGeneric);
+            ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
             //this.SetTransparency(false);
             ImGui.SetNextItemWidth(400f);
             var msg = x.Message;
@@ -524,6 +535,7 @@ internal unsafe class ChatWindow : Window
             {
                 if(ImGui.Selectable(x.TranslatedMessage == null? "Translate" : "Translate again"))
                 {
+                    P.Translator.TranslationResults.Remove(x.Message, out _);
                     x.AwaitingTranslation = false;
                     x.IgnoreTranslation = false;
                 }
@@ -546,7 +558,7 @@ internal unsafe class ChatWindow : Window
         }
     }
 
-    void SendMessage(string subject)
+    void SendMessage(string subject, bool generic)
     {
         var bytes = P.GetLength(subject, msg);
         var trimmed = msg.Trim();
@@ -560,7 +572,7 @@ internal unsafe class ChatWindow : Window
         }
         else if (trimmed.StartsWith("/") && P.config.CommandPassthrough)
         {
-            if (P.config.AutoTarget &&
+            if (!generic && P.config.AutoTarget &&
             (P.TargetCommands.Any(x => msg.Equals(x, StringComparison.OrdinalIgnoreCase) || msg.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
             && Svc.Objects.TryGetFirst(x => x is PlayerCharacter pc && pc.GetPlayerName() == subject && x.Struct()->GetIsTargetable(), out var obj))
             {
@@ -576,7 +588,8 @@ internal unsafe class ChatWindow : Window
         }
         else
         {
-            var error = P.SendDirectMessage(subject, trimmed);
+            PluginLog.Verbose($"Begin send message to {subject} {generic}: {trimmed}");
+            var error = P.SendDirectMessage(subject, trimmed, generic);
             if (error == null)
             {
                 this.msg = "";

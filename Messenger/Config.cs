@@ -1,5 +1,6 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.Text;
 using Dalamud.Interface.GameFonts;
 using GTranslatorAPI;
 using Messenger.FontControl;
@@ -11,29 +12,44 @@ internal class Config : IPluginConfiguration
     public int Version { get; set; } = 1;
     public int ContextMenuIndex = 1;
     public bool ContextMenuEnable = true;
-    public bool AutoOpenTellIncoming = true;
-    public bool AutoOpenTellOutgoing = true;
-    public bool AutoFocusTellOutgoing = true;
-    public bool QuickOpenButton = false;
-    public int QuickOpenPositionX2 = 0;
-    public int QuickOpenPositionY2 = 0;
-    public Vector4 ColorToTitle = new(0.77f, 0.7f, 0.965f, 1f);
-    public Vector4 ColorToMessage = new(0.86f, 0.52f, 0.98f, 1f);
-    public Vector4 ColorFromTitle = new(0.47f, 0.30f, 0.96f, 1f);
-    public Vector4 ColorFromMessage = new(0.77f, 0.69f, 1f, 1f);
-    public Vector4 ColorGeneric = new(1f, 1f, 1f, 1f);
-    public Vector4 ColorTitleFlash = new(0.91f, 1f, 0f, 1f);
+
+    [Obsolete("", true)] public bool AutoOpenTellIncoming = true;
+    [Obsolete("", true)] public bool AutoOpenTellOutgoing = true;
+    [Obsolete("", true)] public bool AutoFocusTellOutgoing = true;
+    [Obsolete("", true)] public Vector4 ColorToTitle = new(0.77f, 0.7f, 0.965f, 1f);
+    [Obsolete("", true)] public Vector4 ColorToMessage = new(0.86f, 0.52f, 0.98f, 1f);
+    [Obsolete("", true)] public Vector4 ColorFromTitle = new(0.47f, 0.30f, 0.96f, 1f);
+    [Obsolete("", true)] public Vector4 ColorFromMessage = new(0.77f, 0.69f, 1f, 1f);
+    [Obsolete("", true)] public Vector4 ColorGeneric = new(1f, 1f, 1f, 1f);
+    [Obsolete("", true)] public Vector4 ColorTitleFlash = new(0.91f, 1f, 0f, 1f);
+    public string TranslationProvider = "Do not use translation";
+    public bool TranslatorLowercase = false;
+    public bool TranslateSelf = false;
+    public Languages GTranslateSourceLang = Languages.auto;
+    public Languages GTranslateTargetLang = Languages.en;
+
+    public HashSet<XivChatType> Channels = new();
+
+    public ChannelCustomization DefaultChannelCustomization = null;
+    public Dictionary<XivChatType, ChannelCustomization> SpecificChannelCustomizations = new();
+
     public bool IRCStyle = true;
     public bool PrintDate = true;
-    public int HistoryAmount = 50;
     public string MessageTimestampFormat = "HH:mm:ss";
     public string DateFormat = "D";
     public bool AutoHideCombat = true;
     public bool AutoReopenAfterCombat = true;
+
+    public bool QuickOpenButton = false;
+    public int QuickOpenPositionX2 = 0;
+    public int QuickOpenPositionY2 = 0;
+    public int HistoryAmount = 50;
+
     public bool EnableKey = true;
     public ModifierKey ModifierKey = ModifierKey.Alt;
     public VirtualKey Key = VirtualKey.R;
     public bool CommandPassthrough = true;
+
     public bool WindowShift = true;
     public int WindowShiftX = 50;
     public int WindowShiftY = 50;
@@ -63,25 +79,22 @@ internal class Config : IPluginConfiguration
     public bool QuickOpenButtonOnTop = true;
     public bool Tabs = false;
     public bool ColorTitleFlashTab = true;
+
     public bool ButtonSend = true;
     public bool ButtonInvite = true;
     public bool ButtonFriend = true;
     public bool ButtonBlack = true;
     public bool ButtonLog = true;
+
     public bool LockWindowSize = true;
     public Vector2 DefaultSize = new(300, 200);
     public bool ResetSizeOnAppearing = false;
     public bool NoResize = false;
+    public bool NoMove = false;
     public bool CloseLogout = false;
     public bool RefocusInputAfterSending = true;
     public bool NoWarningWhenOpenLinks = false;
-    public string LogStorageFolder = "";
     public bool NoFlashing = false;
+    public string LogStorageFolder = "";
 
-    public string TranslationProvider = "Do not use translation";
-    public bool TranslatorLowercase = false;
-    public bool TranslateSelf = false;
-
-    public Languages GTranslateSourceLang = Languages.auto;
-    public Languages GTranslateTargetLang = Languages.en;
 }

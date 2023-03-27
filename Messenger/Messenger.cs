@@ -10,6 +10,7 @@ using Messenger.FriendListManager;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
 using Messenger.Translation;
+using SharpDX.DXGI;
 using System.IO;
 
 namespace Messenger;
@@ -48,6 +49,7 @@ public unsafe class Messenger : IDalamudPlugin
         new TickScheduler(delegate
         {
             config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
+            Migrator.MigrateConfiguration();
             Svc.Chat.ChatMessage += OnChatMessage;
             gameFunctions = new();
             ws = new();
@@ -227,7 +229,7 @@ public unsafe class Messenger : IDalamudPlugin
         {
             foreach (var x in P.Chats)
             {
-                if (x.Key.GetPlayerName().Contains(args, StringComparison.OrdinalIgnoreCase))
+                if (x.Key.GetChannelName().Contains(args, StringComparison.OrdinalIgnoreCase))
                 {
                     P.OpenMessenger(x.Key, true);
                     P.Chats[x.Key].SetFocus = true;
@@ -371,8 +373,8 @@ public unsafe class Messenger : IDalamudPlugin
                     OpenMessenger(s,
                         (!Svc.Condition[ConditionFlag.InCombat] || config.AutoReopenAfterCombat) && 
                         (
-                        (config.AutoOpenTellIncoming && type == XivChatType.TellIncoming) 
-                        || (config.AutoOpenTellOutgoing && type == XivChatType.TellOutgoing)
+                        (s.GetCustomization().AutoOpenTellIncoming && type == XivChatType.TellIncoming) 
+                        || (s.GetCustomization().AutoOpenTellOutgoing && type == XivChatType.TellOutgoing)
                         )
                         );
                     var addedMessage = new SavedMessage()
@@ -398,7 +400,7 @@ public unsafe class Messenger : IDalamudPlugin
                     Chats[s].Scroll();
                     if (type == XivChatType.TellOutgoing)
                     {
-                        if (P.config.AutoFocusTellOutgoing && !isOpen)
+                        if (s.GetCustomization().AutoFocusTellOutgoing && !isOpen)
                         {
                             Chats[s].SetFocus = true;
                         }
@@ -423,6 +425,62 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         isHandled = true;
                     }
+                }
+                else if(type.GetCommand() != null && P.config.Channels.Contains(type)) 
+                {
+                    //generic
+                    var incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
+                    var genericSender = new Sender(type.ToString(), 0);
+                    var isOpen = Chats.TryGetValue(genericSender, out var sHist) && sHist.chatWindow.IsOpen;
+                    OpenMessenger(genericSender,
+                        (!Svc.Condition[ConditionFlag.InCombat] || config.AutoReopenAfterCombat) &&
+                        (
+                        (genericSender.GetCustomization().AutoOpenTellIncoming && incoming)
+                        || (genericSender.GetCustomization().AutoOpenTellOutgoing && !incoming)
+                        )
+                        );
+                    var addedMessage = new SavedMessage()
+                    {
+                        IsIncoming = incoming,
+                        Message = message.ToString(),
+                        OverrideName = s.GetPlayerName(),
+                        IgnoreTranslation = !incoming && P.config.TranslateSelf
+                    };
+                    foreach (var payload in message.Payloads)
+                    {
+                        if (payload.Type == PayloadType.MapLink)
+                        {
+                            addedMessage.MapPayload = (MapLinkPayload)payload;
+                        }
+                        if (payload.Type == PayloadType.Item)
+                        {
+                            addedMessage.Item = (ItemPayload)payload;
+                        }
+                    }
+                    Chats[genericSender].Messages.Add(addedMessage);
+                    Chats[genericSender].Scroll();
+                    if (incoming)
+                    {
+                        if (genericSender.GetCustomization().AutoFocusTellOutgoing && !isOpen)
+                        {
+                            Chats[genericSender].SetFocus = true;
+                        }
+                    }
+                    else
+                    {
+                        LastReceivedMessage = s;
+                        Chats[genericSender].chatWindow.Unread = incoming;
+                        Chats[genericSender].chatWindow.SetTransparency(true);
+                        /*if (P.config.IncomingTellSound != Sounds.None)
+                        {
+                            gameFunctions.PlaySound(P.config.IncomingTellSound);
+                        }*/
+                    }
+                    logger.Log(new()
+                    {
+                        History = Chats[genericSender],
+                        Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {s.GetPlayerName()}: {message.ToString()}"
+                    });
                 }
                 var idx = gameFunctions.GetCurrentChatLogEntryIndex();
                 if (idx != null)
@@ -470,6 +528,11 @@ public unsafe class Messenger : IDalamudPlugin
                 return true;
             }
         }
+        if(sender.ToString().EndsWith(Svc.ClientState.LocalPlayer?.Name.ToString()))
+        {
+            senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Svc.ClientState.LocalPlayer.HomeWorld.Id);
+            return true;
+        }
         senderStruct = default;
         return false;
     }
@@ -481,24 +544,36 @@ public unsafe class Messenger : IDalamudPlugin
         return (msg, 500 - cmd);
     }
 
-    internal string SendDirectMessage(string destination, string message)
+    internal string SendDirectMessage(string destination, string message, bool generic = false)
     {
         try
         {
-            if(Svc.ClientState.LocalPlayer == null)
+            if (Svc.ClientState.LocalPlayer == null)
             {
                 return "Not logged in";
             }
             if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
             {
-                if(destination == P.LastReceivedMessage.GetPlayerName())
+                if (generic)
                 {
-                    PluginLog.Debug("Sending via reply");
-                    P.chat.SendMessage($"/r {message}");
+                    var c = $"/{destination} {message}";
+                    PluginLog.Verbose($"Sending command generic: {c}");
+                    P.chat.SendMessage(c);
                 }
                 else
                 {
-                    P.chat.SendMessage($"/tell {destination} {message}");
+                    if (destination == P.LastReceivedMessage.GetPlayerName())
+                    {
+                        var c = $"/r {message}";
+                        PluginLog.Verbose($"Sending via reply: {c}");
+                        P.chat.SendMessage(c);
+                    }
+                    else
+                    {
+                        var c = $"/tell {destination} {message}";
+                        PluginLog.Verbose($"Sending command: {c}");
+                        P.chat.SendMessage(c);
+                    }
                 }
                 return null;
             }

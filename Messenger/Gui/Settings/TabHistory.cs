@@ -55,8 +55,8 @@ internal static class TabHistory
             ImGui.InputTextWithHint("##fltr", "Filter...", ref search, 50);
             foreach (var x in P.Chats)
             {
-                if (search.Length > 0 && !x.Key.GetPlayerName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
-                if (ImGui.Selectable($"{x.Key.GetPlayerName()} ({x.Value.Messages.Count(x => !x.IsSystem)} messages)"))
+                if (search.Length > 0 && !x.Key.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
+                if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count(x => !x.IsSystem)} messages)"))
                 {
                     P.OpenMessenger(x.Key, true);
                     P.Chats[x.Key].SetFocus = true;
@@ -66,8 +66,8 @@ internal static class TabHistory
             {
                 foreach (var x in fileChatList)
                 {
-                    if (search.Length > 0 && !x.GetPlayerName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
-                    if (!P.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetPlayerName()} (unloaded)"))
+                    if (search.Length > 0 && !x.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!P.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetChannelName()} (unloaded)"))
                     {
                         P.OpenMessenger(x, true);
                         P.Chats[x].SetFocus = true;

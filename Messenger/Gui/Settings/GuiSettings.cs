@@ -18,6 +18,7 @@ internal class GuiSettings : Window
             ("Settings", TabSettings.Draw, null, true),
             ("Style", TabStyle.Draw, null, true),
             ("Fonts", TabFonts.Draw, null, true),
+            ("Generic channels", TabIndividual.Draw, null, true),
             ("Translation", TabTranslation.Draw, null, true),
             ("Log", InternalLog.PrintImgui, ImGuiColors.DalamudGrey3, false),
             ("Debug", TabDebug.Draw, ImGuiColors.DalamudGrey3, true)

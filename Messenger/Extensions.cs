@@ -5,11 +5,111 @@ using Dalamud.Game.Text;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 using ECommons.Configuration;
+using Dalamud.Game.Gui.PartyFinder.Types;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using Messenger.Gui.Settings;
 
 namespace Messenger;
 
-internal static class Extensions
+internal unsafe static class Extensions
 {
+    internal static ChannelCustomization GetCustomization(this Sender s)
+    {
+        if (s.IsGenericChannel())
+        {
+            if (Enum.TryParse<XivChatType>(s.Name, out var e))
+            {
+                if (P.config.SpecificChannelCustomizations.TryGetValue(e, out var cust))
+                {
+                    return cust;
+                }
+            }
+        }
+        else
+        {
+            if (P.config.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out var cust))
+            {
+                return cust;
+            }
+        }
+        return P.config.DefaultChannelCustomization;
+    }
+
+    internal static string GetName(this XivChatType type)
+    {
+        var affix = string.Empty;
+        if(type.EqualsAny(XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4, XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8))
+        {
+            
+        }
+
+        if (TabIndividual.Types.Contains(type))
+        {
+            return TabIndividual.Names[Array.IndexOf(TabIndividual.Types, type)];
+        }
+        return type.ToString();
+    }
+
+    internal static string GetCommand(this XivChatType type)
+    {
+        if (type == XivChatType.Party) return "p";
+        if (type == XivChatType.Say) return "say";
+        if (type == XivChatType.Shout) return "shout";
+        if (type == XivChatType.Yell) return "yell";
+        if (type == XivChatType.Alliance) return "alliance";
+        if (type == XivChatType.Ls1) return "linkshell1";
+        if (type == XivChatType.Ls2) return "linkshell2";
+        if (type == XivChatType.Ls3) return "linkshell3";
+        if (type == XivChatType.Ls4) return "linkshell4";
+        if (type == XivChatType.Ls5) return "linkshell5";
+        if (type == XivChatType.Ls6) return "linkshell6";
+        if (type == XivChatType.Ls7) return "linkshell7";
+        if (type == XivChatType.Ls8) return "linkshell8";
+        if (type == XivChatType.CrossLinkShell1) return "cwl1";
+        if (type == XivChatType.CrossLinkShell2) return "cwl2";
+        if (type == XivChatType.CrossLinkShell3) return "cwl3";
+        if (type == XivChatType.CrossLinkShell4) return "cwl4";
+        if (type == XivChatType.CrossLinkShell5) return "cwl5";
+        if (type == XivChatType.CrossLinkShell6) return "cwl6";
+        if (type == XivChatType.CrossLinkShell7) return "cwl7";
+        if (type == XivChatType.CrossLinkShell8) return "cwl8";
+        if (type == XivChatType.FreeCompany) return "fc";
+        if (type == XivChatType.NoviceNetwork) return "novice";
+        return null;
+    }
+
+    internal static string GetChannelName(this Sender s)
+    {
+        if (s.IsGenericChannel(out var t))
+        {
+            return t.GetName();
+        }
+        else
+        {
+            return s.GetPlayerName();
+        }
+    }
+
+    internal static bool IsGenericChannel(this Sender s)
+    {
+        return TabIndividual.Types.Select(x => x.ToString()).Contains(s.Name);
+    }
+
+    internal static bool IsGenericChannel(this Sender s, out XivChatType type)
+    {
+        if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out var z))
+        {
+            type = z;
+            return true;
+        }
+        else
+        {
+            type = 0;
+            return false;
+        }
+    }
+
     internal static List<Payload> GetItemPayload(Item item, bool hq)
     {
         if (item == null)
@@ -96,8 +196,8 @@ internal static class Extensions
         _ => throw new ArgumentOutOfRangeException(nameof(ranges), ranges, null),
     };
 
-    internal static Vector4 GetFlashColor(this ImGuiCol col)
+    internal static Vector4 GetFlashColor(this ImGuiCol col, ChannelCustomization c)
     {
-        return P.config.NoFlashing ? P.config.ColorTitleFlash : GradientColor.Get(ImGui.GetStyle().Colors[(int)col], P.config.ColorTitleFlash, 500);
+        return P.config.NoFlashing ? c.ColorTitleFlash : GradientColor.Get(ImGui.GetStyle().Colors[(int)col], c.ColorTitleFlash, 500);
     }
 }
