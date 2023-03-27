@@ -1,6 +1,3 @@
 [submodule "ECommons"]
 	path = ECommons
 	url = https://github.com/NightmareXIV/ECommons
-[submodule "GTranslatorAPI"]
-	path = GTranslatorAPI
-	url = https://github.com/Limiana/GTranslatorAPI
