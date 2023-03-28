@@ -18,5 +18,6 @@ namespace Messenger
         public Vector4 ColorFromMessage = new(0.77f, 0.69f, 1f, 1f);
         public Vector4 ColorGeneric = new(1f, 1f, 1f, 1f);
         public Vector4 ColorTitleFlash = new(0.91f, 1f, 0f, 1f);
+        public bool SuppressDMs = false;
     }
 }

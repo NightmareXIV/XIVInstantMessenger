@@ -131,11 +131,11 @@ namespace Messenger.Gui.Settings
 
         static void DrawCustomization(ChannelCustomization data)
         {
-            ImGui.Checkbox("Open direct message window on incoming tell", ref data.AutoOpenTellIncoming);
-            ImGui.Checkbox("Open direct message window on outgoing tell", ref data.AutoOpenTellOutgoing);
+            ImGui.Checkbox("Open direct message window on incoming message", ref data.AutoOpenTellIncoming);
+            ImGui.Checkbox("Open direct message window on outgoing message", ref data.AutoOpenTellOutgoing);
             if (data.AutoOpenTellOutgoing)
             {
-                ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref data.AutoFocusTellOutgoing);
+                ImGui.Checkbox("Automatically activate text input after opening window on outgoing message", ref data.AutoFocusTellOutgoing);
             }
             ImGui.ColorEdit4("Generic text color", ref data.ColorGeneric, ImGuiColorEditFlags.NoInputs);
             ImGui.ColorEdit4("Incoming messages: sender color", ref data.ColorFromTitle, ImGuiColorEditFlags.NoInputs);
@@ -143,6 +143,7 @@ namespace Messenger.Gui.Settings
             ImGui.ColorEdit4("Outgoing messages: sender color", ref data.ColorToTitle, ImGuiColorEditFlags.NoInputs);
             ImGui.ColorEdit4("Outgoing messages: message color", ref data.ColorToMessage, ImGuiColorEditFlags.NoInputs);
             ImGui.ColorEdit4("Unread message flashing title color", ref data.ColorTitleFlash, ImGuiColorEditFlags.NoInputs);
+            ImGui.Checkbox("Don't show sent and received messages in game chat", ref data.SuppressDMs);
         }
     }
 }

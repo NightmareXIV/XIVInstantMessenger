@@ -89,10 +89,10 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 Svc.PluginInterface.UiBuilder.GetGameFontHandle(new(P.config.Font));
             }
-            if(P.config.SuppressDMs)
+            /*if(P.config.DefaultChannelCustomization.SuppressDMs)
             {
                 DuoLog.Warning("XIM is currently configured to hide DMs from normal game chat. You may change this behavior in settings.\n/xim - open settings.");
-            }
+            }*/
             tabSystem = new(null);
             ws.AddWindow(tabSystem);
             Tabs(P.config.Tabs);
@@ -372,7 +372,7 @@ public unsafe class Messenger : IDalamudPlugin
                         History = history,
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {message.ToString()}"
                     });
-                    if (P.config.SuppressDMs)
+                    if (P.config.DefaultChannelCustomization.SuppressDMs)
                     {
                         isHandled = true;
                     }
@@ -435,7 +435,7 @@ public unsafe class Messenger : IDalamudPlugin
                         History = Chats[s],
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {(type == XivChatType.TellIncoming? s.GetPlayerName():Svc.ClientState.LocalPlayer?.GetPlayerName())}: {message.ToString()}"
                     });
-                    if (P.config.SuppressDMs)
+                    if (s.GetCustomization().SuppressDMs)
                     {
                         isHandled = true;
                     }
@@ -495,6 +495,10 @@ public unsafe class Messenger : IDalamudPlugin
                         History = Chats[genericSender],
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {s.GetPlayerName()}: {message.ToString()}"
                     });
+                    if (genericSender.GetCustomization().SuppressDMs)
+                    {
+                        isHandled = true;
+                    }
                 }
                 var idx = gameFunctions.GetCurrentChatLogEntryIndex();
                 if (idx != null)

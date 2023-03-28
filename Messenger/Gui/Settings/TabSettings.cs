@@ -70,7 +70,7 @@ internal static class TabSettings
                 {
                     ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref P.config.DefaultChannelCustomization.AutoFocusTellOutgoing);
                 }
-                ImGui.Checkbox("Hide DMs from in-game chat", ref P.config.SuppressDMs);
+                ImGui.Checkbox("Hide DMs from in-game chat", ref P.config.DefaultChannelCustomization.SuppressDMs);
                 ImGui.Checkbox("Auto-hide chat windows in combat", ref P.config.AutoHideCombat);
                 ImGui.Checkbox("Open chat window after combat if received message during it", ref P.config.AutoReopenAfterCombat);
                 ImGui.Checkbox("Command passthrough", ref P.config.CommandPassthrough);

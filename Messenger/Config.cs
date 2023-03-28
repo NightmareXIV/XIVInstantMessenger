@@ -22,6 +22,7 @@ internal class Config : IPluginConfiguration
     [Obsolete("", true)] public Vector4 ColorFromMessage = new(0.77f, 0.69f, 1f, 1f);
     [Obsolete("", true)] public Vector4 ColorGeneric = new(1f, 1f, 1f, 1f);
     [Obsolete("", true)] public Vector4 ColorTitleFlash = new(0.91f, 1f, 0f, 1f);
+    [Obsolete("", true)] public bool SuppressDMs = false;
     public string TranslationProvider = "Do not use translation";
     public bool TranslatorLowercase = false;
     public bool TranslateSelf = false;
@@ -75,7 +76,6 @@ internal class Config : IPluginConfiguration
     public bool IncreaseSpacing = false;
     public string AddonName = "_NaviMap";
     public bool CycleChatHotkey = false;
-    public bool SuppressDMs = true;
     public bool QuickOpenButtonOnTop = true;
     public bool Tabs = false;
     public bool ColorTitleFlashTab = true;
