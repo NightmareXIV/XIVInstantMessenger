@@ -9,6 +9,9 @@ using Dalamud.Game.Gui.PartyFinder.Types;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using Messenger.Gui.Settings;
+using Dalamud.Memory;
+using ECommons.Automation;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 
 namespace Messenger;
 
@@ -39,9 +42,28 @@ internal unsafe static class Extensions
     internal static string GetName(this XivChatType type)
     {
         var affix = string.Empty;
-        if(type.EqualsAny(XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4, XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8))
+        /*if(type.EqualsAny(XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4, XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8))
         {
-            
+            var num = int.Parse(type.ToString()[^1..]);
+            var proxy = (InfoProxyLinkShell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.LinkShell);
+            var name = proxy->LinkShellsSpan[num - 1];
+            var str = MemoryHelper.ReadSeStringNullTerminated((nint)(&name)).ExtractText();
+            if (str != "")
+            {
+                return $"(LS{num}) {str}";
+            }
+        }*/
+
+        if(type.EqualsAny(XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8))
+        {
+            var num = int.Parse(type.ToString()[^1..]);
+            var proxy = (InfoProxyCrossWorldLinkShell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkShell);
+            var name = proxy->CWLSArraySpan[num-1].Name;
+            var str = MemoryHelper.ReadSeString(&name).ExtractText();
+            if(str != "")
+            {
+                return $"(CWLS{num}) {str}";
+            }
         }
 
         if (TabIndividual.Types.Contains(type))
