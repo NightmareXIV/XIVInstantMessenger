@@ -24,6 +24,8 @@ internal unsafe class ChatWindow : Window
     internal new bool BringToFront = false;
     bool fontPushed;
 
+    internal string OwningTab => P.config.TabWindowAssociations.TryGetValue(messageHistory.Player.ToString(), out var owner)?owner:null;
+
     internal ChannelCustomization Cust => this.messageHistory.Player.GetCustomization();
 
     public ChatWindow(MessageHistory messageHistory) : 

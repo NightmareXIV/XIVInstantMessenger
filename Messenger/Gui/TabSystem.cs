@@ -1,4 +1,5 @@
 ﻿using Messenger.FontControl;
+using System.Xml.Linq;
 
 namespace Messenger.Gui;
 
@@ -8,7 +9,10 @@ internal class TabSystem : Window
     float Transparency = P.config.TransMax;
     bool IsTransparent = true;
     bool IsTitleColored = false;
-    public TabSystem() : base("XIV Instant Messenger")
+    internal string Name = null;
+    internal IEnumerable<ChatWindow> Windows => P.wsChats.Windows.Cast<ChatWindow>().Where(x => (Name == null && !P.config.TabWindows.Contains(x.OwningTab)) || x.OwningTab == Name);
+
+    public TabSystem(string name) : base($"XIV Instant Messenger - {name ?? "Default Window"}")
     {
         this.RespectCloseHotkey = false;
         this.IsOpen = true;
@@ -17,6 +21,7 @@ internal class TabSystem : Window
             MinimumSize = new(300, 200),
             MaximumSize = new(9999, 9999)
         };
+        this.Name = name;
     }
 
     internal void SetTransparency(bool isTransparent)
@@ -26,12 +31,12 @@ internal class TabSystem : Window
 
     public override bool DrawConditions()
     {
-        return P.config.Tabs && P.wsChats.Windows.Any(x => x.IsOpen);
+        return P.config.Tabs && Windows.Any(x => x.IsOpen);
     }
 
     public override void OnClose()
     {
-        foreach(var w in P.wsChats.Windows)
+        foreach(var w in Windows)
         {
             w.IsOpen = false;
         }
@@ -59,7 +64,7 @@ internal class TabSystem : Window
         IsTransparent = Transparency < 1f;
         if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
         fontPushed = FontPusher.PushConfiguredFont();
-        if(P.config.ColorTitleFlashTab && P.wsChats.Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
+        if(P.config.ColorTitleFlashTab && Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
         {
             this.IsTitleColored = true;
             ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor(P.config.DefaultChannelCustomization));
@@ -87,10 +92,34 @@ internal class TabSystem : Window
         }
         if (ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
         {
-            foreach (var window in P.wsChats.Windows)
+            foreach (var w in Windows)
             {
-                if (window is ChatWindow w)
                 {
+                    void Associate()
+                    {
+                        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup($"Associate{w.messageHistory.Player}");
+                        }
+                        if (ImGui.BeginPopup($"Associate{w.messageHistory.Player}"))
+                        {
+                            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
+                            if (ImGui.Selectable("Default window"))
+                            {
+                                P.config.TabWindowAssociations.Remove(w.messageHistory.Player.ToString());
+                            }
+                            ImGui.PopStyleColor();
+                            foreach (var x in P.config.TabWindows)
+                            {
+                                if (ImGui.Selectable(x))
+                                {
+                                    P.config.TabWindowAssociations[w.messageHistory.Player.ToString()] = x;
+                                }
+                            }
+                            ImGui.EndPopup();
+                        }
+                    }
+
                     var isOpen = w.IsOpen;
                     var flags = ImGuiTabItemFlags.None;
                     if (w.messageHistory.SetFocus)
@@ -107,6 +136,7 @@ internal class TabSystem : Window
                     }
                     if (isOpen && ImGui.BeginTabItem(w.messageHistory.Player.GetChannelName() + $"###{w.WindowName}", ref isOpen, flags))
                     {
+                        Associate();
                         if (titleColored)
                         {
                             ImGui.PopStyleColor(3);
@@ -118,6 +148,7 @@ internal class TabSystem : Window
                     }
                     else
                     {
+                        Associate();
                         if (ImGui.IsItemClicked())
                         {
                             w.messageHistory.SetFocus = true;
@@ -127,7 +158,7 @@ internal class TabSystem : Window
                             ImGui.PopStyleColor(3);
                         }
                     }
-                    window.IsOpen = isOpen;
+                    w.IsOpen = isOpen;
                 }
             }
             ImGui.EndTabBar();

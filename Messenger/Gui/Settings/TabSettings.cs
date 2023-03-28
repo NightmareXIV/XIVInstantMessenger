@@ -2,6 +2,7 @@
 
 internal static class TabSettings
 {
+    static string NewTabSystem = "";
     internal static void Draw()
     {
         ImGuiEx.EzTabBar("TabSettingsTabs",
@@ -16,6 +17,49 @@ internal static class TabSettings
                 if(ImGui.Checkbox("Tabs instead of windows (beta)", ref P.config.Tabs))
                 {
                     P.Tabs(P.config.Tabs);
+                }
+                if (P.config.Tabs)
+                {
+                    ImGui.Separator();
+                    ImGuiEx.TextWrapped("You may create multiple tabbed windows and associate specific chats with it. Right click on a tab to move it to a specific window later.");
+                    ImGuiEx.TextV("Create new window:");
+                    ImGui.SameLine();
+                    ImGuiEx.InputWithRightButtonsArea("tabNewWindow", delegate
+                    {
+                        ImGui.InputText("##newTab", ref NewTabSystem, 100);
+                    }, delegate
+                    {
+                        if (ImGui.Button("Create"))
+                        {
+                            if(P.config.TabWindows.Contains(NewTabSystem))
+                            {
+                                Notify.Error("This name already exists");
+                            }
+                            else
+                            {
+                                P.config.TabWindows.Add(NewTabSystem);
+                                P.RebuildTabSystems();
+                            }
+                        }
+                    });
+                    ImGui.Separator();
+                    ImGuiEx.Text($"Registered windows:");
+                    string toRem = null;
+                    foreach(var x in P.config.TabWindows)
+                    {
+                        ImGuiEx.Text($"{x} - {P.config.TabWindowAssociations.Count(z => z.Value == x)} chats associated");
+                        ImGuiEx.Tooltip(P.config.TabWindowAssociations.Where(z => z.Value == x).Select(x => x.Key.ToString()).Join("\n"));
+                        ImGui.SameLine();
+                        if(ImGui.SmallButton("Delete window##" + x))
+                        {
+                            toRem = x;
+                        }
+                    }
+                    if(toRem != null)
+                    {
+                        P.config.TabWindows.Remove(toRem);
+                        P.RebuildTabSystems();
+                    }
                 }
             }, null, true),
             ("Behavior", delegate

@@ -41,6 +41,7 @@ public unsafe class Messenger : IDalamudPlugin
     internal Sender LastReceivedMessage;
     internal TabSystem tabSystem;
     internal Translator Translator;
+    internal List<TabSystem> tabSystems = new();
 
     public Messenger(DalamudPluginInterface pi)
     {
@@ -92,11 +93,12 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 DuoLog.Warning("XIM is currently configured to hide DMs from normal game chat. You may change this behavior in settings.\n/xim - open settings.");
             }
-            tabSystem = new();
+            tabSystem = new(null);
             ws.AddWindow(tabSystem);
             Tabs(P.config.Tabs);
             Svc.ClientState.Logout += ClientState_Logout;
             Translator = new();
+            RebuildTabSystems();
         });
     }
 
@@ -109,6 +111,18 @@ public unsafe class Messenger : IDalamudPlugin
                 x.Value.chatWindow.IsOpen = false;
             }
         }
+    }
+
+    internal void RebuildTabSystems()
+    {
+        tabSystems.Each(ws.RemoveWindow);
+        tabSystems.Clear();
+        foreach(var x in P.config.TabWindows)
+        {
+            tabSystems.Add(new(x));
+        }
+        tabSystems.Each(ws.AddWindow);
+        PluginLog.Debug($"Tab systems: {tabSystems.Select(x => x.Name).Join(",")}");
     }
 
     public void Dispose()

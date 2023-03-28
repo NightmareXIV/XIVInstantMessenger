@@ -97,4 +97,6 @@ internal class Config : IPluginConfiguration
     public bool NoFlashing = false;
     public string LogStorageFolder = "";
 
+    public HashSet<string> TabWindows = new();
+    public Dictionary<string, string> TabWindowAssociations = new();
 }
