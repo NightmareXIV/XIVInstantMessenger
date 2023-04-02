@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
 using ECommons.Automation;
+using ECommons.Events;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -532,7 +533,7 @@ public unsafe class Messenger : IDalamudPlugin
 
     bool DecodeSender(SeString sender, out Sender senderStruct)
     {
-        if (sender == null)
+        if (sender == null || !ProperOnLogin.PlayerPresent)
         {
             senderStruct = default;
             return false;
