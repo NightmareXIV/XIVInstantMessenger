@@ -533,7 +533,7 @@ public unsafe class Messenger : IDalamudPlugin
 
     bool DecodeSender(SeString sender, out Sender senderStruct)
     {
-        if (sender == null || !ProperOnLogin.PlayerPresent)
+        if (sender == null)
         {
             senderStruct = default;
             return false;
@@ -546,7 +546,7 @@ public unsafe class Messenger : IDalamudPlugin
                 return true;
             }
         }
-        if(sender.ToString().EndsWith(Svc.ClientState.LocalPlayer?.Name.ToString()))
+        if(ProperOnLogin.PlayerPresent && sender.ToString().EndsWith(Svc.ClientState.LocalPlayer?.Name.ToString()))
         {
             senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Svc.ClientState.LocalPlayer.HomeWorld.Id);
             return true;
