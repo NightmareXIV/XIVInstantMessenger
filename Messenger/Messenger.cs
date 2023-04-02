@@ -473,7 +473,7 @@ public unsafe class Messenger : IDalamudPlugin
                     }
                     Chats[genericSender].Messages.Add(addedMessage);
                     Chats[genericSender].Scroll();
-                    if (incoming)
+                    if (!incoming)
                     {
                         if (genericSender.GetCustomization().AutoFocusTellOutgoing && !isOpen)
                         {
@@ -482,7 +482,6 @@ public unsafe class Messenger : IDalamudPlugin
                     }
                     else
                     {
-                        LastReceivedMessage = s;
                         Chats[genericSender].chatWindow.Unread = incoming;
                         Chats[genericSender].chatWindow.SetTransparency(true);
                         /*if (P.config.IncomingTellSound != Sounds.None)

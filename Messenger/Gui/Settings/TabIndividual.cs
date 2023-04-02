@@ -100,7 +100,7 @@ namespace Messenger.Gui.Settings
                         ImGui.SetClipboardText(JsonConvert.SerializeObject(customizations));
                     }
                     ImGui.SameLine();
-                    if(ImGui.Button("Delete customization (hold CTRL)") && ImGui.GetIO().KeyCtrl)
+                    if(ImGuiEx.ButtonCtrl("Remove customization"))
                     {
                         P.config.SpecificChannelCustomizations.Remove(Selected);
                     }
@@ -112,7 +112,7 @@ namespace Messenger.Gui.Settings
                     ImGuiEx.Text($"There are no overrides for this channel.");
                     if(ImGui.Button("Create overrides"))
                     {
-                        P.config.SpecificChannelCustomizations[Selected] = P.config.DefaultChannelCustomization;
+                        P.config.SpecificChannelCustomizations[Selected] = P.config.DefaultChannelCustomization.JSONClone();
                     }
                     if(ImGui.Button($"Paste overrides from clipboard"))
                     {
