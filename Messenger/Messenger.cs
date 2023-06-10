@@ -5,6 +5,8 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
 using ECommons.Automation;
 using ECommons.Events;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -611,9 +613,9 @@ public unsafe class Messenger : IDalamudPlugin
     {
         foreach(var x in FriendList.Get())
         {
-            if(x->Name.ToString() == s.Name && x->HomeWorld == s.HomeWorld)
+            if(x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
             {
-                cid = x->ContentId;
+                cid = x.ContentId;
                 return true;
             }
         }
@@ -626,9 +628,9 @@ public unsafe class Messenger : IDalamudPlugin
         {
             foreach (var x in FriendList.Get())
             {
-                if (x->Name.ToString() == s.Name && x->HomeWorld == s.HomeWorld)
+                if (x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
                 {
-                    return x->ContentId;
+                    return x.ContentId;
                 }
             }
         }
@@ -640,7 +642,7 @@ public unsafe class Messenger : IDalamudPlugin
     {
         foreach (var x in FriendList.Get())
         {
-            if (x->Name.ToString() == s.Name && x->HomeWorld == s.HomeWorld)
+            if (x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
             {
                 return true;
             }

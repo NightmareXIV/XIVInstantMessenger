@@ -28,8 +28,8 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-	  <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" />
-	  <PackageReference Include="DalamudPackager" Version="2.1.10" />
+	  <PackageReference Include="Dalamud.ContextMenu" Version="1.2.3" />
+	  <PackageReference Include="DalamudPackager" Version="2.1.11" />
 	  <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
 	</ItemGroup>
 

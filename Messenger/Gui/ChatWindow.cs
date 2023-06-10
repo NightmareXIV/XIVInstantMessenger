@@ -322,13 +322,13 @@ internal unsafe class ChatWindow : Window
                     foreach (var x in FriendList.Get())
                     {
                         if (flSuccess) break;
-                        if (x->Name.ToString() == this.messageHistory.Player.Name && x->HomeWorld == this.messageHistory.Player.HomeWorld)
+                        if (x.Name.ToString() == this.messageHistory.Player.Name && x.HomeWorld == this.messageHistory.Player.HomeWorld)
                         {
                             flSuccess = true;
-                            if (x->IsOnline)
+                            if (x.IsOnline)
                             {
-                                var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x->CurrentWorld;
-                                var result = P.InviteToParty(this.messageHistory.Player, sameWorld, x->ContentId);
+                                var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x.CurrentWorld;
+                                var result = P.InviteToParty(this.messageHistory.Player, sameWorld, x.ContentId);
                                 if (result != null)
                                 {
                                     Notify.Error(result);
@@ -338,7 +338,7 @@ internal unsafe class ChatWindow : Window
                                     Notify.Info($"Inviting through FrieldList ({(sameWorld ? "same world" : "different world")})");
                                 }
                             }
-                            else if (P.CIDlist.ContainsValue(x->ContentId))
+                            else if (P.CIDlist.ContainsValue(x.ContentId))
                             {
                                 var result = P.InviteToParty(this.messageHistory.Player, true);
                                 if (result != null)

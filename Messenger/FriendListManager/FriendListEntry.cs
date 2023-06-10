@@ -4,48 +4,47 @@
  * */
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Memory;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
 
 namespace Messenger.FriendListManager;
 
 /// <summary>
 /// An entry in a player's friend list.
 /// </summary>
-[StructLayout(LayoutKind.Explicit, Size = Size)]
 public unsafe struct FriendListEntry
 {
-    internal const int Size = 96;
+    internal InfoProxyCommonList.CharacterData* Data;
+
+    public FriendListEntry(InfoProxyCommonList.CharacterData* data) : this()
+    {
+        Data = data;
+    }
+
     /// <summary>
     /// The content ID of the friend.
     /// </summary>
-    [FieldOffset(0)]
-    public readonly ulong ContentId;
-    [FieldOffset(13)]
-    public readonly byte OnlineStatus;
+    public readonly ulong ContentId => (ulong)Data->ContentId;
+    public readonly ushort OnlineStatus => *(ushort*)((nint)Data + 12);
     /// <summary>
     /// The current world of the friend.
     /// </summary>
-    [FieldOffset(22)]
-    public readonly ushort CurrentWorld;
+    public readonly ushort CurrentWorld => Data->CurrentWorld;
     /// <summary>
     /// The home world of the friend.
     /// </summary>
-    [FieldOffset(24)]
-    public readonly ushort HomeWorld;
+    public readonly ushort HomeWorld => Data->HomeWorld;
     /// <summary>
     /// The job the friend is currently on.
     /// </summary>
-    [FieldOffset(33)]
-    public readonly byte Job;
+    public readonly byte Job => Data->Job;
     /// <summary>
     /// The friend's raw SeString name. See <see cref="Name"/>.
     /// </summary>
-    [FieldOffset(34)]
-    public fixed byte RawName[32];
+    public byte* RawName => Data->Name;
     /// <summary>
     /// The friend's raw SeString free company tag. See <see cref="FreeCompany"/>.
     /// </summary>
-    [FieldOffset(66)]
-    public fixed byte RawFreeCompany[5];
+    public byte* RawFreeCompany => Data->FCTag;
     /// <summary>
     /// The friend's name.
     /// </summary>
@@ -53,10 +52,7 @@ public unsafe struct FriendListEntry
     {
         get
         {
-            fixed (byte* ptr = this.RawName)
-            {
-                return MemoryHelper.ReadSeStringNullTerminated((IntPtr)ptr);
-            }
+            return MemoryHelper.ReadSeStringNullTerminated((nint)this.RawName);
         }
     }
     /// <summary>
@@ -66,10 +62,7 @@ public unsafe struct FriendListEntry
     {
         get
         {
-            fixed (byte* ptr = this.RawFreeCompany)
-            {
-                return MemoryHelper.ReadSeStringNullTerminated((IntPtr)ptr);
-            }
+            return MemoryHelper.ReadSeStringNullTerminated((nint)this.RawFreeCompany);
         }
     }
 
@@ -77,7 +70,7 @@ public unsafe struct FriendListEntry
     {
         get
         {
-            return OnlineStatus == 0x80;
+            return OnlineStatus != 0;
         }
     }
 }
