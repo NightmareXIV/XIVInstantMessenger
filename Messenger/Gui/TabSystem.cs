@@ -31,7 +31,7 @@ internal class TabSystem : Window
 
     public override bool DrawConditions()
     {
-        return P.config.Tabs && Windows.Any(x => x.IsOpen);
+        return P.config.Tabs && Windows.Any(x => x.IsOpen && !x.HideByCombat);
     }
 
     public override void OnClose()

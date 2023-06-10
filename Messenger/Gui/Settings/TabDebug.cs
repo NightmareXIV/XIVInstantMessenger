@@ -2,6 +2,7 @@
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Messenger.FriendListManager;
 
 namespace Messenger.Gui.Settings;
@@ -94,6 +95,7 @@ internal unsafe static class TabDebug
             {
                 P.ClientState_Logout(null, null);
             }
+            ImGuiEx.Text($"a1[48]: {*(byte*)((nint)AgentCharaCard.Instance() + 48)}");
         }
         catch(Exception e)
         {

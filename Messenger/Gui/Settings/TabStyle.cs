@@ -97,5 +97,6 @@ internal static class TabStyle
         ImGui.Checkbox("Add to friendlist", ref P.config.ButtonFriend);
         ImGui.Checkbox("Add to blacklist", ref P.config.ButtonBlack);
         ImGui.Checkbox("Open chat log", ref P.config.ButtonLog);
+        ImGui.Checkbox("Open adventurer plate", ref P.config.ButtonCharaCard);
     }
 }

@@ -1,10 +1,13 @@
 ﻿using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
 using ECommons.Automation;
 using ECommons.Events;
+using ECommons.GameFunctions;
+using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using Lumina.Excel.GeneratedSheets;
@@ -650,6 +653,33 @@ public unsafe class Messenger : IDalamudPlugin
         return false;
     }
 
+    internal void OpenCharaCard(Sender player)
+    {
+        if(!EzThrottler.Throttle($"CharaCard{player.GetPlayerName()}", 1000))
+        {
+            Notify.Error("Please patiently wait while character card is being opened!");
+        }
+        foreach(var x in Svc.Objects)
+        {
+            if(x is PlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable())
+            {
+                AgentCharaCard.Instance()->OpenCharaCard(x.Struct());
+                PluginLog.Debug($"Opening characard via gameobject {x}");
+                return;
+            }
+        }
+        if (TryGetCID(player, out var cid))
+        {
+            AgentCharaCard.Instance()->OpenCharaCard(cid);
+            PluginLog.Debug($"Opening characard via cid {cid}");
+            return;
+        }
+        else
+        {
+            Notify.Error("Unable to open adventurer plate at this moment");
+        }
+    }
+
     internal string InviteToParty(Sender player, bool sameWorld, ulong? cidOverride = null)
     {
         //Notify.Error("Invite to party is temporarily disabled");
@@ -684,18 +714,21 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         if (sameWorld)
                         {
+                            if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                             partyFunctions.InviteSameWorld(player.Name, (ushort)player.HomeWorld, cidOverride ?? 0);
                             return null;
                         }
                         else
                         {
                             if(cidOverride != null && cidOverride.Value != 0)
-{
+                            {
+                                if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                                 partyFunctions.InviteOtherWorld(cidOverride.Value, (ushort)player.HomeWorld);
                                 return null;
                             }
                             else if (TryGetCID(player, out var cid))
                             {
+                                if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                                 partyFunctions.InviteOtherWorld(cid, (ushort)player.HomeWorld);
                                 return null;
                             }

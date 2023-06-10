@@ -45,6 +45,8 @@ internal unsafe class ChatWindow : Window
         this.Transparency = !isTransparent ? P.config.TransMax : P.config.TransMin;
     }
 
+    internal bool HideByCombat => Svc.Condition[ConditionFlag.InCombat] && P.config.AutoHideCombat && !KeepInCombat;
+
     public override bool DrawConditions()
     {
         var ret = true;
@@ -52,7 +54,7 @@ internal unsafe class ChatWindow : Window
         {
             ret = false;
         }
-        if (Svc.Condition[ConditionFlag.InCombat] && P.config.AutoHideCombat && !KeepInCombat)
+        if (HideByCombat)
         {
             ret = false;
         }
@@ -427,6 +429,15 @@ internal unsafe class ChatWindow : Window
                 }
             }
             ImGuiEx.Tooltip("Open text log");
+        }
+        if (P.config.ButtonCharaCard)
+        {
+            ImGui.SameLine(0, 2);
+            if (ImGuiEx.IconButton(FontAwesomeIcon.IdCard, "OpenCharaCard"))
+            {
+                P.OpenCharaCard(this.messageHistory.Player);
+            }
+            ImGuiEx.Tooltip("Open adventurer plate");
         }
         ImGui.SameLine(0, 0);
         afterInputWidth = ImGui.GetCursorPosX() - icur1.X;
