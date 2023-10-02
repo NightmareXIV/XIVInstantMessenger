@@ -53,6 +53,7 @@ public unsafe class Messenger : IDalamudPlugin
     {
         P = this;
         ECommonsMain.Init(pi, this);
+        KoFiButton.IsOfficialPlugin = true;
         new TickScheduler(delegate
         {
             config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
@@ -108,7 +109,7 @@ public unsafe class Messenger : IDalamudPlugin
         });
     }
 
-    internal void ClientState_Logout(object sender, EventArgs e)
+    internal void ClientState_Logout()
     {
         if (P.config.CloseLogout)
         {
@@ -288,7 +289,7 @@ public unsafe class Messenger : IDalamudPlugin
         }
     }
 
-    private void Tick(Framework framework)
+    private void Tick(object framework)
     {
         if (P.config.EnableKey)
         {
@@ -346,8 +347,8 @@ public unsafe class Messenger : IDalamudPlugin
         }
         return false;
     }
-
-    private void Logout(object sender, EventArgs e)
+     
+    private void Logout()
     {
         CIDlist.Clear();
     }

@@ -18,3 +18,5 @@ global using ECommons.ImGuiMethods;
 global using ECommons.Schedulers;
 global using static Messenger.Messenger;
 global using Dalamud.Game.ClientState.Conditions;
+global using ECommons.DalamudServices.Legacy;
+global using Dalamud.Interface.Utility;

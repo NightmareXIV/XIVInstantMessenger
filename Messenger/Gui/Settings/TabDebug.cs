@@ -93,7 +93,7 @@ internal unsafe static class TabDebug
             }
             if (ImGui.Button("Fire logout event"))
             {
-                P.ClientState_Logout(null, null);
+                P.ClientState_Logout();
             }
             ImGuiEx.Text($"a1[48]: {*(byte*)((nint)AgentCharaCard.Instance() + 48)}");
         }

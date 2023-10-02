@@ -13,7 +13,8 @@ internal class GuiSettings : Window
 
     public override void Draw()
     {
-        ImGuiEx.EzTabBar("MessengerBar",
+        KoFiButton.DrawRight();
+        ImGuiEx.EzTabBar("MessengerBar", true,
             ("Chat history", TabHistory.Draw, null, true),
             ("Settings", TabSettings.Draw, null, true),
             ("Style", TabStyle.Draw, null, true),

@@ -28,7 +28,7 @@ internal class ContextMenuManager : IDisposable
 
     internal ContextMenuManager()
     {
-        contextMenu = new();
+        contextMenu = new(Svc.PluginInterface);
         openMessenger = new GameObjectContextMenuItem(
             new SeString(new Payload[]
             {
