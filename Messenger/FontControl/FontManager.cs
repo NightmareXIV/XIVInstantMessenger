@@ -2,6 +2,7 @@
  This file contains source code authored by Anna Clemens from https://git.annaclemens.io/ascclemens/ChatTwo/src/branch/main/ChatTwo which is distributed under EUPL license
  */
 using Dalamud.Interface.GameFonts;
+using ImGuiNET;
 
 #pragma warning disable CS8632
 namespace Messenger.FontControl;
@@ -23,6 +24,7 @@ internal class FontManager
         {
             FontDataOwnedByAtlas = false,
         };
+        FontConfig.NativePtr->RasterizerGamma *= 1.4f;
         SetUpRanges();
         SetUpUserFonts();
         Svc.PluginInterface.UiBuilder.BuildFonts += BuildFonts;
@@ -147,7 +149,7 @@ internal class FontManager
 
         new TickScheduler(delegate
         {
-            ImGuiHelpers.CopyGlyphsAcrossFonts(SourceAxisFont.ImFont, CustomFont, true, true);
+            ImGuiHelpers.CopyGlyphsAcrossFonts(SourceAxisFont.ImFont, CustomFont.GetValueOrDefault(), true, true);
         });
     }
 }

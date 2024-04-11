@@ -1,4 +1,6 @@
-﻿namespace Messenger.Gui.Settings;
+﻿using Messenger.FontControl;
+
+namespace Messenger.Gui.Settings;
 
 internal class GuiSettings : Window
 {   
@@ -9,6 +11,17 @@ internal class GuiSettings : Window
             MaximumSize = new(99999, 99999),
             MinimumSize = new(500, 300)
         };
+    }
+
+    bool fontPushed = false;
+    public override void PreDraw()
+    {
+        fontPushed = FontPusher.PushConfiguredFont();
+    }
+
+    public override void PostDraw()
+    {
+        if (fontPushed) ImGui.PopFont();
     }
 
     public override void Draw()

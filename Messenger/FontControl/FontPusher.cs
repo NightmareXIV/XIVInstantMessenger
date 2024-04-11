@@ -1,6 +1,6 @@
 ﻿namespace Messenger.FontControl;
 
-internal static class FontPusher
+internal unsafe static class FontPusher
 {
     internal static bool PushConfiguredFont()
     {
@@ -24,5 +24,10 @@ internal static class FontPusher
             return true;
         }
         return false;
+    }
+
+    internal static void ReplaceDalamudFont()
+    {
+        ImGui.GetIO().NativePtr->FontDefault = P.fontManager.CustomFont.Value;
     }
 }

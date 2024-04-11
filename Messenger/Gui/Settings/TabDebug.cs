@@ -3,6 +3,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using Messenger.FontControl;
 using Messenger.FriendListManager;
 
 namespace Messenger.Gui.Settings;
@@ -15,6 +16,10 @@ internal unsafe static class TabDebug
     static string MMessage = "";
     internal static void Draw()
     {
+        if(ImGui.Button("Replace Dalamud font"))
+        {
+            FontPusher.ReplaceDalamudFont();
+        }
         try
         {
             if (ImGui.CollapsingHeader("Senders"))
