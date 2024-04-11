@@ -16,16 +16,16 @@ namespace Messenger.Translation
 
         volatile bool IsRunning = false;
         volatile bool Terminate = false;
-        internal ConcurrentDictionary<string, string> TranslationResults = new();
+        internal ConcurrentDictionary<string, string> TranslationResults = [];
         ConcurrentQueue<string> TranslationQueue = new();
         
         internal Translator()
         {
-            RegisteredProviders = new()
-            {
+            RegisteredProviders =
+            [
                 new DummyProvider(),
                 new GTranslator()
-            };
+            ];
             CurrentProvider = RegisteredProviders.FirstOrDefault(x => x.DisplayName == P.config.TranslationProvider);
             CurrentProvider?.Initialize();
         }

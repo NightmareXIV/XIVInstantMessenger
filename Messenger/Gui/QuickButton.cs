@@ -83,11 +83,11 @@ internal unsafe class QuickButton : Window
                     if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count})", false, ImGuiSelectableFlags.None, new Vector2(200f.Scale(), tsize.Y)))
                     {
                         P.Hidden = false;
-                        x.Value.chatWindow.IsOpen = true;
+                        x.Value.ChatWindow.IsOpen = true;
                         x.Value.SetFocus = true;
                         if (Svc.Condition[ConditionFlag.InCombat])
                         {
-                            x.Value.chatWindow.KeepInCombat = true;
+                            x.Value.ChatWindow.KeepInCombat = true;
                             Notify.Info("This chat will not be hidden in combat");
                         }
                     }
@@ -101,7 +101,7 @@ internal unsafe class QuickButton : Window
                 }
                 if (toRem != null)
                 {
-                    P.wsChats.RemoveWindow(P.Chats[toRem.Value].chatWindow);
+                    P.WindowSystemChat.RemoveWindow(P.Chats[toRem.Value].ChatWindow);
                     P.Chats.Remove(toRem.Value);
                     toRem = null;
                 }

@@ -6,7 +6,7 @@ namespace Messenger;
 
 internal class Logger : IDisposable
 {
-    BlockingCollection<LogTask> Tasks = new();
+    BlockingCollection<LogTask> Tasks = [];
     internal Logger()
     {
         new Thread(() =>

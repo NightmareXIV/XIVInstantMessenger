@@ -29,7 +29,7 @@ internal class FontManager
         SetUpUserFonts();
         Svc.PluginInterface.UiBuilder.BuildFonts += BuildFonts;
         Svc.PluginInterface.UiBuilder.RebuildFonts();
-        P.whitespaceForLen.Clear();
+        P.WhitespaceMap.Clear();
     }
 
     public void Dispose()

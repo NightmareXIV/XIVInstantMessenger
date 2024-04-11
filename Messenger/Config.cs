@@ -7,7 +7,7 @@ using Messenger.FontControl;
 
 namespace Messenger;
 
-internal class Config : IPluginConfiguration
+public class Config : IPluginConfiguration
 {
     public int Version { get; set; } = 1;
     public int ContextMenuIndex = 1;
@@ -29,10 +29,10 @@ internal class Config : IPluginConfiguration
     public Languages GTranslateSourceLang = Languages.auto;
     public Languages GTranslateTargetLang = Languages.en;
 
-    public HashSet<XivChatType> Channels = new();
+    public HashSet<XivChatType> Channels = [];
 
     public ChannelCustomization DefaultChannelCustomization = null;
-    public Dictionary<XivChatType, ChannelCustomization> SpecificChannelCustomizations = new();
+    public Dictionary<XivChatType, ChannelCustomization> SpecificChannelCustomizations = [];
 
     public bool IRCStyle = true;
     public bool PrintDate = true;
@@ -98,6 +98,6 @@ internal class Config : IPluginConfiguration
     public bool NoFlashing = false;
     public string LogStorageFolder = "";
 
-    public HashSet<string> TabWindows = new();
-    public Dictionary<string, string> TabWindowAssociations = new();
+    public HashSet<string> TabWindows = [];
+    public Dictionary<string, string> TabWindowAssociations = [];
 }

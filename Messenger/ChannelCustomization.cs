@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Messenger
 {
-    internal class ChannelCustomization
+    public class ChannelCustomization
     {
         public bool AutoOpenTellIncoming = true;
         public bool AutoOpenTellOutgoing = true;

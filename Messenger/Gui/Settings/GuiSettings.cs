@@ -3,7 +3,15 @@
 namespace Messenger.Gui.Settings;
 
 internal class GuiSettings : Window
-{   
+{
+    internal readonly TabHistory TabHistory = new();
+    internal readonly TabSettings TabSettings = new();
+    internal readonly TabStyle TabStyle = new();
+    internal readonly TabFonts TabFonts = new();
+    internal readonly TabIndividual TabIndividual = new();
+    internal readonly TabTranslation TabTranslation = new();
+    internal readonly TabDebug TabDebug = new();
+
     public GuiSettings() : base($"{P.Name} settings")
     {
         this.SizeConstraints = new()

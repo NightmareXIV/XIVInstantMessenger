@@ -10,7 +10,7 @@ internal class MessageHistory
     internal Sender Player;
     internal List<SavedMessage> Messages;
     internal List<SavedMessage> LoadedMessages;
-    internal ChatWindow chatWindow;
+    internal ChatWindow ChatWindow;
     internal volatile int DoScroll = 0;
     internal volatile bool LogLoaded = false;
     internal string LogFile;
@@ -19,8 +19,8 @@ internal class MessageHistory
     internal MessageHistory(Sender player)
     {
         Player = player;
-        Messages = new();
-        LoadedMessages = new();
+        Messages = [];
+        LoadedMessages = [];
         this.Init();
     }
 
@@ -31,8 +31,8 @@ internal class MessageHistory
 
     void Init()
     {
-        chatWindow = new(this);
-        P.wsChats.AddWindow(chatWindow);
+        ChatWindow = new(this);
+        P.WindowSystemChat.AddWindow(ChatWindow);
 
         var logFolder = P.config.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : P.config.LogStorageFolder;
 

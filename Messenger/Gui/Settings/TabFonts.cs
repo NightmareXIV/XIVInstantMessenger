@@ -1,12 +1,13 @@
-﻿using Dalamud.Interface.GameFonts;
+﻿using Dalamud.Interface.Components;
+using Dalamud.Interface.GameFonts;
 using Messenger.FontControl;
 
 namespace Messenger.Gui.Settings;
 
-internal static class TabFonts
+internal class TabFonts
 {
-    internal static List<string> Fonts = new();
-    static Dictionary<GameFontFamilyAndSize, string> fontNames = new()
+    internal List<string> Fonts = [];
+    static readonly Dictionary<GameFontFamilyAndSize, string> FontNames = new()
         {
             { GameFontFamilyAndSize.Axis96, "Axis, 9.6 pt"},
             { GameFontFamilyAndSize.Axis12, "Axis, 12 pt"},
@@ -15,9 +16,9 @@ internal static class TabFonts
             { GameFontFamilyAndSize.Axis36, "Axis, 36 pt"},
         };
 
-    internal static void Draw()
+    internal void Draw()
     {
-        P.whitespaceForLen.Clear();
+        P.WhitespaceMap.Clear();
         ImGuiEx.Text("Select font type:");
         ImGui.SameLine();
         ImGui.SetNextItemWidth(150f);
@@ -27,7 +28,7 @@ internal static class TabFonts
             ImGuiEx.Text("Select font and size:");
             ImGui.SameLine();
             ImGuiEx.SetNextItemFullWidth();
-            ImGuiEx.EnumCombo("##fontselect", ref P.config.Font, x => x.ToString().Contains("Axis"), fontNames);
+            ImGuiEx.EnumCombo("##fontselect", ref P.config.Font, x => x.ToString().Contains("Axis"), FontNames);
         }
         else if (P.config.FontType == FontType.Game_with_custom_size)
         {
@@ -40,7 +41,9 @@ internal static class TabFonts
             ImGui.SameLine();
             if (ImGui.Button("Apply"))
             {
-                P.CustomAxis = Svc.PluginInterface.UiBuilder.GetGameFontHandle(new(GameFontFamily.Axis, P.config.FontSize));
+                P.CustomAxis?.Dispose();
+                P.CustomAxis = null;
+                P.CustomAxis = Svc.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamily.Axis, P.config.FontSize));
             }
         }
         else if (P.config.FontType == FontType.System)

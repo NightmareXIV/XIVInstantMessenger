@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace Messenger.Gui.Settings
 {
-    internal static class TabIndividual
+    internal class TabIndividual
     {
-        internal static readonly XivChatType[] Types = new XivChatType[]
-        {
+        public static readonly XivChatType[] Types =
+        [
             XivChatType.TellIncoming,
             XivChatType.Party,
             XivChatType.Say,
@@ -37,10 +37,10 @@ namespace Messenger.Gui.Settings
             XivChatType.CrossLinkShell8,
             XivChatType.FreeCompany,
             XivChatType.NoviceNetwork
-        };
+        ];
 
-        internal static string[] Names = new string[]
-        {
+        public static readonly string[] Names =
+        [
             "Direct messages",
             "Party",
             "Say",
@@ -65,16 +65,16 @@ namespace Messenger.Gui.Settings
             "Cross-world linkshell 8",
             "Free company",
             "Novice network"
-        };
+        ];
 
-        internal static XivChatType Selected = XivChatType.None;
+        internal XivChatType Selected = XivChatType.None;
 
-        internal static void Draw()
+        internal void Draw()
         {
             ImGuiEx.Text($"Process following generic channels:");
             for (int i = 1; i < Types.Length; i++)
             {
-                ImGuiEx.HashSetCheckbox($"{Names[i]}", Types[i], P.config.Channels);
+                ImGuiEx.CollectionCheckbox($"{Names[i]}", Types[i], P.config.Channels);
             }
             ImGui.Separator();
             ImGuiEx.SetNextItemFullWidth();
@@ -129,7 +129,7 @@ namespace Messenger.Gui.Settings
             }
         }
 
-        static void DrawCustomization(ChannelCustomization data)
+        void DrawCustomization(ChannelCustomization data)
         {
             ImGui.Checkbox("Open direct message window on incoming message", ref data.AutoOpenTellIncoming);
             ImGui.Checkbox("Open direct message window on outgoing message", ref data.AutoOpenTellOutgoing);

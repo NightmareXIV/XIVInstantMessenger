@@ -10,7 +10,7 @@ internal class TabSystem : Window
     bool IsTransparent = true;
     bool IsTitleColored = false;
     internal string Name = null;
-    internal IEnumerable<ChatWindow> Windows => P.wsChats.Windows.Cast<ChatWindow>().Where(x => (Name == null && !P.config.TabWindows.Contains(x.OwningTab)) || x.OwningTab == Name);
+    internal IEnumerable<ChatWindow> Windows => P.WindowSystemChat.Windows.Cast<ChatWindow>().Where(x => (Name == null && !P.config.TabWindows.Contains(x.OwningTab)) || x.OwningTab == Name);
 
     public TabSystem(string name) : base($"XIV Instant Messenger - {name ?? "Default Window"}")
     {

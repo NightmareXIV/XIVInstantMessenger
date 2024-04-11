@@ -4,12 +4,14 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
+using Dalamud.Interface.ManagedFontAtlas;
 using ECommons.Automation;
 using ECommons.Events;
 using ECommons.GameFunctions;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -24,30 +26,30 @@ namespace Messenger;
 public unsafe class Messenger : IDalamudPlugin
 {
     public string Name => "XIV Instant Messenger";
-    internal static Messenger P;
-    internal GameFunctions gameFunctions;
-    internal WindowSystem ws;
-    internal WindowSystem wsChats;
-    internal GuiSettings guiSettings;
-    internal Chat chat;
-    internal Dictionary<Sender, MessageHistory> Chats = new();
+    public static Messenger P;
+    public static Config C => P.config;
+    internal GameFunctions GameFunctions;
+    internal WindowSystem WindowSystemMain;
+    internal WindowSystem WindowSystemChat;
+    internal GuiSettings GuiSettings;
+    internal Dictionary<Sender, MessageHistory> Chats = [];
     internal Config config;
-    internal ContextMenuManager contextMenuManager;
-    internal PartyFunctions partyFunctions;
-    internal Dictionary<Sender, ulong> CIDlist = new();
-    internal Logger logger;
-    internal QuickButton quickButton;
+    internal ContextMenuManager ContextMenuManager;
+    internal PartyFunctions PartyFunctions;
+    internal Dictionary<Sender, ulong> CIDlist = [];
+    internal Logger Logger;
+    internal QuickButton QuickButton;
     internal MessageHistory lastHistory = null;
     internal Sender? RecentReceiver = null;
     internal string[] TargetCommands;
     internal bool Hidden = false;
     internal FontManager fontManager = null;
-    internal Dictionary<float, string> whitespaceForLen = new();
-    internal GameFontHandle CustomAxis;
+    internal Dictionary<float, string> WhitespaceMap = [];
+    internal IFontHandle CustomAxis;
     internal Sender LastReceivedMessage;
-    internal TabSystem tabSystem;
+    internal TabSystem TabSystem;
     internal Translator Translator;
-    internal List<TabSystem> tabSystems = new();
+    internal List<TabSystem> tabSystems = [];
 
     public Messenger(DalamudPluginInterface pi)
     {
@@ -59,49 +61,32 @@ public unsafe class Messenger : IDalamudPlugin
             config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
             Migrator.MigrateConfiguration();
             Svc.Chat.ChatMessage += OnChatMessage;
-            gameFunctions = new();
-            ws = new();
-            wsChats = new();
-            guiSettings = new();
-            ws.AddWindow(guiSettings);
-            Svc.PluginInterface.UiBuilder.Draw += ws.Draw;
-            Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { guiSettings.IsOpen = true; };
+            GameFunctions = new();
+            WindowSystemMain = new();
+            WindowSystemChat = new();
+            GuiSettings = new();
+            WindowSystemMain.AddWindow(GuiSettings);
+            Svc.PluginInterface.UiBuilder.Draw += WindowSystemMain.Draw;
+            Svc.PluginInterface.UiBuilder.OpenConfigUi += delegate { GuiSettings.IsOpen = true; };
             Svc.Commands.AddHandler("/xim", new(OnCommand)
             {
                 HelpMessage = "open main control window\n/xim h|hide → temporarily hide/show all message windows\n/xim c|close → close all active windows and reset cascading positions\n/xim <partial player name> - attempt to open chat history with specified player",
             });
             Svc.Commands.AddHandler("/msg", new(OnCommand) { HelpMessage = "Alias" });
-            chat = new();
-            contextMenuManager = new();
-            partyFunctions = new();
+            ContextMenuManager = new();
+            PartyFunctions = new();
             Svc.ClientState.Logout += Logout;
-            logger = new();
-            quickButton = new();
-            ws.AddWindow(quickButton);
+            Logger = new();
+            QuickButton = new();
+            WindowSystemMain.AddWindow(QuickButton);
             Svc.Framework.Update += Tick;
             TargetCommands = Svc.Data.GetExcelSheet<TextCommand>()
                 .Where(x => (x.Unknown0 == 2 && x.Unknown1 == 1 && x.Unknown2 == 2) || x.Command.ToString() == "/trade")
                 .SelectMulti(x => x.Command.ToString(), x => x.Alias.ToString(),
                     x => x.ShortCommand.ToString(), x => x.ShortAlias.ToString())
                 .Where(x => !string.IsNullOrEmpty(x)).ToArray();
-            if(P.config.FontType == FontType.System)
-            {
-                fontManager = new();
-            }
-            if (P.config.FontType == FontType.Game_with_custom_size)
-            {
-                P.CustomAxis = Svc.PluginInterface.UiBuilder.GetGameFontHandle(new(GameFontFamily.Axis, P.config.FontSize));
-            }
-            if (P.config.FontType == FontType.Game)
-            {
-                Svc.PluginInterface.UiBuilder.GetGameFontHandle(new(P.config.Font));
-            }
-            /*if(P.config.DefaultChannelCustomization.SuppressDMs)
-            {
-                DuoLog.Warning("XIM is currently configured to hide DMs from normal game chat. You may change this behavior in settings.\n/xim - open settings.");
-            }*/
-            tabSystem = new(null);
-            ws.AddWindow(tabSystem);
+            TabSystem = new(null);
+            WindowSystemMain.AddWindow(TabSystem);
             Tabs(P.config.Tabs);
             Svc.ClientState.Logout += ClientState_Logout;
             Translator = new();
@@ -115,37 +100,37 @@ public unsafe class Messenger : IDalamudPlugin
         {
             foreach(var x in Chats)
             {
-                x.Value.chatWindow.IsOpen = false;
+                x.Value.ChatWindow.IsOpen = false;
             }
         }
     }
 
     internal void RebuildTabSystems()
     {
-        tabSystems.Each(ws.RemoveWindow);
+        tabSystems.Each(WindowSystemMain.RemoveWindow);
         tabSystems.Clear();
         foreach(var x in P.config.TabWindows)
         {
             tabSystems.Add(new(x));
         }
-        tabSystems.Each(ws.AddWindow);
+        tabSystems.Each(WindowSystemMain.AddWindow);
         PluginLog.Debug($"Tab systems: {tabSystems.Select(x => x.Name).Join(",")}");
     }
 
     public void Dispose()
     {
-        Safe(contextMenuManager.Dispose);
+        Safe(ContextMenuManager.Dispose);
         Safe(() => Svc.PluginInterface.SavePluginConfig(config));
         Svc.Chat.ChatMessage -= OnChatMessage;
-        Svc.PluginInterface.UiBuilder.Draw -= ws.Draw;
-        Svc.PluginInterface.UiBuilder.Draw -= wsChats.Draw;
+        Svc.PluginInterface.UiBuilder.Draw -= WindowSystemMain.Draw;
+        Svc.PluginInterface.UiBuilder.Draw -= WindowSystemChat.Draw;
         Svc.Commands.RemoveHandler("/msg");
         Svc.Commands.RemoveHandler("/xim");
-        Safe(gameFunctions.Dispose);
+        Safe(GameFunctions.Dispose);
         Svc.ClientState.Logout -= Logout;
         Svc.Framework.Update -= Tick;
-        Safe(logger.Dispose);
-        Safe(partyFunctions.Dispose);
+        Safe(Logger.Dispose);
+        Safe(PartyFunctions.Dispose);
         if(fontManager != null) Safe(fontManager.Dispose);
         Svc.ClientState.Logout -= ClientState_Logout;
         Translator.Dispose();
@@ -156,11 +141,11 @@ public unsafe class Messenger : IDalamudPlugin
     {
         if (useTabs)
         {
-            Svc.PluginInterface.UiBuilder.Draw -= wsChats.Draw;
+            Svc.PluginInterface.UiBuilder.Draw -= WindowSystemChat.Draw;
         }
         else
         {
-            Svc.PluginInterface.UiBuilder.Draw += wsChats.Draw;
+            Svc.PluginInterface.UiBuilder.Draw += WindowSystemChat.Draw;
         }
     }
 
@@ -203,7 +188,7 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal string GetWhitespacesForLen(float len)
     {
-        if(whitespaceForLen.TryGetValue(len, out var x))
+        if(WhitespaceMap.TryGetValue(len, out var x))
         {
             return x;
         }
@@ -222,7 +207,7 @@ public unsafe class Messenger : IDalamudPlugin
                 }
             }
             if (!P.config.IncreaseSpacing) spc = spc[0..^1];
-            whitespaceForLen[len] = spc;
+            WhitespaceMap[len] = spc;
             return spc;
         }
     }
@@ -231,7 +216,7 @@ public unsafe class Messenger : IDalamudPlugin
     {
         if(args == "")
         {
-            guiSettings.IsOpen = true;
+            GuiSettings.IsOpen = true;
         }
         else if(args.EqualsAny("hide", "h"))
         {
@@ -242,7 +227,7 @@ public unsafe class Messenger : IDalamudPlugin
         {
             foreach(var x in Chats.Values)
             {
-                x.chatWindow.IsOpen = false;
+                x.ChatWindow.IsOpen = false;
             }
             Notify.Success($"All chat windows have been closed");
         }
@@ -302,7 +287,7 @@ public unsafe class Messenger : IDalamudPlugin
                 {
                     foreach(var x in Chats.Values)
                     {
-                        if (x.chatWindow.IsFocused)
+                        if (x.ChatWindow.IsFocused)
                         {
                             toOpen = GetPreviousMessageHistory(x) ?? toOpen;
                             break;
@@ -311,11 +296,11 @@ public unsafe class Messenger : IDalamudPlugin
                 }
                 if (toOpen != null)
                 {
-                    toOpen.chatWindow.IsOpen = true;
+                    toOpen.ChatWindow.IsOpen = true;
                     toOpen.SetFocus = true;
                     if (Svc.Condition[ConditionFlag.InCombat])
                     {
-                        toOpen.chatWindow.KeepInCombat = true;
+                        toOpen.ChatWindow.KeepInCombat = true;
                         Notify.Info("This chat will not be hidden in combat");
                     }
                 }
@@ -374,7 +359,7 @@ public unsafe class Messenger : IDalamudPlugin
                         IgnoreTranslation = true
                     });
                     history.Scroll();
-                    logger.Log(new()
+                    Logger.Log(new()
                     {
                         History = history,
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {message.ToString()}"
@@ -386,11 +371,11 @@ public unsafe class Messenger : IDalamudPlugin
                 }
                 RecentReceiver = null;
             }
-            if (DecodeSender(sender, out var s))
+            if (Utils.DecodeSender(sender, out var s))
             {
                 if (type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
                 {
-                    var isOpen = Chats.TryGetValue(s, out var sHist) && sHist.chatWindow.IsOpen;
+                    var isOpen = Chats.TryGetValue(s, out var sHist) && sHist.ChatWindow.IsOpen;
                     OpenMessenger(s,
                         (!Svc.Condition[ConditionFlag.InCombat] || config.AutoReopenAfterCombat) && 
                         (
@@ -430,14 +415,14 @@ public unsafe class Messenger : IDalamudPlugin
                     else
                     {
                         LastReceivedMessage = s;
-                        Chats[s].chatWindow.Unread = true;
-                        Chats[s].chatWindow.SetTransparency(true);
+                        Chats[s].ChatWindow.Unread = true;
+                        Chats[s].ChatWindow.SetTransparency(true);
                         if(P.config.IncomingTellSound != Sounds.None)
                         {
-                            gameFunctions.PlaySound(P.config.IncomingTellSound);
+                            GameFunctions.PlaySound(P.config.IncomingTellSound);
                         }
                     }
-                    logger.Log(new()
+                    Logger.Log(new()
                     {
                         History = Chats[s],
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {(type == XivChatType.TellIncoming? s.GetPlayerName():Svc.ClientState.LocalPlayer?.GetPlayerName())}: {message.ToString()}"
@@ -452,7 +437,7 @@ public unsafe class Messenger : IDalamudPlugin
                     //generic
                     var incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
                     var genericSender = new Sender(type.ToString(), 0);
-                    var isOpen = Chats.TryGetValue(genericSender, out var sHist) && sHist.chatWindow.IsOpen;
+                    var isOpen = Chats.TryGetValue(genericSender, out var sHist) && sHist.ChatWindow.IsOpen;
                     OpenMessenger(genericSender,
                         (!Svc.Condition[ConditionFlag.InCombat] || config.AutoReopenAfterCombat) &&
                         (
@@ -489,14 +474,14 @@ public unsafe class Messenger : IDalamudPlugin
                     }
                     else
                     {
-                        Chats[genericSender].chatWindow.Unread = incoming;
-                        Chats[genericSender].chatWindow.SetTransparency(true);
+                        Chats[genericSender].ChatWindow.Unread = incoming;
+                        Chats[genericSender].ChatWindow.SetTransparency(true);
                         /*if (P.config.IncomingTellSound != Sounds.None)
                         {
                             gameFunctions.PlaySound(P.config.IncomingTellSound);
                         }*/
                     }
-                    logger.Log(new()
+                    Logger.Log(new()
                     {
                         History = Chats[genericSender],
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {s.GetPlayerName()}: {message.ToString()}"
@@ -506,10 +491,10 @@ public unsafe class Messenger : IDalamudPlugin
                         isHandled = true;
                     }
                 }
-                var idx = gameFunctions.GetCurrentChatLogEntryIndex();
+                var idx = GameFunctions.GetCurrentChatLogEntryIndex();
                 if (idx != null)
                 {
-                    var cid = gameFunctions.GetContentIdForEntry(idx.Value - 1);
+                    var cid = GameFunctions.GetContentIdForEntry(idx.Value - 1);
                     if (cid != null && cid.Value != 0)
                     {
                         PluginLog.Debug($"Player {s.GetPlayerName()} CID={cid:X16}");
@@ -529,43 +514,13 @@ public unsafe class Messenger : IDalamudPlugin
         PluginLog.Debug($"Sender is {s.Name}");
         if (s.Name != null)
         {
-            if (!Chats.ContainsKey(s))
+            if (!Chats.TryGetValue(s, out var value))
             {
-                Chats[s] = new(s);
+                value = new(s);
+                Chats[s] = value;
             }
-            if(open) Chats[s].chatWindow.IsOpen = true;
+            if(open) value.ChatWindow.IsOpen = true;
         }
-    }
-
-    bool DecodeSender(SeString sender, out Sender senderStruct)
-    {
-        if (sender == null)
-        {
-            senderStruct = default;
-            return false;
-        }
-        foreach (var x in sender.Payloads)
-        {
-            if (x is PlayerPayload p)
-            {
-                senderStruct = new(p.PlayerName, p.World.RowId);
-                return true;
-            }
-        }
-        if(ProperOnLogin.PlayerPresent && sender.ToString().EndsWith(Svc.ClientState.LocalPlayer?.Name.ToString()))
-        {
-            senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Svc.ClientState.LocalPlayer.HomeWorld.Id);
-            return true;
-        }
-        senderStruct = default;
-        return false;
-    }
-
-    internal (int current, int max) GetLength(string destination, string message)
-    {
-        var cmd = Encoding.UTF8.GetBytes($"/tell {destination} ").Length;
-        var msg = Encoding.UTF8.GetBytes(message).Length;
-        return (msg, 500 - cmd);
     }
 
     internal string SendDirectMessage(string destination, string message, bool generic = false)
@@ -576,13 +531,13 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 return "Not logged in";
             }
-            if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
+            if (TryGetAddonByName<AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
             {
                 if (generic)
                 {
                     var c = $"/{destination} {message}";
                     PluginLog.Verbose($"Sending command generic: {c}");
-                    P.chat.SendMessage(c);
+                    Chat.Instance.SendMessage(c);
                 }
                 else
                 {
@@ -590,13 +545,13 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         var c = $"/r {message}";
                         PluginLog.Verbose($"Sending via reply: {c}");
-                        P.chat.SendMessage(c);
+                        Chat.Instance.SendMessage(c);
                     }
                     else
                     {
                         var c = $"/tell {destination} {message}";
                         PluginLog.Verbose($"Sending command: {c}");
-                        P.chat.SendMessage(c);
+                        Chat.Instance.SendMessage(c);
                     }
                 }
                 return null;
@@ -705,7 +660,7 @@ public unsafe class Messenger : IDalamudPlugin
             var isLeader = party.Length == 0 || Svc.ClientState.LocalContentId == leader;
             var member = party.FirstOrDefault(member => member.Name.TextValue == player.Name && member.World.Id == player.HomeWorld);
             var isInParty = member != default;
-            var inInstance = gameFunctions.IsInInstance();
+            var inInstance = GameFunctions.IsInInstance();
             //var inPartyInstance = Svc.Data.GetExcelSheet<TerritoryType>()!.GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse is (41 or 47 or 48 or 52 or 53);
             if (isLeader)
             {
@@ -716,7 +671,7 @@ public unsafe class Messenger : IDalamudPlugin
                         if (sameWorld)
                         {
                             if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
-                            partyFunctions.InviteSameWorld(player.Name, (ushort)player.HomeWorld, cidOverride ?? 0);
+                            PartyFunctions.InviteSameWorld(player.Name, (ushort)player.HomeWorld, cidOverride ?? 0);
                             return null;
                         }
                         else
@@ -724,13 +679,13 @@ public unsafe class Messenger : IDalamudPlugin
                             if(cidOverride != null && cidOverride.Value != 0)
                             {
                                 if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
-                                partyFunctions.InviteOtherWorld(cidOverride.Value, (ushort)player.HomeWorld);
+                                PartyFunctions.InviteOtherWorld(cidOverride.Value, (ushort)player.HomeWorld);
                                 return null;
                             }
                             else if (TryGetCID(player, out var cid))
                             {
                                 if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
-                                partyFunctions.InviteOtherWorld(cid, (ushort)player.HomeWorld);
+                                PartyFunctions.InviteOtherWorld(cid, (ushort)player.HomeWorld);
                                 return null;
                             }
                             else

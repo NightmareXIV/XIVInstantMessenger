@@ -2,10 +2,10 @@
 
 namespace Messenger.Gui.Settings;
 
-internal static class TabStyle
+internal class TabStyle
 {
 
-    internal static void Draw()
+    internal void Draw()
     {
         ImGui.ColorEdit4("Generic text color", ref P.config.DefaultChannelCustomization.ColorGeneric, ImGuiColorEditFlags.NoInputs);
         ImGui.ColorEdit4("Incoming messages: sender color", ref P.config.DefaultChannelCustomization.ColorFromTitle, ImGuiColorEditFlags.NoInputs);

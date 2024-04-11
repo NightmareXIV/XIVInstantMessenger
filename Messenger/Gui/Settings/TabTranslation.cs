@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Messenger.Gui.Settings
 {
-    internal static class TabTranslation
+    internal class TabTranslation
     {
-        internal static void Draw()
+        internal void Draw()
         {
+            ImGuiEx.TextWrapped(EColor.Red, $"Warning: this feature is deprecated and scheduled to be discontinued.");
             ImGuiEx.Text("Select translation provider:");
             if(ImGui.BeginCombo("##trans", P.config.TranslationProvider))
             {

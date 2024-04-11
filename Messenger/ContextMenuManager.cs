@@ -63,7 +63,7 @@ internal class ContextMenuManager : IDisposable
         P.Chats[s].Scroll();
         if (Svc.Condition[ConditionFlag.InCombat])
         {
-            P.Chats[s].chatWindow.KeepInCombat = true;
+            P.Chats[s].ChatWindow.KeepInCombat = true;
             Notify.Info("This chat will not be hidden in combat");
         }
     }

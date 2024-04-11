@@ -81,7 +81,7 @@ internal unsafe class ChatWindow : Window
     public override void OnClose()
     {
         KeepInCombat = false;
-        if(P.Chats.All(x => !x.Value.chatWindow.IsOpen))
+        if(P.Chats.All(x => !x.Value.ChatWindow.IsOpen))
         {
             //Notify.Info("Cascading has been reset");
             ChatWindow.CascadingPosition = 0;
@@ -400,7 +400,7 @@ internal unsafe class ChatWindow : Window
                 ImGui.SameLine(0, 2);
                 if (ImGuiEx.IconButton(FontAwesomeIcon.Smile, "AddFriend"))
                 {
-                    P.gameFunctions.SendFriendRequest(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
+                    P.GameFunctions.SendFriendRequest(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
                 }
                 ImGuiEx.Tooltip("Add to friend list");
             }
@@ -409,7 +409,7 @@ internal unsafe class ChatWindow : Window
                 ImGui.SameLine(0, 2);
                 if (ImGuiEx.IconButton(FontAwesomeIcon.Frown, "AddBlacklist"))
                 {
-                    P.gameFunctions.AddToBlacklist(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
+                    P.GameFunctions.AddToBlacklist(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
                 }
                 ImGuiEx.Tooltip("Add to blacklist");
             }
@@ -540,7 +540,7 @@ internal unsafe class ChatWindow : Window
                 {
                     Safe(delegate
                     {
-                        Svc.Chat.Print(new SeStringBuilder().Add(Extensions.GetItemPayload(x.Item.Item, x.Item.IsHQ)).BuiltString);
+                        Svc.Chat.Print(new SeStringBuilder().Add(Utils.GetItemPayload(x.Item.Item, x.Item.IsHQ)).BuiltString);
                     });
                 }
             }

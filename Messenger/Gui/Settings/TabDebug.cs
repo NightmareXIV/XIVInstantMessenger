@@ -8,13 +8,13 @@ using Messenger.FriendListManager;
 
 namespace Messenger.Gui.Settings;
 
-internal unsafe static class TabDebug
+internal unsafe class TabDebug
 {
-    static XivChatType MType = XivChatType.TellIncoming;
-    static string MName = "";
-    static int MWorld = 0;
-    static string MMessage = "";
-    internal static void Draw()
+    XivChatType MType = XivChatType.TellIncoming;
+    string MName = "";
+    int MWorld = 0;
+    string MMessage = "";
+    internal void Draw()
     {
         if(ImGui.Button("Replace Dalamud font"))
         {
@@ -47,13 +47,13 @@ internal unsafe static class TabDebug
                 P.OnChatMessage(MType, 0, ref s, ref m, ref n);
             }
             ImGui.Separator();
-            ImGuiEx.Text($"Is in instance: {P.gameFunctions.IsInInstance()}");
+            ImGuiEx.Text($"Is in instance: {P.GameFunctions.IsInInstance()}");
             ImGuiEx.Text($"Last received message: {P.LastReceivedMessage.GetPlayerName()}");
             if (ImGui.Button("Mark all as unread"))
             {
                 foreach (var x in P.Chats.Values)
                 {
-                    x.chatWindow.Unread = true;
+                    x.ChatWindow.Unread = true;
                 }
             }
             ImGuiEx.Text("CID map:");
@@ -77,11 +77,11 @@ internal unsafe static class TabDebug
             }
             if (ImGui.Button("Install invite to party hook"))
             {
-                P.partyFunctions.InstallHooks();
+                P.PartyFunctions.InstallHooks();
             }
             if (ImGui.Button("Install tell hook"))
             {
-                P.gameFunctions.InstallHooks();
+                P.GameFunctions.InstallHooks();
             }
             ImGui.Separator();
             ImGuiEx.Text("Target commands");
@@ -92,7 +92,7 @@ internal unsafe static class TabDebug
             ImGui.Separator();
             ImGuiEx.Text("Width-to-spaces");
 
-            foreach (var x in P.whitespaceForLen)
+            foreach (var x in P.WhitespaceMap)
             {
                 ImGuiEx.Text($"{x.Key} => {x.Value.Length}x");
             }

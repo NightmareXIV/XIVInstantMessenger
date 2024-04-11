@@ -1,11 +1,11 @@
 ﻿namespace Messenger;
 
-internal struct Sender : IEquatable<Sender>
+public struct Sender : IEquatable<Sender>
 {
-    internal string Name;
-    internal uint HomeWorld;
+    public string Name;
+    public uint HomeWorld;
 
-    internal Sender(string Name, uint HomeWorld)
+    public Sender(string Name, uint HomeWorld)
     {
         this.Name = Name;
         this.HomeWorld = HomeWorld;

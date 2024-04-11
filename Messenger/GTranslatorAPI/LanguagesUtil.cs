@@ -38,7 +38,7 @@ namespace GTranslatorAPI
         {
             if (_languageNameToLanguageCode == null)
             {
-                _languageNameToLanguageCode = new Dictionary<string, Languages>();
+                _languageNameToLanguageCode = [];
                 foreach (var kvp in _languageCodeToLanguageName)
                     _languageNameToLanguageCode[kvp.Value] = kvp.Key;
             }

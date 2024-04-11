@@ -2,21 +2,21 @@
 
 namespace Messenger.Gui.Settings;
 
-internal static class TabHistory
+internal class TabHistory
 {
-    internal static volatile bool LoadingFinished = false;
-    internal static volatile bool LoadingRequested = true;
-    static List<Sender> fileChatList = new();
-    static string search = "";
+    internal volatile bool LoadingFinished = false;
+    internal volatile bool LoadingRequested = true;
+    List<Sender> fileChatList = [];
+    string search = "";
 
-    internal static void Reload()
+    internal void Reload()
     {
         LoadingFinished = false;
         LoadingRequested = true;
-        fileChatList = new();
+        fileChatList = [];
     }
 
-    internal static void Draw()
+    internal void Draw()
     {
         if (LoadingRequested)
         {

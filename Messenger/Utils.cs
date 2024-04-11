@@ -12,12 +12,24 @@ using Messenger.Gui.Settings;
 using Dalamud.Memory;
 using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Client.System.String;
+using ECommons.Events;
+using ECommons.GameHelpers;
+using ECommons.ExcelServices;
 
 namespace Messenger;
 
-internal unsafe static class Extensions
+internal unsafe static class Utils
 {
-    internal static ChannelCustomization GetCustomization(this Sender s)
+    public static string GetAddonName(this string s)
+    {
+        if (s == "") return "No element/whole screen";
+        if (s == "_NaviMap") return "Mini-map";
+        if (s == "_DTR") return "Server status bar";
+        if (s == "ChatLog") return "Chat window";
+        return s;
+    }
+
+    public static ChannelCustomization GetCustomization(this Sender s)
     {
         if (s.IsGenericChannel())
         {
@@ -39,7 +51,7 @@ internal unsafe static class Extensions
         return P.config.DefaultChannelCustomization;
     }
 
-    internal static string GetName(this XivChatType type)
+    public static string GetName(this XivChatType type)
     {
         var affix = string.Empty;
         /*if(type.EqualsAny(XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4, XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8))
@@ -73,7 +85,7 @@ internal unsafe static class Extensions
         return type.ToString();
     }
 
-    internal static string GetCommand(this XivChatType type)
+    public static string GetCommand(this XivChatType type)
     {
         if (type == XivChatType.Party) return "p";
         if (type == XivChatType.Say) return "say";
@@ -101,7 +113,7 @@ internal unsafe static class Extensions
         return null;
     }
 
-    internal static string GetChannelName(this Sender s)
+    public static string GetChannelName(this Sender s)
     {
         if (s.IsGenericChannel(out var t))
         {
@@ -113,12 +125,12 @@ internal unsafe static class Extensions
         }
     }
 
-    internal static bool IsGenericChannel(this Sender s)
+    public static bool IsGenericChannel(this Sender s)
     {
         return TabIndividual.Types.Select(x => x.ToString()).Contains(s.Name);
     }
 
-    internal static bool IsGenericChannel(this Sender s, out XivChatType type)
+    public static bool IsGenericChannel(this Sender s, out XivChatType type)
     {
         if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out var z))
         {
@@ -132,7 +144,7 @@ internal unsafe static class Extensions
         }
     }
 
-    internal static List<Payload> GetItemPayload(Item item, bool hq)
+    public static List<Payload> GetItemPayload(Item item, bool hq)
     {
         if (item == null)
         {
@@ -157,7 +169,7 @@ internal unsafe static class Extensions
     }
 
 
-    internal static long GetLatestMessageTime(this MessageHistory history)
+    public static long GetLatestMessageTime(this MessageHistory history)
     {
         var timeCurrent = 0L;
         if (history.Messages.TryGetLast(x => !x.IsSystem, out var currentLastMessage))
@@ -167,7 +179,7 @@ internal unsafe static class Extensions
         return timeCurrent;
     }
 
-    internal static bool TryGetSender(this string value, out Sender sender)
+    public static bool TryGetSender(this string value, out Sender sender)
     {
         var a = value.Split("@");
         if (a.Length != 2)
@@ -187,17 +199,14 @@ internal unsafe static class Extensions
         }
     }
 
-    internal static string GetPlayerName(this Sender value)
+    public static string GetPlayerName(this Sender value)
     {
-        return $"{value.Name}@{Svc.Data.GetExcelSheet<World>().GetRow(value.HomeWorld).Name}";
+        return $"{value.Name}@{ExcelWorldHelper.GetName(value.HomeWorld)}";
     }
 
-    internal static string GetPlayerName(this PlayerCharacter c)
-    {
-        return $"{c.Name}@{c.HomeWorld.GameData.Name}";
-    }
+    public static string GetPlayerName(this PlayerCharacter c) => c.GetNameWithWorld();
 
-    internal static byte[] ToTerminatedBytes(this string s)
+    public static byte[] ToTerminatedBytes(this string s)
     {
         var utf8 = Encoding.UTF8;
         var bytes = new byte[utf8.GetByteCount(s) + 1];
@@ -206,7 +215,7 @@ internal unsafe static class Extensions
         return bytes;
     }
 
-    internal static IntPtr Range(this ExtraGlyphRanges ranges) => ranges switch
+    public static IntPtr Range(this ExtraGlyphRanges ranges) => ranges switch
     {
         ExtraGlyphRanges.ChineseFull => ImGui.GetIO().Fonts.GetGlyphRangesChineseFull(),
         ExtraGlyphRanges.ChineseSimplifiedCommon => ImGui.GetIO().Fonts.GetGlyphRangesChineseSimplifiedCommon(),
@@ -218,8 +227,39 @@ internal unsafe static class Extensions
         _ => throw new ArgumentOutOfRangeException(nameof(ranges), ranges, null),
     };
 
-    internal static Vector4 GetFlashColor(this ImGuiCol col, ChannelCustomization c)
+    public static Vector4 GetFlashColor(this ImGuiCol col, ChannelCustomization c)
     {
         return P.config.NoFlashing ? c.ColorTitleFlash : GradientColor.Get(ImGui.GetStyle().Colors[(int)col], c.ColorTitleFlash, 500);
+    }
+
+    public static bool DecodeSender(SeString sender, out Sender senderStruct)
+    {
+        if (sender == null)
+        {
+            senderStruct = default;
+            return false;
+        }
+        foreach (var x in sender.Payloads)
+        {
+            if (x is PlayerPayload p)
+            {
+                senderStruct = new(p.PlayerName, p.World.RowId);
+                return true;
+            }
+        }
+        if (ProperOnLogin.PlayerPresent && sender.ToString().EndsWith(Svc.ClientState.LocalPlayer?.Name.ToString()))
+        {
+            senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Svc.ClientState.LocalPlayer.HomeWorld.Id);
+            return true;
+        }
+        senderStruct = default;
+        return false;
+    }
+
+    public static (int current, int max) GetLength(string destination, string message)
+    {
+        var cmd = Encoding.UTF8.GetBytes($"/tell {destination} ").Length;
+        var msg = Encoding.UTF8.GetBytes(message).Length;
+        return (msg, 500 - cmd);
     }
 }

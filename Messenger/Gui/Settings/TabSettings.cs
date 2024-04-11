@@ -1,9 +1,9 @@
 ﻿namespace Messenger.Gui.Settings;
 
-internal static class TabSettings
+internal class TabSettings
 {
-    static string NewTabSystem = "";
-    internal static void Draw()
+    string NewTabSystem = "";
+    internal void Draw()
     {
         ImGuiEx.EzTabBar("TabSettingsTabs",
             ("General", delegate
@@ -87,7 +87,7 @@ internal static class TabSettings
                 {
                     if (P.config.IncomingTellSound != Sounds.None)
                     {
-                        P.gameFunctions.PlaySound(P.config.IncomingTellSound);
+                        P.GameFunctions.PlaySound(P.config.IncomingTellSound);
                     }
                 }
                 ImGui.Checkbox("Auto-close all chat windows on logout", ref P.config.CloseLogout);
@@ -170,10 +170,10 @@ internal static class TabSettings
                     {
                         foreach (var x in P.Chats)
                         {
-                            P.wsChats.RemoveWindow(x.Value.chatWindow);
+                            P.WindowSystemChat.RemoveWindow(x.Value.ChatWindow);
                         }
                         P.Chats.Clear();
-                        TabHistory.Reload();
+                        P.GuiSettings.TabHistory.Reload();
                     }
                     ImGuiEx.Tooltip("All chats will be closed");
                 });
@@ -195,14 +195,5 @@ internal static class TabSettings
                 }
             }, null, true)
         );
-    }
-
-    static string GetAddonName(this string s)
-    {
-        if (s == "") return "No element/whole screen";
-        if (s == "_NaviMap") return "Mini-map";
-        if (s == "_DTR") return "Server status bar";
-        if (s == "ChatLog") return "Chat window";
-        return s;
     }
 }

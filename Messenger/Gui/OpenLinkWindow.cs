@@ -18,7 +18,7 @@ internal class OpenLinkWindow : Window
             MaximumSize = new(600, 400)
         };
         this.Link = link;
-        P.ws.AddWindow(this);
+        P.WindowSystemMain.AddWindow(this);
     }
 
     public override void PreDraw()
@@ -64,6 +64,6 @@ internal class OpenLinkWindow : Window
 
     public override void OnClose()
     {
-        P.ws.RemoveWindow(this);
+        P.WindowSystemMain.RemoveWindow(this);
     }
 }
