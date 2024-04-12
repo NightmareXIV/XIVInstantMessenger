@@ -27,13 +27,13 @@ public unsafe class Messenger : IDalamudPlugin
 {
     public string Name => "XIV Instant Messenger";
     public static Messenger P;
-    public static Config C => P.config;
+    public static Config C => P.Config;
     internal GameFunctions GameFunctions;
     internal WindowSystem WindowSystemMain;
     internal WindowSystem WindowSystemChat;
     internal GuiSettings GuiSettings;
     internal Dictionary<Sender, MessageHistory> Chats = [];
-    internal Config config;
+    private Config Config;
     internal ContextMenuManager ContextMenuManager;
     internal PartyFunctions PartyFunctions;
     internal Dictionary<Sender, ulong> CIDlist = [];
@@ -43,13 +43,13 @@ public unsafe class Messenger : IDalamudPlugin
     internal Sender? RecentReceiver = null;
     internal string[] TargetCommands;
     internal bool Hidden = false;
-    internal FontManager fontManager = null;
+    internal FontManager FontManager = null;
     internal Dictionary<float, string> WhitespaceMap = [];
     internal IFontHandle CustomAxis;
     internal Sender LastReceivedMessage;
     internal TabSystem TabSystem;
     internal Translator Translator;
-    internal List<TabSystem> tabSystems = [];
+    internal List<TabSystem> TabSystems = [];
 
     public Messenger(DalamudPluginInterface pi)
     {
@@ -58,7 +58,7 @@ public unsafe class Messenger : IDalamudPlugin
         KoFiButton.IsOfficialPlugin = true;
         new TickScheduler(delegate
         {
-            config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
+            Config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
             Migrator.MigrateConfiguration();
             Svc.Chat.ChatMessage += OnChatMessage;
             GameFunctions = new();
@@ -87,16 +87,17 @@ public unsafe class Messenger : IDalamudPlugin
                 .Where(x => !string.IsNullOrEmpty(x)).ToArray();
             TabSystem = new(null);
             WindowSystemMain.AddWindow(TabSystem);
-            Tabs(P.config.Tabs);
+            Tabs(C.Tabs);
             Svc.ClientState.Logout += ClientState_Logout;
             Translator = new();
+            FontManager = new();
             RebuildTabSystems();
         });
     }
 
     internal void ClientState_Logout()
     {
-        if (P.config.CloseLogout)
+        if (C.CloseLogout)
         {
             foreach(var x in Chats)
             {
@@ -107,34 +108,35 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal void RebuildTabSystems()
     {
-        tabSystems.Each(WindowSystemMain.RemoveWindow);
-        tabSystems.Clear();
-        foreach(var x in P.config.TabWindows)
+        TabSystems.Each(WindowSystemMain.RemoveWindow);
+        TabSystems.Clear();
+        foreach(var x in C.TabWindows)
         {
-            tabSystems.Add(new(x));
+            TabSystems.Add(new(x));
         }
-        tabSystems.Each(WindowSystemMain.AddWindow);
-        PluginLog.Debug($"Tab systems: {tabSystems.Select(x => x.Name).Join(",")}");
+        TabSystems.Each(WindowSystemMain.AddWindow);
+        PluginLog.Debug($"Tab systems: {TabSystems.Select(x => x.Name).Join(",")}");
     }
 
     public void Dispose()
     {
-        Safe(ContextMenuManager.Dispose);
-        Safe(() => Svc.PluginInterface.SavePluginConfig(config));
+        Safe(() => ContextMenuManager.Dispose());
+        Safe(() => Svc.PluginInterface.SavePluginConfig(Config));
         Svc.Chat.ChatMessage -= OnChatMessage;
         Svc.PluginInterface.UiBuilder.Draw -= WindowSystemMain.Draw;
         Svc.PluginInterface.UiBuilder.Draw -= WindowSystemChat.Draw;
         Svc.Commands.RemoveHandler("/msg");
         Svc.Commands.RemoveHandler("/xim");
-        Safe(GameFunctions.Dispose);
+        Safe(() => GameFunctions.Dispose());
         Svc.ClientState.Logout -= Logout;
         Svc.Framework.Update -= Tick;
-        Safe(Logger.Dispose);
-        Safe(PartyFunctions.Dispose);
-        if(fontManager != null) Safe(fontManager.Dispose);
+        Safe(() => Logger.Dispose());
+        Safe(() => PartyFunctions.Dispose());
+        if(FontManager != null) Safe(() => FontManager.Dispose());
         Svc.ClientState.Logout -= ClientState_Logout;
-        Translator.Dispose();
+        Safe(() => Translator.Dispose());
         ECommonsMain.Dispose();
+        P = null;
     }
 
     internal void Tabs(bool useTabs)
@@ -206,7 +208,7 @@ public unsafe class Messenger : IDalamudPlugin
                     break;
                 }
             }
-            if (!P.config.IncreaseSpacing) spc = spc[0..^1];
+            if (!C.IncreaseSpacing) spc = spc[0..^1];
             WhitespaceMap[len] = spc;
             return spc;
         }
@@ -247,7 +249,7 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 Safe(delegate
                 {
-                    var logFolder = P.config.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : P.config.LogStorageFolder;
+                    var logFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
                     var files = Directory.GetFiles(logFolder);
                     foreach (var file in files)
                     {
@@ -276,14 +278,14 @@ public unsafe class Messenger : IDalamudPlugin
 
     private void Tick(object framework)
     {
-        if (P.config.EnableKey)
+        if (C.EnableKey)
         {
-            if ((ImGuiEx.IsKeyPressed((int)P.config.Key, false) || Svc.KeyState.GetRawValue(P.config.Key) != 0) 
-                && ModifierKeyMatch(P.config.ModifierKey))
+            if ((ImGuiEx.IsKeyPressed((int)C.Key, false) || Svc.KeyState.GetRawValue(C.Key) != 0) 
+                && ModifierKeyMatch(C.ModifierKey))
             {
-                Svc.KeyState.SetRawValue(P.config.Key, 0);
+                Svc.KeyState.SetRawValue(C.Key, 0);
                 var toOpen = lastHistory;
-                if (P.config.CycleChatHotkey)
+                if (C.CycleChatHotkey)
                 {
                     foreach(var x in Chats.Values)
                     {
@@ -364,7 +366,7 @@ public unsafe class Messenger : IDalamudPlugin
                         History = history,
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {message.ToString()}"
                     });
-                    if (P.config.DefaultChannelCustomization.SuppressDMs)
+                    if (C.DefaultChannelCustomization.SuppressDMs)
                     {
                         isHandled = true;
                     }
@@ -377,7 +379,7 @@ public unsafe class Messenger : IDalamudPlugin
                 {
                     var isOpen = Chats.TryGetValue(s, out var sHist) && sHist.ChatWindow.IsOpen;
                     OpenMessenger(s,
-                        (!Svc.Condition[ConditionFlag.InCombat] || config.AutoReopenAfterCombat) && 
+                        (!Svc.Condition[ConditionFlag.InCombat] || Config.AutoReopenAfterCombat) && 
                         (
                         (s.GetCustomization().AutoOpenTellIncoming && type == XivChatType.TellIncoming) 
                         || (s.GetCustomization().AutoOpenTellOutgoing && type == XivChatType.TellOutgoing)
@@ -388,7 +390,7 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = type == XivChatType.TellIncoming,
                         Message = message.ToString(),
                         OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
-                        IgnoreTranslation = type == XivChatType.TellOutgoing && P.config.TranslateSelf
+                        IgnoreTranslation = type == XivChatType.TellOutgoing && C.TranslateSelf
                     };
                     foreach (var payload in message.Payloads)
                     {
@@ -417,9 +419,9 @@ public unsafe class Messenger : IDalamudPlugin
                         LastReceivedMessage = s;
                         Chats[s].ChatWindow.Unread = true;
                         Chats[s].ChatWindow.SetTransparency(true);
-                        if(P.config.IncomingTellSound != Sounds.None)
+                        if(C.IncomingTellSound != Sounds.None)
                         {
-                            GameFunctions.PlaySound(P.config.IncomingTellSound);
+                            GameFunctions.PlaySound(C.IncomingTellSound);
                         }
                     }
                     Logger.Log(new()
@@ -432,14 +434,14 @@ public unsafe class Messenger : IDalamudPlugin
                         isHandled = true;
                     }
                 }
-                else if(type.GetCommand() != null && P.config.Channels.Contains(type)) 
+                else if(type.GetCommand() != null && C.Channels.Contains(type)) 
                 {
                     //generic
                     var incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
                     var genericSender = new Sender(type.ToString(), 0);
                     var isOpen = Chats.TryGetValue(genericSender, out var sHist) && sHist.ChatWindow.IsOpen;
                     OpenMessenger(genericSender,
-                        (!Svc.Condition[ConditionFlag.InCombat] || config.AutoReopenAfterCombat) &&
+                        (!Svc.Condition[ConditionFlag.InCombat] || Config.AutoReopenAfterCombat) &&
                         (
                         (genericSender.GetCustomization().AutoOpenTellIncoming && incoming)
                         || (genericSender.GetCustomization().AutoOpenTellOutgoing && !incoming)
@@ -450,7 +452,7 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = incoming,
                         Message = message.ToString(),
                         OverrideName = s.GetPlayerName(),
-                        IgnoreTranslation = !incoming && P.config.TranslateSelf
+                        IgnoreTranslation = !incoming && C.TranslateSelf
                     };
                     foreach (var payload in message.Payloads)
                     {
@@ -474,11 +476,18 @@ public unsafe class Messenger : IDalamudPlugin
                     }
                     else
                     {
-                        Chats[genericSender].ChatWindow.Unread = incoming;
-                        Chats[genericSender].ChatWindow.SetTransparency(true);
-                        /*if (P.config.IncomingTellSound != Sounds.None)
+                        if (!genericSender.GetCustomization().NoUnread)
                         {
-                            gameFunctions.PlaySound(P.config.IncomingTellSound);
+                            Chats[genericSender].ChatWindow.Unread = incoming;
+                        }
+                        else
+                        {
+                            Chats[genericSender].ChatWindow.Unread = false;
+                        }
+                        Chats[genericSender].ChatWindow.SetTransparency(true);
+                        /*if (C.IncomingTellSound != Sounds.None)
+                        {
+                            gameFunctions.PlaySound(C.IncomingTellSound);
                         }*/
                     }
                     Logger.Log(new()

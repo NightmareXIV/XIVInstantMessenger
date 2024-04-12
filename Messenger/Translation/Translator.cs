@@ -26,7 +26,7 @@ namespace Messenger.Translation
                 new DummyProvider(),
                 new GTranslator()
             ];
-            CurrentProvider = RegisteredProviders.FirstOrDefault(x => x.DisplayName == P.config.TranslationProvider);
+            CurrentProvider = RegisteredProviders.FirstOrDefault(x => x.DisplayName == C.TranslationProvider);
             CurrentProvider?.Initialize();
         }
 

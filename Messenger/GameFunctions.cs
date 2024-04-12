@@ -7,6 +7,7 @@
 using Dalamud.Hooking;
 using Dalamud.Memory;
 using Dalamud.Utility.Signatures;
+using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
@@ -129,7 +130,7 @@ internal unsafe class GameFunctions : IDisposable
 
         var worldName = row.Name.RawString;
         this._replacementName = $"{name}@{worldName}";
-        P.chat.SendMessage($"/{commandName} add {this._placeholder}");
+        Chat.Instance.SendMessage($"/{commandName} add {this._placeholder}");
     }
 
     internal void SendFriendRequest(string name, ushort world)

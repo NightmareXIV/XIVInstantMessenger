@@ -19,8 +19,8 @@ namespace Messenger.Translation.Providers
 
         public void DrawSettings()
         {
-            ImGuiEx.EnumCombo("Source language", ref P.config.GTranslateSourceLang);
-            ImGuiEx.EnumCombo("Target language", ref P.config.GTranslateTargetLang);
+            ImGuiEx.EnumCombo("Source language", ref C.GTranslateSourceLang);
+            ImGuiEx.EnumCombo("Target language", ref C.GTranslateTargetLang);
         }
 
         public void Initialize()
@@ -30,7 +30,7 @@ namespace Messenger.Translation.Providers
 
         public string TranslateSynchronous(string sourceText)
         {
-            return GTranslatorInstance.TranslateAsync(P.config.GTranslateSourceLang, P.config.GTranslateTargetLang, sourceText).Result.TranslatedText;
+            return GTranslatorInstance.TranslateAsync(C.GTranslateSourceLang, C.GTranslateTargetLang, sourceText).Result.TranslatedText;
         }
     }
 }

@@ -15,12 +15,12 @@ internal unsafe class QuickButton : Window
     public override bool DrawConditions()
     {
         AtkUnitBase* addon = null;
-        var ret = P.config.QuickOpenButton
-            && (P.config.AddonName == string.Empty || (TryGetAddonByName(P.config.AddonName, out addon)
+        var ret = C.QuickOpenButton
+            && (C.AddonName == string.Empty || (TryGetAddonByName(C.AddonName, out addon)
             && addon->IsVisible));
         if (ret)
         {
-            this.Position = new Vector2(P.config.QuickOpenPositionX2, P.config.QuickOpenPositionY2);
+            this.Position = new Vector2(C.QuickOpenPositionX2, C.QuickOpenPositionY2);
             if (addon != null)
             {
                 this.Position += new Vector2(addon->X, addon->Y);
@@ -37,9 +37,9 @@ internal unsafe class QuickButton : Window
 
     public override void Draw()
     {
-        if (P.config.QuickOpenButtonOnTop)
+        if (C.QuickOpenButtonOnTop)
         {
-            Native.igBringWindowToDisplayFront(Native.igGetCurrentWindow());
+            CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
         }
         ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
@@ -47,7 +47,7 @@ internal unsafe class QuickButton : Window
         var col = false;
         if(P.Hidden)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiCol.Text.GetFlashColor(P.config.DefaultChannelCustomization));
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiCol.Text.GetFlashColor(C.DefaultChannelCustomization));
             col = true;
         }
         if (ImGuiEx.IconButton(FontAwesomeIcon.MailBulk))

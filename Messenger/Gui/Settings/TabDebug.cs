@@ -16,10 +16,6 @@ internal unsafe class TabDebug
     string MMessage = "";
     internal void Draw()
     {
-        if(ImGui.Button("Replace Dalamud font"))
-        {
-            FontPusher.ReplaceDalamudFont();
-        }
         try
         {
             if (ImGui.CollapsingHeader("Senders"))

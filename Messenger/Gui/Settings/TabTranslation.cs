@@ -12,11 +12,11 @@ namespace Messenger.Gui.Settings
         {
             ImGuiEx.TextWrapped(EColor.Red, $"Warning: this feature is deprecated and scheduled to be discontinued.");
             ImGuiEx.Text("Select translation provider:");
-            if(ImGui.BeginCombo("##trans", P.config.TranslationProvider))
+            if(ImGui.BeginCombo("##trans", C.TranslationProvider))
             {
                 if(ImGui.Selectable("Do not use translation"))
                 {
-                    P.config.TranslationProvider = "Do not use translation";
+                    C.TranslationProvider = "Do not use translation";
                     P.Translator.Dispose();
                     P.Translator = new();
                 }
@@ -24,7 +24,7 @@ namespace Messenger.Gui.Settings
                 {
                     if (ImGui.Selectable(x.DisplayName))
                     {
-                        P.config.TranslationProvider = x.DisplayName;
+                        C.TranslationProvider = x.DisplayName;
                         P.Translator.Dispose();
                         P.Translator = new();
                     }
@@ -38,7 +38,7 @@ namespace Messenger.Gui.Settings
             }
 
             ImGui.Separator();
-            ImGui.Checkbox($"Translate my own messages", ref P.config.TranslateSelf);
+            ImGui.Checkbox($"Translate my own messages", ref C.TranslateSelf);
         }
     }
 }

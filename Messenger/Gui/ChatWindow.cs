@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using ECommons.Automation;
 using ECommons.GameFunctions;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -11,28 +12,27 @@ namespace Messenger.Gui;
 internal unsafe class ChatWindow : Window
 {
     static int CascadingPosition = 0;
-    internal MessageHistory messageHistory;
+    internal MessageHistory MessageHistory;
     float fieldHeight = 0;
     float afterInputWidth = 0;
     string msg = "";
     internal bool KeepInCombat = false;
     internal bool Unread = false;
     bool TitleColored = false;
-    float Transparency = P.config.TransMax;
+    float Transparency = C.TransMax;
     bool IsTransparent = true;
     internal bool SetPosition = false;
     internal new bool BringToFront = false;
-    bool fontPushed;
 
-    internal string OwningTab => P.config.TabWindowAssociations.TryGetValue(messageHistory.Player.ToString(), out var owner)?owner:null;
+    internal string OwningTab => C.TabWindowAssociations.TryGetValue(MessageHistory.Player.ToString(), out var owner)?owner:null;
 
-    internal ChannelCustomization Cust => this.messageHistory.Player.GetCustomization();
+    internal ChannelCustomization Cust => this.MessageHistory.Player.GetCustomization();
 
     public ChatWindow(MessageHistory messageHistory) : 
         base($"Chat with {messageHistory.Player.GetChannelName()}###Messenger - {messageHistory.Player.Name}{messageHistory.Player.HomeWorld}"
             , ImGuiWindowFlags.NoFocusOnAppearing)
     {
-        this.messageHistory = messageHistory;
+        this.MessageHistory = messageHistory;
         this.SizeConstraints = new()
         {
             MinimumSize = new(200, 200),
@@ -42,10 +42,10 @@ internal unsafe class ChatWindow : Window
 
     internal void SetTransparency(bool isTransparent)
     {
-        this.Transparency = !isTransparent ? P.config.TransMax : P.config.TransMin;
+        this.Transparency = !isTransparent ? C.TransMax : C.TransMin;
     }
 
-    internal bool HideByCombat => Svc.Condition[ConditionFlag.InCombat] && P.config.AutoHideCombat && !KeepInCombat;
+    internal bool HideByCombat => Svc.Condition[ConditionFlag.InCombat] && C.AutoHideCombat && !KeepInCombat;
 
     public override bool DrawConditions()
     {
@@ -60,19 +60,19 @@ internal unsafe class ChatWindow : Window
         }
         if (!ret)
         {
-            this.messageHistory.SetFocus = false;
+            this.MessageHistory.SetFocus = false;
         }
         return ret;
     }
 
     public override void OnOpen()
     {
-        P.lastHistory = this.messageHistory;
-        if (P.config.WindowCascading)
+        P.lastHistory = this.MessageHistory;
+        if (C.WindowCascading)
         {
             SetPosition = true;
         }
-        if (!P.config.NoBringWindowToFrontIfTyping || !ImGui.GetIO().WantCaptureKeyboard)
+        if (!C.NoBringWindowToFrontIfTyping || !ImGui.GetIO().WantCaptureKeyboard)
         {
             BringToFront = true;
         }
@@ -90,7 +90,7 @@ internal unsafe class ChatWindow : Window
 
     public override void PreDraw()
     {
-        if (P.config.NoResize && !ImGui.GetIO().KeyCtrl)
+        if (C.NoResize && !ImGui.GetIO().KeyCtrl)
         {
             this.Flags |= ImGuiWindowFlags.NoResize;
         }
@@ -98,7 +98,7 @@ internal unsafe class ChatWindow : Window
         {
             this.Flags &= ~ImGuiWindowFlags.NoResize;
         }
-        if (P.config.NoMove && !ImGui.GetIO().KeyCtrl)
+        if (C.NoMove && !ImGui.GetIO().KeyCtrl)
         {
             this.Flags |= ImGuiWindowFlags.NoMove;
         }
@@ -106,8 +106,8 @@ internal unsafe class ChatWindow : Window
         {
             this.Flags &= ~ImGuiWindowFlags.NoMove;
         }
-        this.Size = P.config.DefaultSize;
-        this.SizeCondition = P.config.ResetSizeOnAppearing ? ImGuiCond.Appearing : ImGuiCond.FirstUseEver;
+        this.Size = C.DefaultSize;
+        this.SizeCondition = C.ResetSizeOnAppearing ? ImGuiCond.Appearing : ImGuiCond.FirstUseEver;
         IsTransparent = Transparency < 1f;
         TitleColored = false;
         if (Unread)
@@ -120,70 +120,70 @@ internal unsafe class ChatWindow : Window
         if (SetPosition)
         {
             SetPosition = false;
-            if (P.config.WindowCascading)
+            if (C.WindowCascading)
             {
-                var cPos = CascadingPosition % P.config.WindowCascadingReset;
-                var xmult = (int)(CascadingPosition / P.config.WindowCascadingReset);
+                var cPos = CascadingPosition % C.WindowCascadingReset;
+                var xmult = (int)(CascadingPosition / C.WindowCascadingReset);
                 ImGuiHelpers.SetNextWindowPosRelativeMainViewport(ImGuiHelpers.MainViewport.Pos
-                    + new Vector2(P.config.WindowCascadingX, P.config.WindowCascadingY)
-                    + new Vector2(P.config.WindowCascadingXDelta * cPos + P.config.WindowCascadingXDelta * xmult, P.config.WindowCascadingYDelta * cPos));
+                    + new Vector2(C.WindowCascadingX, C.WindowCascadingY)
+                    + new Vector2(C.WindowCascadingXDelta * cPos + C.WindowCascadingXDelta * xmult, C.WindowCascadingYDelta * cPos));
                 CascadingPosition++;
-                if (CascadingPosition > P.config.WindowCascadingReset * P.config.WindowCascadingMaxColumns)
+                if (CascadingPosition > C.WindowCascadingReset * C.WindowCascadingMaxColumns)
                 {
                     CascadingPosition = 0;
                 }
             }
         }
-        fontPushed = FontPusher.PushConfiguredFont();
+        P.FontManager.PushFont();
     }
 
     public override void Draw()
     {
-        var prev = P.GetPreviousMessageHistory(this.messageHistory);
+        var prev = P.GetPreviousMessageHistory(this.MessageHistory);
         /*ImGuiEx.Text($"{(prev == null ? "null" : prev.Player)}");
         ImGui.SameLine();
         ImGuiEx.TextCopy($"{this.messageHistory.GetLatestMessageTime()}");*/
         if (ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
         {
             Unread = false;
-            Transparency = Math.Min(P.config.TransMax, Transparency + P.config.TransDelta);
+            Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
         }
         else
         {
             if (ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
             {
-                Transparency = Math.Min(P.config.TransMax, Transparency + P.config.TransDelta);
+                Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
             }
             else
             {
-                Transparency = Math.Max(P.config.TransMin, Transparency - P.config.TransDelta);
+                Transparency = Math.Max(C.TransMin, Transparency - C.TransDelta);
             }
         }
         if (BringToFront)
         {
             BringToFront = false;
-            Native.igBringWindowToDisplayFront(Native.igGetCurrentWindow());
+            CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
         }
-        var subject = messageHistory.Player.IsGenericChannel()? Enum.GetValues<XivChatType>().First(x => x.ToString() == messageHistory.Player.Name).GetCommand() : messageHistory.Player.GetPlayerName();
-        var subjectNoWorld = messageHistory.Player.GetPlayerName().Split("@")[0];
+        var subject = MessageHistory.Player.IsGenericChannel()? Enum.GetValues<XivChatType>().First(x => x.ToString() == MessageHistory.Player.Name).GetCommand() : MessageHistory.Player.GetPlayerName();
+        var subjectNoWorld = MessageHistory.Player.GetPlayerName().Split("@")[0];
         var me = Svc.ClientState.LocalPlayer?.Name.ToString().Split("@")[0] ?? "Me";
         ImGui.BeginChild($"##ChatChild{subject}", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - fieldHeight));
-        if(messageHistory.Messages.Count == 0)
+        if(MessageHistory.Messages.Count == 0)
         {
             ImGuiEx.TextWrapped($"This is the beginning of your chat with {subject}");
         }
         bool? isIncoming = null;
-        if (messageHistory.LogLoaded && messageHistory.LoadedMessages.Count > 0)
+        if (MessageHistory.LogLoaded && MessageHistory.LoadedMessages.Count > 0)
         {
-            foreach(var message in messageHistory.LoadedMessages)
+            foreach(var message in MessageHistory.LoadedMessages)
             {
-                messageHistory.Messages.Insert(0, message);
+                MessageHistory.Messages.Insert(0, message);
             }
-            messageHistory.Scroll();
-            messageHistory.LoadedMessages.Clear();
+            MessageHistory.Scroll();
+            MessageHistory.LoadedMessages.Clear();
         }
         (int year, int day) currentDay = (0, 0);
-        foreach (var x in messageHistory.Messages)
+        foreach (var x in MessageHistory.Messages)
         {
             if (x.IsSystem)
             {
@@ -192,16 +192,16 @@ internal unsafe class ChatWindow : Window
             else
             {
                 var time = DateTimeOffset.FromUnixTimeMilliseconds(x.Time).ToLocalTime();
-                if (P.config.PrintDate)
+                if (C.PrintDate)
                 {
                     if (!(time.DayOfYear == currentDay.day && time.Year == currentDay.year))
                     {
-                        ImGuiEx.Text(Cust.ColorGeneric, $"[{time.ToString(P.config.DateFormat)}]");
+                        ImGuiEx.Text(Cust.ColorGeneric, $"[{time.ToString(C.DateFormat)}]");
                         currentDay = (time.Year, time.DayOfYear);
                     }
                 }
-                var timestamp = time.ToString(P.config.MessageTimestampFormat);
-                if (P.config.IRCStyle)
+                var timestamp = time.ToString(C.MessageTimestampFormat);
+                if (C.IRCStyle)
                 {
                     var messageColor = x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage;
                     var subjectColor = x.IsIncoming ? Cust.ColorFromTitle : Cust.ColorToTitle;
@@ -245,13 +245,13 @@ internal unsafe class ChatWindow : Window
                 }
             }
         }
-        if (messageHistory.DoScroll > 0)
+        if (MessageHistory.DoScroll > 0)
         {
-            messageHistory.DoScroll--;
+            MessageHistory.DoScroll--;
             ImGui.SetScrollHereY();
         } 
         ImGui.EndChild();
-        var isCmd = P.config.CommandPassthrough && msg.Trim().StartsWith("/");
+        var isCmd = C.CommandPassthrough && msg.Trim().StartsWith("/");
         var cursor = ImGui.GetCursorPosY();
         ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - afterInputWidth);
         var inputCol = false;
@@ -263,31 +263,31 @@ internal unsafe class ChatWindow : Window
         var cur = ImGui.GetCursorPosY();
         if (ImGui.InputText("##outgoing", ref msg, 500, ImGuiInputTextFlags.EnterReturnsTrue))
         {
-            SendMessage(subject, messageHistory.Player.IsGenericChannel());
+            SendMessage(subject, MessageHistory.Player.IsGenericChannel());
         }
         if (inputCol)
         {
             ImGui.PopStyleColor();
         }
-        if (messageHistory.SetFocus)
+        if (MessageHistory.SetFocus)
         {
             this.SetTransparency(false);
             ImGui.SetWindowFocus();
             ImGui.SetKeyboardFocusHere(-1);
-            messageHistory.SetFocus = false;
+            MessageHistory.SetFocus = false;
         }
         ImGui.SetWindowFontScale(ImGui.CalcTextSize(" ").Y / ImGuiEx.CalcIconSize(FontAwesomeIcon.ArrowRight).Y);
         ImGui.SameLine(0, 0);
         var icur1 = ImGui.GetCursorPos();
         ImGui.Dummy(Vector2.Zero);
-        if (P.config.ButtonSend)
+        if (C.ButtonSend)
         {
             ImGui.SameLine(0, 2);
             if (isCmd)
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command"))
                 {
-                    SendMessage(subject, messageHistory.Player.IsGenericChannel());
+                    SendMessage(subject, MessageHistory.Player.IsGenericChannel());
                 }
                 ImGuiEx.Tooltip("Execute command");
             }
@@ -295,20 +295,20 @@ internal unsafe class ChatWindow : Window
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send"))
                 {
-                    SendMessage(subject, messageHistory.Player.IsGenericChannel());
+                    SendMessage(subject, MessageHistory.Player.IsGenericChannel());
                 }
                 ImGuiEx.Tooltip("Send message");
             }
         }
-        if (P.config.ButtonInvite && !this.messageHistory.Player.IsGenericChannel())
+        if (C.ButtonInvite && !this.MessageHistory.Player.IsGenericChannel())
         {
             ImGui.SameLine(0, 2);
             if (ImGuiEx.IconButton(FontAwesomeIcon.DoorOpen, "InviteToParty"))
             {
                 if (Svc.Objects.Any(c => c is PlayerCharacter pc
-                    && pc.HomeWorld.Id == this.messageHistory.Player.HomeWorld && pc.Name.ToString() == this.messageHistory.Player.Name))
+                    && pc.HomeWorld.Id == this.MessageHistory.Player.HomeWorld && pc.Name.ToString() == this.MessageHistory.Player.Name))
                 {
-                    var result = P.InviteToParty(this.messageHistory.Player, true);
+                    var result = P.InviteToParty(this.MessageHistory.Player, true);
                     if (result != null)
                     {
                         Notify.Error(result);
@@ -324,13 +324,13 @@ internal unsafe class ChatWindow : Window
                     foreach (var x in FriendList.Get())
                     {
                         if (flSuccess) break;
-                        if (x.Name.ToString() == this.messageHistory.Player.Name && x.HomeWorld == this.messageHistory.Player.HomeWorld)
+                        if (x.Name.ToString() == this.MessageHistory.Player.Name && x.HomeWorld == this.MessageHistory.Player.HomeWorld)
                         {
                             flSuccess = true;
                             if (x.IsOnline)
                             {
                                 var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x.CurrentWorld;
-                                var result = P.InviteToParty(this.messageHistory.Player, sameWorld, x.ContentId);
+                                var result = P.InviteToParty(this.MessageHistory.Player, sameWorld, x.ContentId);
                                 if (result != null)
                                 {
                                     Notify.Error(result);
@@ -342,7 +342,7 @@ internal unsafe class ChatWindow : Window
                             }
                             else if (P.CIDlist.ContainsValue(x.ContentId))
                             {
-                                var result = P.InviteToParty(this.messageHistory.Player, true);
+                                var result = P.InviteToParty(this.MessageHistory.Player, true);
                                 if (result != null)
                                 {
                                     Notify.Error(result);
@@ -376,13 +376,13 @@ internal unsafe class ChatWindow : Window
                 ImGuiEx.Text("Unable to determine player's current world.");
                 if (ImGui.Selectable("Same world"))
                 {
-                    P.InviteToParty(this.messageHistory.Player, true);
+                    P.InviteToParty(this.MessageHistory.Player, true);
                 }
                 if (ImGui.Selectable("Different world"))
                 {
-                    if (P.IsFriend(this.messageHistory.Player))
+                    if (P.IsFriend(this.MessageHistory.Player))
                     {
-                        P.InviteToParty(this.messageHistory.Player, false);
+                        P.InviteToParty(this.MessageHistory.Player, false);
                     }
                     else
                     {
@@ -393,35 +393,35 @@ internal unsafe class ChatWindow : Window
             }
         }
         
-        if (!this.messageHistory.Player.IsGenericChannel() && !P.IsFriend(this.messageHistory.Player))
+        if (!this.MessageHistory.Player.IsGenericChannel() && !P.IsFriend(this.MessageHistory.Player))
         {
-            if (P.config.ButtonFriend)
+            if (C.ButtonFriend)
             {
                 ImGui.SameLine(0, 2);
                 if (ImGuiEx.IconButton(FontAwesomeIcon.Smile, "AddFriend"))
                 {
-                    P.GameFunctions.SendFriendRequest(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
+                    P.GameFunctions.SendFriendRequest(this.MessageHistory.Player.Name, (ushort)this.MessageHistory.Player.HomeWorld);
                 }
                 ImGuiEx.Tooltip("Add to friend list");
             }
-            if (P.config.ButtonBlack)
+            if (C.ButtonBlack)
             {
                 ImGui.SameLine(0, 2);
                 if (ImGuiEx.IconButton(FontAwesomeIcon.Frown, "AddBlacklist"))
                 {
-                    P.GameFunctions.AddToBlacklist(this.messageHistory.Player.Name, (ushort)this.messageHistory.Player.HomeWorld);
+                    P.GameFunctions.AddToBlacklist(this.MessageHistory.Player.Name, (ushort)this.MessageHistory.Player.HomeWorld);
                 }
                 ImGuiEx.Tooltip("Add to blacklist");
             }
         }
-        if (P.config.ButtonLog)
+        if (C.ButtonLog)
         {
             ImGui.SameLine(0, 2);
             if (ImGuiEx.IconButton(FontAwesomeIcon.Book, "Log"))
             {
-                if (File.Exists(this.messageHistory.LogFile))
+                if (File.Exists(this.MessageHistory.LogFile))
                 {
-                    ShellStart(this.messageHistory.LogFile);
+                    ShellStart(this.MessageHistory.LogFile);
                 }
                 else
                 {
@@ -430,19 +430,19 @@ internal unsafe class ChatWindow : Window
             }
             ImGuiEx.Tooltip("Open text log");
         }
-        if (P.config.ButtonCharaCard)
+        if (C.ButtonCharaCard)
         {
             ImGui.SameLine(0, 2);
             if (ImGuiEx.IconButton(FontAwesomeIcon.IdCard, "OpenCharaCard"))
             {
-                P.OpenCharaCard(this.messageHistory.Player);
+                P.OpenCharaCard(this.MessageHistory.Player);
             }
             ImGuiEx.Tooltip("Open adventurer plate");
         }
         ImGui.SameLine(0, 0);
         afterInputWidth = ImGui.GetCursorPosX() - icur1.X;
         ImGui.Dummy(Vector2.Zero);
-        var bytes = P.GetLength(subject, msg);
+        var bytes = Utils.GetLength(subject, msg);
         var fraction = (float)bytes.current / (float)bytes.max;
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f?ImGuiColors.DalamudRed: Cust.ColorGeneric);
         ImGui.ProgressBar(fraction, new Vector2(ImGui.GetContentRegionAvail().X, 3f), "");
@@ -472,7 +472,7 @@ internal unsafe class ChatWindow : Window
                 PluginLog.Verbose($"Message {x.Message} translation enqueued");
             }
         }
-        if (P.config.ClickToOpenLink && ImGui.IsItemHovered())
+        if (C.ClickToOpenLink && ImGui.IsItemHovered())
         {
             foreach (var s in x.Message.Split(" "))
             {
@@ -560,10 +560,7 @@ internal unsafe class ChatWindow : Window
 
     public override void PostDraw()
     {
-        if (fontPushed)
-        {
-            ImGui.PopFont();
-        }
+        P.FontManager.PopFont();
         if (IsTransparent) ImGui.PopStyleVar();
         if (TitleColored)
         {
@@ -573,29 +570,29 @@ internal unsafe class ChatWindow : Window
 
     void SendMessage(string subject, bool generic)
     {
-        var bytes = P.GetLength(subject, msg);
+        var bytes = Utils.GetLength(subject, msg);
         var trimmed = msg.Trim();
         if (trimmed.Length == 0)
         {
-            Notify.Error("Message is empty!");
+            //Notify.Error("Message is empty!");
         }
         else if (bytes.current > bytes.max)
         {
             Notify.Error("Message is too long!");
         }
-        else if (trimmed.StartsWith("/") && P.config.CommandPassthrough)
+        else if (trimmed.StartsWith("/") && C.CommandPassthrough)
         {
-            if (!generic && P.config.AutoTarget &&
+            if (!generic && C.AutoTarget &&
             (P.TargetCommands.Any(x => msg.Equals(x, StringComparison.OrdinalIgnoreCase) || msg.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
             && Svc.Objects.TryGetFirst(x => x is PlayerCharacter pc && pc.GetPlayerName() == subject && x.Struct()->GetIsTargetable(), out var obj))
             {
                 Svc.Targets.SetTarget(obj);
                 Notify.Info($"Targeting {subject}");
-                new TickScheduler(delegate { P.chat.SendMessage(trimmed); }, 100);
+                new TickScheduler(delegate { Chat.Instance.SendMessage(trimmed); }, 100);
             }
             else
             {
-                P.chat.SendMessage(trimmed);
+                Chat.Instance.SendMessage(trimmed);
             }
             this.msg = "";
         }
@@ -612,9 +609,9 @@ internal unsafe class ChatWindow : Window
                 Notify.Error(msg);
             }
         }
-        if (P.config.RefocusInputAfterSending)
+        if (C.RefocusInputAfterSending)
         {
-            messageHistory.SetFocus = true;
+            MessageHistory.SetFocus = true;
         }
     }
 }

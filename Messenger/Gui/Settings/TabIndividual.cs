@@ -71,71 +71,91 @@ namespace Messenger.Gui.Settings
 
         internal void Draw()
         {
-            ImGuiEx.Text($"Process following generic channels:");
-            for (int i = 1; i < Types.Length; i++)
+            if(ImGui.BeginTable("##table", 2, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.Borders))
             {
-                ImGuiEx.CollectionCheckbox($"{Names[i]}", Types[i], P.config.Channels);
-            }
-            ImGui.Separator();
-            ImGuiEx.SetNextItemFullWidth();
-            if(ImGui.BeginCombo("###custom", Selected == XivChatType.None?"Customize settings for specific channel...":$"Customize settings for: {Selected.GetName()}"))
-            {
-                for (int i = 0; i < Types.Length; i++)
+                ImGui.TableSetupColumn("col1");
+                ImGui.TableSetupColumn("col2");
+
+                ImGui.TableNextColumn();
+
+                if (ImGui.BeginChild("Col1"))
                 {
-                    if (i != 0 && !P.config.Channels.Contains(Types[i])) continue;
-                    if (ImGui.Selectable($"{Names[i]}"))
+                    ImGuiEx.Text($"Process following generic channels:");
+                    for (int i = 1; i < Types.Length; i++)
                     {
-                        Selected = Types[i];
+                        ImGuiEx.CollectionCheckbox($"{Names[i]}", Types[i], C.Channels);
                     }
                 }
-                ImGui.EndCombo();
-            }
-            ImGui.Separator();
-            if(Selected != XivChatType.None)
-            {
-                if(P.config.SpecificChannelCustomizations.TryGetValue(Selected, out var customizations))
+                ImGui.EndChild();
+
+                ImGui.TableNextColumn();
+                if (ImGui.BeginChild("Col2"))
                 {
-                    if(ImGui.Button("Copy to clipboard"))
+                    ImGuiEx.SetNextItemFullWidth();
+                    if (ImGui.BeginCombo("###custom", Selected == XivChatType.None ? "Customize settings for specific channel..." : $"Customize settings for: {Selected.GetName()}"))
                     {
-                        ImGui.SetClipboardText(JsonConvert.SerializeObject(customizations));
-                    }
-                    ImGui.SameLine();
-                    if(ImGuiEx.ButtonCtrl("Remove customization"))
-                    {
-                        P.config.SpecificChannelCustomizations.Remove(Selected);
+                        for (int i = 0; i < Types.Length; i++)
+                        {
+                            if (i != 0 && !C.Channels.Contains(Types[i])) continue;
+                            if (ImGui.Selectable($"{Names[i]}"))
+                            {
+                                Selected = Types[i];
+                            }
+                        }
+                        ImGui.EndCombo();
                     }
                     ImGui.Separator();
-                    DrawCustomization(customizations);
-                }
-                else
-                {
-                    ImGuiEx.Text($"There are no overrides for this channel.");
-                    if(ImGui.Button("Create overrides"))
+                    if (Selected != XivChatType.None)
                     {
-                        P.config.SpecificChannelCustomizations[Selected] = P.config.DefaultChannelCustomization.JSONClone();
-                    }
-                    if(ImGui.Button($"Paste overrides from clipboard"))
-                    {
-                        try
+                        if (C.SpecificChannelCustomizations.TryGetValue(Selected, out var customizations))
                         {
-                            P.config.SpecificChannelCustomizations[Selected] = JsonConvert.DeserializeObject<ChannelCustomization>(ImGui.GetClipboardText());
+                            if (ImGui.Button("Copy to clipboard"))
+                            {
+                                ImGui.SetClipboardText(JsonConvert.SerializeObject(customizations));
+                            }
+                            ImGui.SameLine();
+                            if (ImGuiEx.ButtonCtrl("Remove customization"))
+                            {
+                                C.SpecificChannelCustomizations.Remove(Selected);
+                            }
+                            ImGui.Separator();
+                            DrawCustomization(customizations, false);
                         }
-                        catch(Exception e)
+                        else
                         {
-                            Notify.Error(e.Message);
+                            ImGuiEx.Text($"There are no overrides for this channel.");
+                            if (ImGui.Button("Create overrides"))
+                            {
+                                C.SpecificChannelCustomizations[Selected] = C.DefaultChannelCustomization.JSONClone();
+                            }
+                            if (ImGui.Button($"Paste overrides from clipboard"))
+                            {
+                                try
+                                {
+                                    C.SpecificChannelCustomizations[Selected] = JsonConvert.DeserializeObject<ChannelCustomization>(ImGui.GetClipboardText());
+                                }
+                                catch (Exception e)
+                                {
+                                    Notify.Error(e.Message);
+                                }
+                            }
                         }
                     }
                 }
+                ImGui.EndChild();
+
+                ImGui.EndTable();
             }
         }
 
-        void DrawCustomization(ChannelCustomization data)
+        public static void DrawCustomization(ChannelCustomization data, bool isGlobal)
         {
-            ImGui.Checkbox("Open direct message window on incoming message", ref data.AutoOpenTellIncoming);
-            ImGui.Checkbox("Open direct message window on outgoing message", ref data.AutoOpenTellOutgoing);
+            ImGui.Checkbox("Open window on incoming message", ref data.AutoOpenTellIncoming);
+            ImGui.Checkbox("Open window on outgoing message", ref data.AutoOpenTellOutgoing);
             if (data.AutoOpenTellOutgoing)
             {
-                ImGui.Checkbox("Automatically activate text input after opening window on outgoing message", ref data.AutoFocusTellOutgoing);
+                ImGuiEx.Spacing();
+                ImGui.Checkbox("Auto-activate input after window opens on outgoing message", ref data.AutoFocusTellOutgoing);
             }
             ImGui.ColorEdit4("Generic text color", ref data.ColorGeneric, ImGuiColorEditFlags.NoInputs);
             ImGui.ColorEdit4("Incoming messages: sender color", ref data.ColorFromTitle, ImGuiColorEditFlags.NoInputs);
@@ -144,6 +164,10 @@ namespace Messenger.Gui.Settings
             ImGui.ColorEdit4("Outgoing messages: message color", ref data.ColorToMessage, ImGuiColorEditFlags.NoInputs);
             ImGui.ColorEdit4("Unread message flashing title color", ref data.ColorTitleFlash, ImGuiColorEditFlags.NoInputs);
             ImGui.Checkbox("Don't show sent and received messages in game chat", ref data.SuppressDMs);
+            if (!isGlobal)
+            {
+                ImGui.Checkbox("Never mark this channel as unread", ref data.NoUnread);
+            }
         }
     }
 }

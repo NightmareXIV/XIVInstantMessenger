@@ -21,17 +21,6 @@ internal class GuiSettings : Window
         };
     }
 
-    bool fontPushed = false;
-    public override void PreDraw()
-    {
-        fontPushed = FontPusher.PushConfiguredFont();
-    }
-
-    public override void PostDraw()
-    {
-        if (fontPushed) ImGui.PopFont();
-    }
-
     public override void Draw()
     {
         KoFiButton.DrawRight();
@@ -55,6 +44,6 @@ internal class GuiSettings : Window
     public override void OnClose()
     {
         base.OnClose();
-        Svc.PluginInterface.SavePluginConfig(P.config);
+        Svc.PluginInterface.SavePluginConfig(C);
     }
 }

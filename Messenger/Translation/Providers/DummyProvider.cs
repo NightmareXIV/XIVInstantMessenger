@@ -27,20 +27,20 @@ namespace Messenger.Translation.Providers
         public void DrawSettings()
         {
             ImGuiEx.Text($"Turn text:");
-            if (ImGui.RadioButton("UPPERCASE", !P.config.TranslatorLowercase))
+            if (ImGui.RadioButton("UPPERCASE", !C.TranslatorLowercase))
             {
-                P.config.TranslatorLowercase = false;
+                C.TranslatorLowercase = false;
             }
-            if (ImGui.RadioButton("lowercase", P.config.TranslatorLowercase))
+            if (ImGui.RadioButton("lowercase", C.TranslatorLowercase))
             {
-                P.config.TranslatorLowercase = true;
+                C.TranslatorLowercase = true;
             }
         }
 
         public string TranslateSynchronous(string sourceText)
         {
             Thread.Sleep(500);
-            return P.config.TranslatorLowercase ? sourceText.ToLower() : sourceText.ToUpper();
+            return C.TranslatorLowercase ? sourceText.ToLower() : sourceText.ToUpper();
         }
     }
 }

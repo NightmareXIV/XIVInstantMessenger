@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Messenger;
 
-internal class MessageHistory
+internal partial class MessageHistory
 {
     const int LoadBytes = 128 * 1024;
     internal Sender Player;
@@ -34,7 +34,7 @@ internal class MessageHistory
         ChatWindow = new(this);
         P.WindowSystemChat.AddWindow(ChatWindow);
 
-        var logFolder = P.config.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : P.config.LogStorageFolder;
+        var logFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
 
         LogFile = Path.Combine(logFolder, Player.GetPlayerName() + ".txt");
         var subject = Player.GetPlayerName();
@@ -42,86 +42,82 @@ internal class MessageHistory
         {
             Safe(delegate
             {
-                if (!File.Exists(LogFile))
+                using var reader = new FileStream(LogFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                if (reader.Length > LoadBytes)
                 {
-                    File.Create(LogFile);
+                    reader.Seek(-LoadBytes, SeekOrigin.End);
                 }
-                else
+                using var reader2 = new StreamReader(reader);
+                foreach (var x in reader2.ReadToEnd().Split("\n"))
                 {
-                    using var reader = new FileStream(LogFile, FileMode.Open);
-                    if (reader.Length > LoadBytes)
+                    PluginLog.Debug("Have read line: " + x);
+                    //[Mon, 20 Jun 2022 12:44:41 GMT] To Falalala lala@Omega: fgdfgdfg
+                    var parsed = MessageRegex().Match(x);
+                    if (parsed.Success)
                     {
-                        reader.Seek(-LoadBytes, SeekOrigin.End);
-                    }
-                    using var reader2 = new StreamReader(reader);
-                    foreach (var x in reader2.ReadToEnd().Split("\n"))
-                    {
-                        PluginLog.Debug("Have read line: " + x);
-                        //[Mon, 20 Jun 2022 12:44:41 GMT] To Falalala lala@Omega: fgdfgdfg
-                        var parsed = Regex.Match(x, "^\\[(.+)\\] From (.+)@([a-zA-Z]+): (.+)$");
-                        if (parsed.Success)
+                        Safe(delegate
                         {
-                            Safe(delegate
-                            {
-                                var i = 0;
-                                PluginLog.Debug($"Parsed line: {parsed.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
+                            var i = 0;
+                            PluginLog.Debug($"Parsed line: {parsed.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
-                                var matches = parsed.Groups.Values.ToArray();
-                                if (matches.Length == 5)
+                            var matches = parsed.Groups.Values.ToArray();
+                            if (matches.Length == 5)
+                            {
+                                var name = matches[2].ToString() + "@" + matches[3].ToString();
+                                PluginLog.Debug($"name: {name}, subject: {subject}");
+                                LoadedMessages.Insert(0, new()
                                 {
-                                    var name = matches[2].ToString() + "@" + matches[3].ToString();
-                                    PluginLog.Debug($"name: {name}, subject: {subject}");
-                                    LoadedMessages.Insert(0, new()
-                                    {
-                                        IsIncoming = name == subject,
-                                        Message = matches[4].ToString(),
-                                        Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
-                                        OverrideName = name,
-                                        IgnoreTranslation = true
-                                    }) ;
-                                }
-                            }, PluginLog.Warning);
-                        }
-                        else
+                                    IsIncoming = name == subject,
+                                    Message = matches[4].ToString(),
+                                    Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
+                                    OverrideName = name,
+                                    IgnoreTranslation = true
+                                });
+                            }
+                        }, PluginLog.Warning);
+                    }
+                    else
+                    {
+                        var systemMessage = Regex.Match(x, "^\\[(.+)\\] System: (.+)$");
+                        if (systemMessage.Success) Safe(delegate
                         {
-                            var systemMessage = Regex.Match(x, "^\\[(.+)\\] System: (.+)$");
-                            if(systemMessage.Success) Safe(delegate
-                            {
-                                var i = 0;
-                                PluginLog.Debug($"Parsed system message line: {systemMessage.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
+                            var i = 0;
+                            PluginLog.Debug($"Parsed system message line: {systemMessage.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
-                                var matches = systemMessage.Groups.Values.ToArray();
-                                if (matches.Length == 3)
+                            var matches = systemMessage.Groups.Values.ToArray();
+                            if (matches.Length == 3)
+                            {
+                                PluginLog.Debug($"subject: {subject}");
+                                LoadedMessages.Insert(0, new()
                                 {
-                                    PluginLog.Debug($"subject: {subject}");
-                                    LoadedMessages.Insert(0, new()
-                                    {
-                                        IsIncoming = false,
-                                        Message = matches[2].ToString(),
-                                        Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
-                                        IsSystem = true,
-                                        IgnoreTranslation = true
-                                    });
-                                }
-                            }, PluginLog.Warning);
-                        }
+                                    IsIncoming = false,
+                                    Message = matches[2].ToString(),
+                                    Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
+                                    IsSystem = true,
+                                    IgnoreTranslation = true
+                                });
+                            }
+                        }, PluginLog.Warning);
                     }
-                    //LoadedMessages.Reverse();
-                    if(LoadedMessages.Count > P.config.HistoryAmount)
-                    {
-                        LoadedMessages = LoadedMessages.Take(P.config.HistoryAmount).ToList();
-                    }
-                    LoadedMessages.Insert(0, new()
-                    {
-                        IsSystem = true,
-                        Message = $"Loaded {LoadedMessages.Count} messages from history.",
-                        IgnoreTranslation = true
-                    });
-                    reader2.Dispose();
-                    reader.Dispose();
                 }
+                //LoadedMessages.Reverse();
+                if (LoadedMessages.Count > C.HistoryAmount)
+                {
+                    LoadedMessages = LoadedMessages.Take(C.HistoryAmount).ToList();
+                }
+                LoadedMessages.Insert(0, new()
+                {
+                    IsSystem = true,
+                    Message = $"Loaded {LoadedMessages.Count} messages from history.",
+                    IgnoreTranslation = true
+                });
+                reader2.Dispose();
+                reader.Dispose();
             });
             this.LogLoaded = true;
         });
     }
+
+    [GeneratedRegex("^\\[(.+)\\] From (.+)@([a-zA-Z]+): (.+)$")]
+    private static partial Regex MessageRegex();
 }

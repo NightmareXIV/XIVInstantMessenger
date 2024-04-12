@@ -10,15 +10,17 @@ internal class TabSettings
             {
                 if (ImGui.Button("Open logs folder"))
                 {
-                    var logFolder = P.config.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : P.config.LogStorageFolder;
+                    var logFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
                     ShellStart(logFolder);
                 }
-                ImGui.Checkbox("Enable context menu integration", ref P.config.ContextMenuEnable);
-                if(ImGui.Checkbox("Tabs instead of windows (beta)", ref P.config.Tabs))
+                ImGui.Checkbox("Enable context menu integration", ref C.ContextMenuEnable);
+                if(ImGui.Checkbox("Tabs instead of windows", ref C.Tabs))
                 {
-                    P.Tabs(P.config.Tabs);
+                    P.Tabs(C.Tabs);
                 }
-                if (P.config.Tabs)
+                ImGuiEx.Spacing();
+                ImGui.Checkbox("Do not display world in tab header", ref C.TabsNoWorld);
+                if (C.Tabs)
                 {
                     ImGui.Separator();
                     ImGuiEx.TextWrapped("You may create multiple tabbed windows and associate specific chats with it. Right click on a tab to move it to a specific window later.");
@@ -31,13 +33,13 @@ internal class TabSettings
                     {
                         if (ImGui.Button("Create"))
                         {
-                            if(P.config.TabWindows.Contains(NewTabSystem))
+                            if(C.TabWindows.Contains(NewTabSystem))
                             {
                                 Notify.Error("This name already exists");
                             }
                             else
                             {
-                                P.config.TabWindows.Add(NewTabSystem);
+                                C.TabWindows.Add(NewTabSystem);
                                 P.RebuildTabSystems();
                             }
                         }
@@ -45,10 +47,10 @@ internal class TabSettings
                     ImGui.Separator();
                     ImGuiEx.Text($"Registered windows:");
                     string toRem = null;
-                    foreach(var x in P.config.TabWindows)
+                    foreach(var x in C.TabWindows)
                     {
-                        ImGuiEx.Text($"{x} - {P.config.TabWindowAssociations.Count(z => z.Value == x)} chats associated");
-                        ImGuiEx.Tooltip(P.config.TabWindowAssociations.Where(z => z.Value == x).Select(x => x.Key.ToString()).Join("\n"));
+                        ImGuiEx.Text($"{x} - {C.TabWindowAssociations.Count(z => z.Value == x)} chats associated");
+                        ImGuiEx.Tooltip(C.TabWindowAssociations.Where(z => z.Value == x).Select(x => x.Key.ToString()).Join("\n"));
                         ImGui.SameLine();
                         if(ImGui.SmallButton("Delete window##" + x))
                         {
@@ -57,113 +59,113 @@ internal class TabSettings
                     }
                     if(toRem != null)
                     {
-                        P.config.TabWindows.Remove(toRem);
+                        C.TabWindows.Remove(toRem);
                         P.RebuildTabSystems();
                     }
                 }
             }, null, true),
             ("Behavior", delegate
             {
-                ImGui.Checkbox("Open direct message window on incoming tell", ref P.config.DefaultChannelCustomization.AutoOpenTellIncoming);
-                ImGui.Checkbox("Open direct message window on outgoing tell", ref P.config.DefaultChannelCustomization.AutoOpenTellOutgoing);
-                if (P.config.DefaultChannelCustomization.AutoOpenTellOutgoing)
+                ImGui.Checkbox("Open direct message window on incoming tell", ref C.DefaultChannelCustomization.AutoOpenTellIncoming);
+                ImGui.Checkbox("Open direct message window on outgoing tell", ref C.DefaultChannelCustomization.AutoOpenTellOutgoing);
+                if (C.DefaultChannelCustomization.AutoOpenTellOutgoing)
                 {
-                    ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref P.config.DefaultChannelCustomization.AutoFocusTellOutgoing);
+                    ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref C.DefaultChannelCustomization.AutoFocusTellOutgoing);
                 }
-                ImGui.Checkbox("Hide DMs from in-game chat", ref P.config.DefaultChannelCustomization.SuppressDMs);
-                ImGui.Checkbox("Auto-hide chat windows in combat", ref P.config.AutoHideCombat);
-                ImGui.Checkbox("Open chat window after combat if received message during it", ref P.config.AutoReopenAfterCombat);
-                ImGui.Checkbox("Command passthrough", ref P.config.CommandPassthrough);
-                if (P.config.CommandPassthrough)
+                ImGui.Checkbox("Hide DMs from in-game chat", ref C.DefaultChannelCustomization.SuppressDMs);
+                ImGui.Checkbox("Auto-hide chat windows in combat", ref C.AutoHideCombat);
+                ImGui.Checkbox("Open chat window after combat if received message during it", ref C.AutoReopenAfterCombat);
+                ImGui.Checkbox("Command passthrough", ref C.CommandPassthrough);
+                if (C.CommandPassthrough)
                 {
-                    ImGui.Checkbox("If emote or trade command is used, attempt to target receiver first", ref P.config.AutoTarget);
+                    ImGui.Checkbox("If emote or trade command is used, attempt to target receiver first", ref C.AutoTarget);
                 }
-                ImGui.Checkbox("Left click on message to open first web link in it", ref P.config.ClickToOpenLink);
-                ImGui.Checkbox("Don't bring appearing chat window to front if text input is active", ref P.config.NoBringWindowToFrontIfTyping);
+                ImGui.Checkbox("Left click on message to open first web link in it", ref C.ClickToOpenLink);
+                ImGui.Checkbox("Don't bring appearing chat window to front if text input is active", ref C.NoBringWindowToFrontIfTyping);
                 ImGuiEx.TextV("Incoming tell sound:");
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150f);
-                if (ImGuiEx.EnumCombo("##incsound", ref P.config.IncomingTellSound))
+                if (ImGuiEx.EnumCombo("##incsound", ref C.IncomingTellSound))
                 {
-                    if (P.config.IncomingTellSound != Sounds.None)
+                    if (C.IncomingTellSound != Sounds.None)
                     {
-                        P.GameFunctions.PlaySound(P.config.IncomingTellSound);
+                        P.GameFunctions.PlaySound(C.IncomingTellSound);
                     }
                 }
-                ImGui.Checkbox("Auto-close all chat windows on logout", ref P.config.CloseLogout);
-                ImGui.Checkbox("Refocus text input after sending message", ref P.config.RefocusInputAfterSending);
-                ImGui.Checkbox("Skip link opening confirmation", ref P.config.NoWarningWhenOpenLinks);
+                ImGui.Checkbox("Auto-close all chat windows on logout", ref C.CloseLogout);
+                ImGui.Checkbox("Refocus text input after sending message", ref C.RefocusInputAfterSending);
+                ImGui.Checkbox("Skip link opening confirmation", ref C.NoWarningWhenOpenLinks);
             }, null, true),
             ("Quick button", delegate
             {
-                ImGui.Checkbox("Display quick open button", ref P.config.QuickOpenButton);
-                if (P.config.QuickOpenButton)
+                ImGui.Checkbox("Display quick open button", ref C.QuickOpenButton);
+                if (C.QuickOpenButton)
                 {
                     ImGuiEx.Text("Attach button to UI element:");
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(100f);
-                    if (ImGui.BeginCombo("##bindquick", P.config.AddonName.GetAddonName()))
+                    if (ImGui.BeginCombo("##bindquick", C.AddonName.GetAddonName()))
                     {
                         if (ImGui.Selectable("".GetAddonName()))
                         {
-                            P.config.AddonName = "";
+                            C.AddonName = "";
                         }
                         if (ImGui.Selectable("_NaviMap".GetAddonName()))
                         {
-                            if (P.config.AddonName != "_NaviMap")
+                            if (C.AddonName != "_NaviMap")
                             {
-                                P.config.QuickOpenPositionX2 = P.config.QuickOpenPositionY2 = 0;
+                                C.QuickOpenPositionX2 = C.QuickOpenPositionY2 = 0;
                             }
-                            P.config.AddonName = "_NaviMap";
+                            C.AddonName = "_NaviMap";
                         }
                         if (ImGui.Selectable("_DTR".GetAddonName()))
                         {
-                            if (P.config.AddonName != "_DTR")
+                            if (C.AddonName != "_DTR")
                             {
-                                P.config.QuickOpenPositionX2 = P.config.QuickOpenPositionY2 = 0;
+                                C.QuickOpenPositionX2 = C.QuickOpenPositionY2 = 0;
                             }
-                            P.config.AddonName = "_DTR";
+                            C.AddonName = "_DTR";
                         }
                         if (ImGui.Selectable("ChatLog".GetAddonName()))
                         {
-                            if (P.config.AddonName != "ChatLog")
+                            if (C.AddonName != "ChatLog")
                             {
-                                P.config.QuickOpenPositionX2 = P.config.QuickOpenPositionY2 = 0;
+                                C.QuickOpenPositionX2 = C.QuickOpenPositionY2 = 0;
                             }
-                            P.config.AddonName = "ChatLog";
+                            C.AddonName = "ChatLog";
                         }
                         ImGui.Separator();
                         ImGuiEx.Text("Enter manually:");
                         ImGuiEx.SetNextItemFullWidth();
-                        ImGui.InputText("##bindquick2", ref P.config.AddonName, 50);
+                        ImGui.InputText("##bindquick2", ref C.AddonName, 50);
                         ImGui.EndCombo();
                     }
                     ImGui.SameLine();
                     ImGuiEx.Text("X:");
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(50f);
-                    ImGui.DragInt("##quickopenX", ref P.config.QuickOpenPositionX2);
+                    ImGui.DragInt("##quickopenX", ref C.QuickOpenPositionX2);
                     ImGui.SameLine();
                     ImGuiEx.Text("Y:");
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(50f);
-                    ImGui.DragInt("##quickopenY", ref P.config.QuickOpenPositionY2);
-                    ImGui.Checkbox("Quick button always on top", ref P.config.QuickOpenButtonOnTop);
+                    ImGui.DragInt("##quickopenY", ref C.QuickOpenPositionY2);
+                    ImGui.Checkbox("Quick button always on top", ref C.QuickOpenButtonOnTop);
                 }
             }, null, true),
             ("Logging", delegate
             {
                 ImGui.SetNextItemWidth(50f);
-                ImGui.DragInt("Load up to this much messages from history upon opening messenger", ref P.config.HistoryAmount, 1f, 0, 1000);
-                if (P.config.HistoryAmount > 1000)
+                ImGui.DragInt("Load up to this much messages from history upon opening messenger", ref C.HistoryAmount, 1f, 0, 1000);
+                if (C.HistoryAmount > 1000)
                 {
                     ImGuiEx.Text(ImGuiColors.DalamudRed, "This setting may cause issues");
                 }
-                P.config.HistoryAmount.ValidateRange(0, 10000);
+                C.HistoryAmount.ValidateRange(0, 10000);
                 ImGuiEx.Text("Log storage folder:");
                 ImGuiEx.InputWithRightButtonsArea("logstr", delegate
                 {
-                    ImGui.InputTextWithHint("##logstor", "%appdata%\\XIVLauncher\\pluginConfigs\\Messenger\\", ref P.config.LogStorageFolder, 1000);
+                    ImGui.InputTextWithHint("##logstor", "%appdata%\\XIVLauncher\\pluginConfigs\\Messenger\\", ref C.LogStorageFolder, 1000);
                 }, delegate
                 {
                     if (ImGui.Button("Apply"))
@@ -181,17 +183,17 @@ internal class TabSettings
             }, null, true),
             ("Hotkey", delegate
             {
-                ImGui.Checkbox("Enable open last chat on hotkey", ref P.config.EnableKey);
-                if (P.config.EnableKey)
+                ImGui.Checkbox("Enable open last chat on hotkey", ref C.EnableKey);
+                if (C.EnableKey)
                 {
                     ImGui.SetNextItemWidth(150f);
-                    ImGuiEx.EnumCombo("##modkey", ref P.config.ModifierKey);
+                    ImGuiEx.EnumCombo("##modkey", ref C.ModifierKey);
                     ImGui.SameLine();
                     ImGuiEx.Text("+");
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(200f);
-                    ImGuiEx.EnumCombo("##modkey2", ref P.config.Key);
-                    ImGui.Checkbox("Enable cycling between recent chats on sequential keypresses", ref P.config.CycleChatHotkey);
+                    ImGuiEx.EnumCombo("##modkey2", ref C.Key);
+                    ImGui.Checkbox("Enable cycling between recent chats on sequential keypresses", ref C.CycleChatHotkey);
                 }
             }, null, true)
         );

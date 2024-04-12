@@ -6,9 +6,9 @@ internal class OpenLinkWindow : Window
     bool flash = false;
     public OpenLinkWindow(string link) : base($"XIVInstantMessenger: warning##{ImGui.GetFrameCount()}", ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.AlwaysAutoResize)
     {
-        if (P.config.NoWarningWhenOpenLinks)
+        if (C.NoWarningWhenOpenLinks)
         {
-            ShellStart(Link);
+            ShellStart(link);
             return;
         }
         this.IsOpen = true;
@@ -23,7 +23,7 @@ internal class OpenLinkWindow : Window
 
     public override void PreDraw()
     {
-        flash = (Environment.TickCount % 2000 > 1000 || P.config.NoFlashing);
+        flash = (Environment.TickCount % 2000 > 1000 || C.NoFlashing);
         if (flash)
         {
             ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiColors.DalamudRed);
@@ -39,7 +39,7 @@ internal class OpenLinkWindow : Window
         ImGuiEx.Text("Do you want to continue?");
         ImGuiEx.Text(ImGuiColors.DalamudRed, "Never enter your FFXIV, Discord, Steam or E-mail account data on this website.");
         ImGui.Separator();
-        ImGuiEx.ImGuiLineCentered($"openlink{Link}", delegate
+        ImGuiEx.LineCentered($"openlink{Link}", delegate
         {
             if(ImGui.Button("Open link"))
             {

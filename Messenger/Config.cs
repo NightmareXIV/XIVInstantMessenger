@@ -1,6 +1,7 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
+using Dalamud.Interface.FontIdentifier;
 using Dalamud.Interface.GameFonts;
 using GTranslatorAPI;
 using Messenger.FontControl;
@@ -68,11 +69,7 @@ public class Config : IPluginConfiguration
     public bool NoBringWindowToFrontIfTyping = true;
     public bool AutoTarget = true;
     public Sounds IncomingTellSound = Sounds.Sound01;
-    public FontType FontType = FontType.Game;
-    public GameFontFamilyAndSize Font = GameFontFamilyAndSize.Axis14;
-    public ExtraGlyphRanges ExtraGlyphRanges;
-    public string GlobalFont = "";
-    public float FontSize = 12f;
+    public bool UseCustomFont = false;
     public bool IncreaseSpacing = false;
     public string AddonName = "_NaviMap";
     public bool CycleChatHotkey = false;
@@ -100,4 +97,7 @@ public class Config : IPluginConfiguration
 
     public HashSet<string> TabWindows = [];
     public Dictionary<string, string> TabWindowAssociations = [];
+
+    public bool FontNoTabs = false;
+    public bool TabsNoWorld = false;
 }

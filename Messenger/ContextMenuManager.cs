@@ -40,7 +40,7 @@ internal class ContextMenuManager : IDisposable
     private void OpenContextMenu(GameObjectContextMenuOpenArgs args)
     {
         //Svc.Chat.Print($"{args.ParentAddonName.NullSafe()}/{args.Text}/{args.ObjectWorld}");
-        if (P.config.ContextMenuEnable
+        if (C.ContextMenuEnable
             && args.Text != null
             && ValidAddons.Contains(args.ParentAddonName) && args.ObjectWorld != 0 && args.ObjectWorld != 65535)
         {

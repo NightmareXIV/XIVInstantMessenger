@@ -35,7 +35,7 @@ internal unsafe static class Utils
         {
             if (Enum.TryParse<XivChatType>(s.Name, out var e))
             {
-                if (P.config.SpecificChannelCustomizations.TryGetValue(e, out var cust))
+                if (C.SpecificChannelCustomizations.TryGetValue(e, out var cust))
                 {
                     return cust;
                 }
@@ -43,12 +43,12 @@ internal unsafe static class Utils
         }
         else
         {
-            if (P.config.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out var cust))
+            if (C.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out var cust))
             {
                 return cust;
             }
         }
-        return P.config.DefaultChannelCustomization;
+        return C.DefaultChannelCustomization;
     }
 
     public static string GetName(this XivChatType type)
@@ -113,7 +113,7 @@ internal unsafe static class Utils
         return null;
     }
 
-    public static string GetChannelName(this Sender s)
+    public static string GetChannelName(this Sender s, bool includeWorld = true)
     {
         if (s.IsGenericChannel(out var t))
         {
@@ -121,7 +121,14 @@ internal unsafe static class Utils
         }
         else
         {
-            return s.GetPlayerName();
+            if (includeWorld)
+            {
+                return s.GetPlayerName();
+            }
+            else
+            {
+                return s.Name;
+            }
         }
     }
 
@@ -215,21 +222,9 @@ internal unsafe static class Utils
         return bytes;
     }
 
-    public static IntPtr Range(this ExtraGlyphRanges ranges) => ranges switch
-    {
-        ExtraGlyphRanges.ChineseFull => ImGui.GetIO().Fonts.GetGlyphRangesChineseFull(),
-        ExtraGlyphRanges.ChineseSimplifiedCommon => ImGui.GetIO().Fonts.GetGlyphRangesChineseSimplifiedCommon(),
-        ExtraGlyphRanges.Cyrillic => ImGui.GetIO().Fonts.GetGlyphRangesCyrillic(),
-        ExtraGlyphRanges.Japanese => ImGui.GetIO().Fonts.GetGlyphRangesJapanese(),
-        ExtraGlyphRanges.Korean => ImGui.GetIO().Fonts.GetGlyphRangesKorean(),
-        ExtraGlyphRanges.Thai => ImGui.GetIO().Fonts.GetGlyphRangesThai(),
-        ExtraGlyphRanges.Vietnamese => ImGui.GetIO().Fonts.GetGlyphRangesVietnamese(),
-        _ => throw new ArgumentOutOfRangeException(nameof(ranges), ranges, null),
-    };
-
     public static Vector4 GetFlashColor(this ImGuiCol col, ChannelCustomization c)
     {
-        return P.config.NoFlashing ? c.ColorTitleFlash : GradientColor.Get(ImGui.GetStyle().Colors[(int)col], c.ColorTitleFlash, 500);
+        return C.NoFlashing ? c.ColorTitleFlash : GradientColor.Get(ImGui.GetStyle().Colors[(int)col], c.ColorTitleFlash, 500);
     }
 
     public static bool DecodeSender(SeString sender, out Sender senderStruct)

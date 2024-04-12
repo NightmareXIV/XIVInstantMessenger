@@ -1,97 +1,64 @@
 ﻿using Dalamud.Interface.Components;
+using Dalamud.Interface.FontIdentifier;
 using Dalamud.Interface.GameFonts;
+using Dalamud.Interface.ImGuiFontChooserDialog;
+using Dalamud.Plugin.Ipc.Exceptions;
+using ECommons.Configuration;
+using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 
 namespace Messenger.Gui.Settings;
 
 internal class TabFonts
 {
-    internal List<string> Fonts = [];
-    static readonly Dictionary<GameFontFamilyAndSize, string> FontNames = new()
-        {
-            { GameFontFamilyAndSize.Axis96, "Axis, 9.6 pt"},
-            { GameFontFamilyAndSize.Axis12, "Axis, 12 pt"},
-            { GameFontFamilyAndSize.Axis14, "Axis, 14 pt"},
-            { GameFontFamilyAndSize.Axis18, "Axis, 18 pt"},
-            { GameFontFamilyAndSize.Axis36, "Axis, 36 pt"},
-        };
+    bool Changed = false;
 
     internal void Draw()
     {
         P.WhitespaceMap.Clear();
-        ImGuiEx.Text("Select font type:");
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(150f);
-        ImGuiEx.EnumCombo("##Select font type", ref P.config.FontType);
-        if (P.config.FontType == FontType.Game)
+        Changed |= ImGui.Checkbox($"Use Custom Font", ref C.UseCustomFont);
+        ImGui.Checkbox("Increase spacing between sender information and message", ref C.IncreaseSpacing);
+        ImGui.Checkbox($"Do not use custom font for tabs", ref C.FontNoTabs);
+        if (C.UseCustomFont)
         {
-            ImGuiEx.Text("Select font and size:");
-            ImGui.SameLine();
-            ImGuiEx.SetNextItemFullWidth();
-            ImGuiEx.EnumCombo("##fontselect", ref P.config.Font, x => x.ToString().Contains("Axis"), FontNames);
-        }
-        else if (P.config.FontType == FontType.Game_with_custom_size)
-        {
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudOrange, "You can crash your game with these settings. \nIt is recommended to restart the game once you finished configuring fonts.");
-            ImGuiEx.Text("Size:");
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(50f);
-            ImGui.DragFloat("##fsize", ref P.config.FontSize, 0.01f, 1f, 100f);
-            P.config.FontSize.ValidateRange(1f, 100f);
-            ImGui.SameLine();
-            if (ImGui.Button("Apply"))
+            if (P.FontManager.FontConfiguration.Font != null)
             {
-                P.CustomAxis?.Dispose();
-                P.CustomAxis = null;
-                P.CustomAxis = Svc.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamily.Axis, P.config.FontSize));
+                ImGuiEx.Text($"Currently selected: \n{P.FontManager.FontConfiguration.Font}");
+            }
+            else
+            {
+                ImGuiEx.Text(EColor.RedBright, "No font currently selected.\nDefault font will be used.");
+            }
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Font, "Select font..."))
+            {
+                DisplayFontSelector();
             }
         }
-        else if (P.config.FontType == FontType.System)
+        ImGui.Separator();
+        var col = Changed;
+        if (col) ImGui.PushStyleColor(ImGuiCol.Text, GradientColor.Get(ImGuiColors.DalamudYellow, ImGuiColors.DalamudRed));
+        if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Check, "Apply Settings"))
         {
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudOrange, "You can crash your game with certain settings. \nIt is recommended to restart the game once you finished configuring fonts.");
-            ImGuiEx.Text("Select font and size:");
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(200f);
-            if (ImGui.BeginCombo("##selectfont", P.config.GlobalFont))
+            _ = new TickScheduler(() =>
             {
-                if (ImGui.IsWindowAppearing())
-                {
-                    Fonts = FontControl.Fonts.GetFonts();
-                }
-                foreach (var name in Fonts)
-                {
-                    if (ImGui.Selectable(name, P.config.GlobalFont == name))
-                    {
-                        P.config.GlobalFont = name;
-                    }
-
-                    if (ImGui.IsWindowAppearing() && P.config.GlobalFont == name)
-                    {
-                        ImGui.SetScrollHereY(0.5f);
-                    }
-                }
-
-                ImGui.EndCombo();
-            }
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(50f);
-            ImGui.DragFloat("##fsize", ref P.config.FontSize, 0.01f, 1f, 100f);
-            P.config.FontSize.ValidateRange(1f, 100f);
-            ImGuiEx.Text("Extra glyphs range: ");
-            var range = (int)P.config.ExtraGlyphRanges;
-            foreach (var extra in Enum.GetValues<ExtraGlyphRanges>())
-            {
-                ImGui.CheckboxFlags(extra.ToString(), ref range, (int)extra);
-            }
-
-            P.config.ExtraGlyphRanges = (ExtraGlyphRanges)range;
-
-            if (ImGui.Button("Apply font settings"))
-            {
-                if (P.fontManager != null) Safe(P.fontManager.Dispose);
-                P.fontManager = new();
-            }
+                P.FontManager.Dispose();
+                P.FontManager = new();
+            });
+            Changed = false;
         }
-        ImGui.Checkbox("Increase spacing between sender information and message", ref P.config.IncreaseSpacing);
+        if (col) ImGui.PopStyleColor();
+    }
+
+    void DisplayFontSelector()
+    {
+        var chooser = SingleFontChooserDialog.CreateAuto(Svc.PluginInterface.UiBuilder);
+        chooser.SelectedFontSpecChanged += this.Chooser_SelectedFontSpecChanged;
+    }
+
+    private void Chooser_SelectedFontSpecChanged(SingleFontSpec font)
+    {
+        Changed = true;
+        P.FontManager.FontConfiguration.Font = font;
+        P.FontManager.Save();
     }
 }
