@@ -23,13 +23,16 @@ public unsafe class FontManager
             Notify.Error($"Failed to load font configuration.\nFont settings have been reset.");
             e.Log();
         }
-        try
+        if (C.UseCustomFont)
         {
-            Handle = FontConfiguration.Font.CreateFontHandle(Svc.PluginInterface.UiBuilder.FontAtlas);
-        }
-        catch(Exception e)
-        {
-            e.Log();
+            try
+            {
+                Handle = FontConfiguration.Font.CreateFontHandle(Svc.PluginInterface.UiBuilder.FontAtlas);
+            }
+            catch (Exception e)
+            {
+                e.Log();
+            }
         }
     }
 
@@ -40,7 +43,7 @@ public unsafe class FontManager
 
     public void Dispose()
     {
-        Handle.Dispose();
+        Handle?.Dispose();
         Save();
     }
 
