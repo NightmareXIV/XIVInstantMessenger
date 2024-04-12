@@ -587,7 +587,7 @@ internal unsafe class ChatWindow : Window
             && Svc.Objects.TryGetFirst(x => x is PlayerCharacter pc && pc.GetPlayerName() == subject && x.Struct()->GetIsTargetable(), out var obj))
             {
                 Svc.Targets.SetTarget(obj);
-                Notify.Info($"Targeting {subject}");
+                //Notify.Info($"Targeting {subject}");
                 new TickScheduler(delegate { Chat.Instance.SendMessage(trimmed); }, 100);
             }
             else
