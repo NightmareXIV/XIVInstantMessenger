@@ -41,7 +41,7 @@ internal class TabFonts
         {
             _ = new TickScheduler(() =>
             {
-                P.FontManager.Dispose();
+                P.FontManager?.Dispose();
                 P.FontManager = new();
             });
             Changed = false;
