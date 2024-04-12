@@ -21,6 +21,43 @@ namespace Messenger;
 
 internal unsafe static class Utils
 {
+    /*static float widgetWidth;
+    public static bool DrawInputPML(string label, ref string s)
+    {
+        widgetWidth = ImGui.GetContentRegionAvail().X / 3;
+        
+        //MemoryHelper.WriteString(P.TextMem, builder.ToString());
+        //var ret = ImGuiNative.igInputTextMultiline((byte*)P.LabelMem, (byte*)P.TextMem, 500, new(widgetWidth, 100), ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.CallbackAlways, null, null) != 0;
+        var ret = ImGui.InputTextMultiline(label, ref s, 500, new(widgetWidth, 100), ImGuiInputTextFlags.CallbackAlways, Callback);
+        return ret;
+    }
+
+    static int Callback(ImGuiInputTextCallbackData* data)
+    {
+        var s = MemoryHelper.ReadString((nint)data->Buf, data->BufSize).Replace("\n", "");
+        var maxTextWidth = widgetWidth - ImGui.GetStyle().FramePadding.X * 2;
+        var splitText = s.Split(" ");
+        var builder = new StringBuilder();
+        var spaceSize = ImGui.CalcTextSize(" ");
+        var lineWidth = 0f;
+        for (int i = 0; i < splitText.Length; i++)
+        {
+            var text = splitText[i];
+            var partSize = ImGui.CalcTextSize(text);
+            if (i > 0) builder.Append(' ');
+            if (lineWidth + spaceSize.X + partSize.X > maxTextWidth)
+            {
+                builder.Append('\n');
+                lineWidth = 0;
+            }
+            lineWidth += partSize.X;
+            builder.Append(text);
+        }
+        var transformedString = builder.ToString();
+        MemoryHelper.WriteString((nint)data->Buf, transformedString);
+        data->bu
+    }*/
+
     public static string GetAddonName(this string s)
     {
         if (s == "") return "No element/whole screen";
@@ -111,6 +148,7 @@ internal unsafe static class Utils
         if (type == XivChatType.CrossLinkShell8) return "cwl8";
         if (type == XivChatType.FreeCompany) return "fc";
         if (type == XivChatType.NoviceNetwork) return "novice";
+        if (type == XivChatType.CustomEmote) return "emote";
         return null;
     }
 

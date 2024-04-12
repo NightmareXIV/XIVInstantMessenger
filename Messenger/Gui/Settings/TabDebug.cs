@@ -2,6 +2,7 @@
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
+using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -14,10 +15,15 @@ internal unsafe class TabDebug
     string MName = "";
     int MWorld = 0;
     string MMessage = "";
+    string PMLMessage = "";
     internal void Draw()
     {
         try
         {
+            if (ImGui.CollapsingHeader("PML"))
+            {
+                //Utils.DrawInputPML("##test", ref PMLMessage);
+            }
             if (ImGui.CollapsingHeader("Senders"))
             {
                 foreach (var x in P.Chats)

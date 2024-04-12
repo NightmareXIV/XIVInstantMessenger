@@ -36,7 +36,8 @@ namespace Messenger.Gui.Settings
             XivChatType.CrossLinkShell7,
             XivChatType.CrossLinkShell8,
             XivChatType.FreeCompany,
-            XivChatType.NoviceNetwork
+            XivChatType.NoviceNetwork,
+            XivChatType.CustomEmote,
         ];
 
         public static readonly string[] Names =
@@ -64,7 +65,8 @@ namespace Messenger.Gui.Settings
             "Cross-world linkshell 7",
             "Cross-world linkshell 8",
             "Free company",
-            "Novice network"
+            "Novice network",
+            "Custom emote"
         ];
 
         internal XivChatType Selected = XivChatType.None;

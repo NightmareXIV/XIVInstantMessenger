@@ -53,6 +53,9 @@ public unsafe class Messenger : IDalamudPlugin
     internal List<TabSystem> TabSystems = [];
     public string CurrentPlayer = null;
 
+    public nint LabelMem = Marshal.AllocHGlobal(512);
+    public nint TextMem = Marshal.AllocHGlobal(4096);
+
     public Messenger(DalamudPluginInterface pi)
     {
         P = this;
@@ -154,6 +157,8 @@ public unsafe class Messenger : IDalamudPlugin
         if(FontManager != null) Safe(() => FontManager.Dispose());
         Svc.ClientState.Logout -= ClientState_Logout;
         Safe(() => Translator.Dispose());
+        Marshal.FreeHGlobal(LabelMem);
+        Marshal.FreeHGlobal(TextMem);
         ECommonsMain.Dispose();
         P = null;
     }

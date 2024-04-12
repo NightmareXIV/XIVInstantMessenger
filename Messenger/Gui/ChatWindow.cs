@@ -584,7 +584,7 @@ internal unsafe class ChatWindow : Window
         {
             if (!generic && C.AutoTarget &&
             (P.TargetCommands.Any(x => msg.Equals(x, StringComparison.OrdinalIgnoreCase) || msg.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
-            && Svc.Objects.TryGetFirst(x => x is PlayerCharacter pc && pc.GetPlayerName() == subject && x.Struct()->GetIsTargetable(), out var obj))
+            && Svc.Objects.TryGetFirst(x => x is PlayerCharacter pc && pc.GetPlayerName() == subject && x.IsTargetable, out var obj))
             {
                 Svc.Targets.SetTarget(obj);
                 //Notify.Info($"Targeting {subject}");
