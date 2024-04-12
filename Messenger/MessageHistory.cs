@@ -19,8 +19,6 @@ internal partial class MessageHistory
     internal MessageHistory(Sender player)
     {
         Player = player;
-        Messages = [];
-        LoadedMessages = [];
         this.Init();
     }
 
@@ -33,10 +31,17 @@ internal partial class MessageHistory
     {
         ChatWindow = new(this);
         P.WindowSystemChat.AddWindow(ChatWindow);
+        LoadHistory();
+    }
 
-        var logFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
+    public void LoadHistory()
+    {
+        Messages = [];
+        LoadedMessages = [];
+        LogLoaded = false;
 
-        LogFile = Path.Combine(logFolder, Player.GetPlayerName() + ".txt");
+        LogFile = Path.Combine(Utils.GetLogStorageFolder(), Player.GetPlayerName() + ".txt");
+
         var subject = Player.GetPlayerName();
         Task.Run(delegate
         {
@@ -78,7 +83,7 @@ internal partial class MessageHistory
                     }
                     else
                     {
-                        var systemMessage = Regex.Match(x, "^\\[(.+)\\] System: (.+)$");
+                        var systemMessage = SystemMessageRegex().Match(x);
                         if (systemMessage.Success) Safe(delegate
                         {
                             var i = 0;
@@ -120,4 +125,6 @@ internal partial class MessageHistory
 
     [GeneratedRegex("^\\[(.+)\\] From (.+)@([a-zA-Z]+): (.+)$")]
     private static partial Regex MessageRegex();
+    [GeneratedRegex("^\\[(.+)\\] System: (.+)$")]
+    private static partial Regex SystemMessageRegex();
 }

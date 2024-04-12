@@ -100,4 +100,7 @@ public class Config : IPluginConfiguration
 
     public bool FontNoTabs = false;
     public bool TabsNoWorld = false;
+    public bool SplitLogging = false;
+    public bool SplitAutoUnload = false;
+    public HashSet<string> SplitBlacklist = [];
 }

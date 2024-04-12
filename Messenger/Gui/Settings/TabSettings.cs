@@ -10,7 +10,7 @@ internal class TabSettings
             {
                 if (ImGui.Button("Open logs folder"))
                 {
-                    var logFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
+                    var logFolder = Utils.GetLogStorageFolder();
                     ShellStart(logFolder);
                 }
                 ImGui.Checkbox("Enable context menu integration", ref C.ContextMenuEnable);
@@ -162,6 +162,14 @@ internal class TabSettings
                     ImGuiEx.Text(ImGuiColors.DalamudRed, "This setting may cause issues");
                 }
                 C.HistoryAmount.ValidateRange(0, 10000);
+                ImGui.Separator();
+                if(ImGui.Checkbox($"Write separate logs for each character", ref C.SplitLogging))
+                {
+                    Utils.ReloadAllChat();
+                }
+                ImGuiEx.Spacing();
+                ImGui.Checkbox($"Automatically close and unload all chats upon logging in", ref C.SplitAutoUnload);
+                ImGui.Separator();
                 ImGuiEx.Text("Log storage folder:");
                 ImGuiEx.InputWithRightButtonsArea("logstr", delegate
                 {
@@ -170,12 +178,7 @@ internal class TabSettings
                 {
                     if (ImGui.Button("Apply"))
                     {
-                        foreach (var x in P.Chats)
-                        {
-                            P.WindowSystemChat.RemoveWindow(x.Value.ChatWindow);
-                        }
-                        P.Chats.Clear();
-                        P.GuiSettings.TabHistory.Reload();
+                        Utils.UnloadAllChat();
                     }
                     ImGuiEx.Tooltip("All chats will be closed");
                 });

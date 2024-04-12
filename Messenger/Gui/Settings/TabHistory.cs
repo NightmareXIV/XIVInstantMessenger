@@ -26,7 +26,7 @@ internal class TabHistory
             {
                 Safe(delegate
                 {
-                    var logFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
+                    var logFolder = Utils.GetLogStorageFolder();
                     var files = Directory.GetFiles(logFolder);
                     foreach (var file in files)
                     {

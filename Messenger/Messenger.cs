@@ -8,6 +8,7 @@ using Dalamud.Interface.ManagedFontAtlas;
 using ECommons.Automation;
 using ECommons.Events;
 using ECommons.GameFunctions;
+using ECommons.GameHelpers;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
@@ -50,6 +51,7 @@ public unsafe class Messenger : IDalamudPlugin
     internal TabSystem TabSystem;
     internal Translator Translator;
     internal List<TabSystem> TabSystems = [];
+    public string CurrentPlayer = null;
 
     public Messenger(DalamudPluginInterface pi)
     {
@@ -92,7 +94,24 @@ public unsafe class Messenger : IDalamudPlugin
             Translator = new();
             FontManager = new();
             RebuildTabSystems();
+            ProperOnLogin.RegisterAvailable(OnLogin, true);
         });
+    }
+
+    private void OnLogin()
+    {
+        CurrentPlayer = Player.NameWithWorld;
+        if (C.SplitLogging)
+        {
+            if (C.SplitAutoUnload)
+            {
+                Utils.UnloadAllChat();
+            }
+            else
+            {
+                Utils.ReloadAllChat();
+            }
+        }
     }
 
     internal void ClientState_Logout()
@@ -249,7 +268,7 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 Safe(delegate
                 {
-                    var logFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
+                    var logFolder = Utils.GetLogStorageFolder();
                     var files = Directory.GetFiles(logFolder);
                     foreach (var file in files)
                     {

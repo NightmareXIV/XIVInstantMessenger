@@ -15,6 +15,7 @@ using FFXIVClientStructs.FFXIV.Client.System.String;
 using ECommons.Events;
 using ECommons.GameHelpers;
 using ECommons.ExcelServices;
+using System.IO;
 
 namespace Messenger;
 
@@ -256,5 +257,48 @@ internal unsafe static class Utils
         var cmd = Encoding.UTF8.GetBytes($"/tell {destination} ").Length;
         var msg = Encoding.UTF8.GetBytes(message).Length;
         return (msg, 500 - cmd);
+    }
+
+    public static void UnloadAllChat()
+    {
+        Svc.Framework.RunOnFrameworkThread(() =>
+        {
+            foreach (var x in P.Chats)
+            {
+                P.WindowSystemChat.RemoveWindow(x.Value.ChatWindow);
+            }
+            P.Chats.Clear();
+            P.GuiSettings.TabHistory.Reload();
+        });
+    }
+
+    public static void ReloadAllChat()
+    {
+        Svc.Framework.RunOnFrameworkThread(() =>
+        {
+            foreach (var x in P.Chats)
+            {
+                x.Value.LoadHistory();
+            }
+            P.GuiSettings.TabHistory.Reload();
+        });
+    }
+
+    public static string GetLogStorageFolder()
+    {
+        var baseFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
+        if (C.SplitLogging && P.CurrentPlayer != null && !C.SplitBlacklist.Contains(P.CurrentPlayer))
+        {
+            baseFolder = Path.Combine(baseFolder, P.CurrentPlayer);
+        }
+        try
+        {
+            Directory.CreateDirectory(baseFolder);
+        }
+        catch(Exception e)
+        {
+            e.Log();
+        }
+        return baseFolder;
     }
 }
