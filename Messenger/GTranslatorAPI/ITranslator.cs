@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 
+#pragma warning disable
 namespace GTranslatorAPI
 {
     public interface ITranslator

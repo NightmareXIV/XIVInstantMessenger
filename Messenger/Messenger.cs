@@ -7,6 +7,7 @@ using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ManagedFontAtlas;
 using ECommons.Automation;
 using ECommons.Events;
+using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Throttlers;
@@ -46,15 +47,11 @@ public unsafe class Messenger : IDalamudPlugin
     internal bool Hidden = false;
     internal FontManager FontManager = null;
     internal Dictionary<float, string> WhitespaceMap = [];
-    internal IFontHandle CustomAxis;
     internal Sender LastReceivedMessage;
     internal TabSystem TabSystem;
     internal Translator Translator;
     internal List<TabSystem> TabSystems = [];
     public string CurrentPlayer = null;
-
-    public nint LabelMem = Marshal.AllocHGlobal(512);
-    public nint TextMem = Marshal.AllocHGlobal(4096);
 
     public Messenger(DalamudPluginInterface pi)
     {
@@ -157,8 +154,6 @@ public unsafe class Messenger : IDalamudPlugin
         if(FontManager != null) Safe(() => FontManager.Dispose());
         Svc.ClientState.Logout -= ClientState_Logout;
         Safe(() => Translator.Dispose());
-        Marshal.FreeHGlobal(LabelMem);
-        Marshal.FreeHGlobal(TextMem);
         ECommonsMain.Dispose();
         P = null;
     }
@@ -282,7 +277,7 @@ public unsafe class Messenger : IDalamudPlugin
                         && fileInfo.Name.Contains(args, StringComparison.OrdinalIgnoreCase))
                         {
                             var t = fileInfo.Name.Replace(".txt", "").Split("@");
-                            if (TryGetWorldByName(t[1], out var world))
+                            if (ExcelWorldHelper.TryGet(t[1], out var world))
                             {
                                 new TickScheduler(delegate
                                 {
@@ -650,7 +645,7 @@ public unsafe class Messenger : IDalamudPlugin
         }
         foreach(var x in Svc.Objects)
         {
-            if(x is PlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable())
+            if(x is PlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable)
             {
                 AgentCharaCard.Instance()->OpenCharaCard(x.Struct());
                 PluginLog.Debug($"Opening characard via gameobject {x}");

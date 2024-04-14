@@ -5,7 +5,6 @@ namespace Messenger.Gui;
 
 internal class TabSystem : Window
 {
-    bool fontPushed = false;
     float Transparency = C.TransMax;
     bool IsTransparent = true;
     bool IsTitleColored = false;

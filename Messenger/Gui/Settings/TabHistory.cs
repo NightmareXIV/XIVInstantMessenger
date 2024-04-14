@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using ECommons.ExcelServices;
+using System.IO;
 
 namespace Messenger.Gui.Settings;
 
@@ -34,7 +35,7 @@ internal class TabHistory
                         if (file.EndsWith(".txt") && file.Contains("@") && fileInfo.Length > 0)
                         {
                             var t = fileInfo.Name.Replace(".txt", "").Split("@");
-                            if (TryGetWorldByName(t[1], out var world))
+                            if (ExcelWorldHelper.TryGet(t[1], out var world))
                             {
                                 fileChatList.Add(new() { Name = t[0], HomeWorld = world.RowId });
                             }

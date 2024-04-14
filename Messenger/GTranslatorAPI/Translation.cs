@@ -1,5 +1,6 @@
 ﻿namespace GTranslatorAPI
 {
+#pragma warning disable
     public class Translation
     {
         /// <summary>
