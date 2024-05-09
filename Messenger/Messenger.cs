@@ -95,8 +95,16 @@ public unsafe class Messenger : IDalamudPlugin
             FontManager = new();
             RebuildTabSystems();
             ProperOnLogin.RegisterAvailable(OnLogin, true);
-        });
+            ReapplyVisibilitySettings();
+				});
     }
+
+    public void ReapplyVisibilitySettings()
+		{
+				Svc.PluginInterface.UiBuilder.DisableGposeUiHide = C.UIShowGPose;
+				Svc.PluginInterface.UiBuilder.DisableAutomaticUiHide = C.UIShowHidden;
+				Svc.PluginInterface.UiBuilder.DisableCutsceneUiHide = C.UIShowCutscene;
+		}
 
     private void OnLogin()
     {
@@ -259,7 +267,7 @@ public unsafe class Messenger : IDalamudPlugin
                 if (x.Key.GetChannelName().Contains(args, StringComparison.OrdinalIgnoreCase))
                 {
                     P.OpenMessenger(x.Key, true);
-                    P.Chats[x.Key].SetFocus = true;
+                    P.Chats[x.Key].SetFocusAtNextFrame();
                     return;
                 }
             }
@@ -283,7 +291,7 @@ public unsafe class Messenger : IDalamudPlugin
                                 {
                                     var s = new Sender() { Name = t[0], HomeWorld = world.RowId };
                                     P.OpenMessenger(s, true);
-                                    P.Chats[s].SetFocus = true;
+                                    P.Chats[s].SetFocusAtNextFrame();
                                 });
                                 return;
                             }
@@ -318,7 +326,7 @@ public unsafe class Messenger : IDalamudPlugin
                 if (toOpen != null)
                 {
                     toOpen.ChatWindow.IsOpen = true;
-                    toOpen.SetFocus = true;
+                    toOpen.SetFocusAtNextFrame();
                     if (Svc.Condition[ConditionFlag.InCombat])
                     {
                         toOpen.ChatWindow.KeepInCombat = true;
@@ -429,7 +437,7 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         if (s.GetCustomization().AutoFocusTellOutgoing && !isOpen)
                         {
-                            Chats[s].SetFocus = true;
+                            Chats[s].SetFocusAtNextFrame();
                         }
                         RecentReceiver = s;
                     }
@@ -490,7 +498,7 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         if (genericSender.GetCustomization().AutoFocusTellOutgoing && !isOpen)
                         {
-                            Chats[genericSender].SetFocus = true;
+                            Chats[genericSender].SetFocusAtNextFrame();
                         }
                     }
                     else

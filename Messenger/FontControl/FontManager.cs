@@ -47,7 +47,8 @@ public unsafe class FontManager
         Save();
     }
 
-    bool FontPushed = false;
+    public bool FontPushed = false;
+    public bool FontReady => Handle.Available;
 
     public void PushFont()
     {

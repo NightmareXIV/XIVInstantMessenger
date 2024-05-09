@@ -14,9 +14,14 @@ internal partial class MessageHistory
     internal volatile int DoScroll = 0;
     internal volatile bool LogLoaded = false;
     internal string LogFile;
-    internal bool SetFocus = false;
+    private int? SetFocus = 0;
 
-    internal MessageHistory(Sender player)
+		internal void SetFocusAtNextFrame() => SetFocus = ImGui.GetFrameCount() + 1;
+		internal void UnsetFocus() => SetFocus = null;
+		internal bool ShouldSetFocus() => SetFocus != null && ImGui.GetFrameCount() >= SetFocus;
+
+
+		internal MessageHistory(Sender player)
     {
         Player = player;
         this.Init();

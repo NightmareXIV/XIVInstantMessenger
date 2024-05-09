@@ -60,7 +60,7 @@ internal class TabHistory
                 if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count(x => !x.IsSystem)} messages)"))
                 {
                     P.OpenMessenger(x.Key, true);
-                    P.Chats[x.Key].SetFocus = true;
+                    P.Chats[x.Key].SetFocusAtNextFrame();
                 }
             }
             ImGuiEx.WithTextColor(ImGuiColors.DalamudGrey2, delegate
@@ -71,7 +71,7 @@ internal class TabHistory
                     if (!P.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetChannelName()} (unloaded)"))
                     {
                         P.OpenMessenger(x, true);
-                        P.Chats[x].SetFocus = true;
+                        P.Chats[x].SetFocusAtNextFrame();
                     }
                 }
             });

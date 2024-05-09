@@ -95,7 +95,10 @@ internal class TabSettings
                 ImGui.Checkbox("Auto-close all chat windows on logout", ref C.CloseLogout);
                 ImGui.Checkbox("Refocus text input after sending message", ref C.RefocusInputAfterSending);
                 ImGui.Checkbox("Skip link opening confirmation", ref C.NoWarningWhenOpenLinks);
-            }, null, true),
+								if(ImGui.Checkbox("Display when game UI is hidden", ref C.UIShowHidden))P.ReapplyVisibilitySettings();
+								if(ImGui.Checkbox("Display in cutscenes", ref C.UIShowCutscene)) P.ReapplyVisibilitySettings();
+								if(ImGui.Checkbox("Display in group pose", ref C.UIShowGPose)) P.ReapplyVisibilitySettings();
+						}, null, true),
             ("Quick button", delegate
             {
                 ImGui.Checkbox("Display quick open button", ref C.QuickOpenButton);

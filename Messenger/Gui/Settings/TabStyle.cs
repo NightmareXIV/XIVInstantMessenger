@@ -93,5 +93,12 @@ internal class TabStyle
         ImGui.Checkbox("Add to blacklist", ref C.ButtonBlack);
         ImGui.Checkbox("Open chat log", ref C.ButtonLog);
         ImGui.Checkbox("Open adventurer plate", ref C.ButtonCharaCard);
+        ImGui.Separator();
+        ImGui.Checkbox("Enable multiline message input", ref C.PMLEnable);
+        ImGui.Indent();
+        ImGui.SetNextItemWidth(100f);
+        ImGuiEx.SliderInt("Maximum lines", ref C.PMLMaxLines.ValidateRange(1, 30), 1, 10);
+        ImGui.Checkbox("Keep history scrolled down when typing reply", ref C.PMLScrollDown);
+        ImGui.Unindent();
     }
 }

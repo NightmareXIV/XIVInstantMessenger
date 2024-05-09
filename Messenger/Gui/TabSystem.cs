@@ -74,6 +74,11 @@ internal class TabSystem : Window
 
     public override void Draw()
     {
+        if(P.FontManager.FontPushed && !P.FontManager.FontReady)
+        {
+            ImGuiEx.Text($"Loading font, please wait...");
+            return;
+        }
         if (ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
         {
             Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
@@ -121,7 +126,7 @@ internal class TabSystem : Window
 
                     var isOpen = w.IsOpen;
                     var flags = ImGuiTabItemFlags.None;
-                    if (w.MessageHistory.SetFocus)
+                    if (w.MessageHistory.ShouldSetFocus())
                     {
                         flags = ImGuiTabItemFlags.SetSelected;
                     }
@@ -152,7 +157,7 @@ internal class TabSystem : Window
                         Associate();
                         if (ImGui.IsItemClicked())
                         {
-                            w.MessageHistory.SetFocus = true;
+                            w.MessageHistory.SetFocusAtNextFrame();
                         }
                         if (titleColored)
                         {

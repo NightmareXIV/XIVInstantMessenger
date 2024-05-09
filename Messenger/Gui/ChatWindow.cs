@@ -6,6 +6,7 @@ using ECommons.GameFunctions;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
 using System.IO;
+using static FFXIVClientStructs.FFXIV.Client.Graphics.Kernel.VertexShader;
 
 namespace Messenger.Gui;
 
@@ -15,7 +16,6 @@ internal unsafe class ChatWindow : Window
     internal MessageHistory MessageHistory;
     float fieldHeight = 0;
     float afterInputWidth = 0;
-    string msg = "";
     internal bool KeepInCombat = false;
     internal bool Unread = false;
     bool TitleColored = false;
@@ -23,6 +23,7 @@ internal unsafe class ChatWindow : Window
     bool IsTransparent = true;
     internal bool SetPosition = false;
     internal new bool BringToFront = false;
+    PseudoMultilineInput Input = new();
 
     internal string OwningTab => C.TabWindowAssociations.TryGetValue(MessageHistory.Player.ToString(), out var owner)?owner:null;
 
@@ -38,7 +39,7 @@ internal unsafe class ChatWindow : Window
             MinimumSize = new(200, 200),
             MaximumSize = new(9999, 9999)
         };
-    }
+		}
 
     internal void SetTransparency(bool isTransparent)
     {
@@ -60,7 +61,7 @@ internal unsafe class ChatWindow : Window
         }
         if (!ret)
         {
-            this.MessageHistory.SetFocus = false;
+            this.MessageHistory.UnsetFocus();
         }
         return ret;
     }
@@ -139,6 +140,11 @@ internal unsafe class ChatWindow : Window
 
     public override void Draw()
     {
+        if (P.FontManager.FontPushed && !P.FontManager.FontReady)
+        {
+            ImGuiEx.Text($"Loading font, please wait...");
+            return;
+        }
         var prev = P.GetPreviousMessageHistory(this.MessageHistory);
         /*ImGuiEx.Text($"{(prev == null ? "null" : prev.Player)}");
         ImGui.SameLine();
@@ -249,11 +255,16 @@ internal unsafe class ChatWindow : Window
         {
             MessageHistory.DoScroll--;
             ImGui.SetScrollHereY();
-        } 
+        }
+        if(C.PMLScrollDown && C.PMLEnable && Input.IsInputActive)
+        {
+						ImGui.SetScrollHereY();
+				}
         ImGui.EndChild();
-        var isCmd = C.CommandPassthrough && msg.Trim().StartsWith("/");
+        var isCmd = C.CommandPassthrough && Input.SinglelineText.Trim().StartsWith("/");
         var cursor = ImGui.GetCursorPosY();
-        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - afterInputWidth);
+        //ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - afterInputWidth);
+        Input.Width = ImGui.GetContentRegionAvail().X - afterInputWidth;
         var inputCol = false;
         if (isCmd)
         {
@@ -261,21 +272,27 @@ internal unsafe class ChatWindow : Window
             ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.TitleBgActive] with { W = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg].W });
         }
         var cur = ImGui.GetCursorPosY();
-        if (ImGui.InputText("##outgoing", ref msg, 500, ImGuiInputTextFlags.EnterReturnsTrue))
+        Input.Draw();
+        if (Input.EnterWasPressed())
         {
             SendMessage(subject, MessageHistory.Player.IsGenericChannel());
-        }
+            if (Input.IsMultiline)
+            {
+                ImGui.SetWindowFocus(null);
+                ImGui.SetWindowFocus(this.WindowName);
+            }
+				}
         if (inputCol)
         {
             ImGui.PopStyleColor();
         }
-        if (MessageHistory.SetFocus)
+        if (MessageHistory.ShouldSetFocus())
         {
             this.SetTransparency(false);
             ImGui.SetWindowFocus();
             ImGui.SetKeyboardFocusHere(-1);
-            MessageHistory.SetFocus = false;
-        }
+						MessageHistory.UnsetFocus();
+				}
         ImGui.SetWindowFontScale(ImGui.CalcTextSize(" ").Y / ImGuiEx.CalcIconSize(FontAwesomeIcon.ArrowRight).Y);
         ImGui.SameLine(0, 0);
         var icur1 = ImGui.GetCursorPos();
@@ -442,7 +459,7 @@ internal unsafe class ChatWindow : Window
         ImGui.SameLine(0, 0);
         afterInputWidth = ImGui.GetCursorPosX() - icur1.X;
         ImGui.Dummy(Vector2.Zero);
-        var bytes = Utils.GetLength(subject, msg);
+        var bytes = Utils.GetLength(subject, Input.SinglelineText);
         var fraction = (float)bytes.current / (float)bytes.max;
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f?ImGuiColors.DalamudRed: Cust.ColorGeneric);
         ImGui.ProgressBar(fraction, new Vector2(ImGui.GetContentRegionAvail().X, 3f), "");
@@ -570,8 +587,8 @@ internal unsafe class ChatWindow : Window
 
     void SendMessage(string subject, bool generic)
     {
-        var bytes = Utils.GetLength(subject, msg);
-        var trimmed = msg.Trim();
+        var bytes = Utils.GetLength(subject, Input.SinglelineText);
+        var trimmed = Input.SinglelineText.Trim();
         if (trimmed.Length == 0)
         {
             //Notify.Error("Message is empty!");
@@ -583,7 +600,7 @@ internal unsafe class ChatWindow : Window
         else if (trimmed.StartsWith("/") && C.CommandPassthrough)
         {
             if (!generic && C.AutoTarget &&
-            (P.TargetCommands.Any(x => msg.Equals(x, StringComparison.OrdinalIgnoreCase) || msg.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
+            (P.TargetCommands.Any(x => Input.SinglelineText.Equals(x, StringComparison.OrdinalIgnoreCase) || Input.SinglelineText.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
             && Svc.Objects.TryGetFirst(x => x is PlayerCharacter pc && pc.GetPlayerName() == subject && x.IsTargetable, out var obj))
             {
                 Svc.Targets.SetTarget(obj);
@@ -594,7 +611,7 @@ internal unsafe class ChatWindow : Window
             {
                 Chat.Instance.SendMessage(trimmed);
             }
-            this.msg = "";
+            this.Input.SinglelineText = "";
         }
         else
         {
@@ -602,16 +619,16 @@ internal unsafe class ChatWindow : Window
             var error = P.SendDirectMessage(subject, trimmed, generic);
             if (error == null)
             {
-                this.msg = "";
+                this.Input.SinglelineText = "";
             }
             else
             {
-                Notify.Error(msg);
+                Notify.Error(Input.SinglelineText);
             }
         }
         if (C.RefocusInputAfterSending)
         {
-            MessageHistory.SetFocus = true;
+            MessageHistory.SetFocusAtNextFrame();
         }
     }
 }

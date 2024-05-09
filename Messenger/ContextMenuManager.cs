@@ -59,7 +59,7 @@ internal class ContextMenuManager : IDisposable
         var world = args.ObjectWorld;
         var s = new Sender(player, world);
         P.OpenMessenger(s);
-        P.Chats[s].SetFocus = true;
+        P.Chats[s].SetFocusAtNextFrame();
         P.Chats[s].Scroll();
         if (Svc.Condition[ConditionFlag.InCombat])
         {

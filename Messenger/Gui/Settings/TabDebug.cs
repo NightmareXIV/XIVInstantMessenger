@@ -16,13 +16,14 @@ internal unsafe class TabDebug
     int MWorld = 0;
     string MMessage = "";
     string PMLMessage = "";
+    PseudoMultilineInput PseudoMultilineInput = new();
     internal void Draw()
     {
         try
         {
             if (ImGui.CollapsingHeader("PML"))
             {
-                //Utils.DrawInputPML("##test", ref PMLMessage);
+                PseudoMultilineInput.DrawMultiline();
             }
             if (ImGui.CollapsingHeader("Senders"))
             {
@@ -64,18 +65,21 @@ internal unsafe class TabDebug
                 ImGuiEx.Text($"{x.Key.Name}@{x.Key.HomeWorld}={x.Value:X16}");
             }
 
-            ImGuiEx.Text("Friend list: ");
-            foreach (var x in FriendList.Get())
+            if (ImGui.CollapsingHeader("Friends"))
             {
-                ImGuiEx.TextCopy(x.IsOnline ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudWhite,
-                    $"{x.Name} onl={x.OnlineStatus} home world={x.HomeWorld} current world={x.CurrentWorld} CID {x.ContentId:X16}");
-                var sb = new List<string>();
-                sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x.Data + 8, 14).Select(x => $"{x:X2}"));
-                sb.Add("|");
-                sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x.Data + 25, 8).Select(x => $"{x:X2}"));
-                sb.Add("|");
-                sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x.Data + 71, 25).Select(x => $"{x:X2}"));
-                ImGuiEx.TextCopy(sb.Join(" "));
+                ImGuiEx.Text("Friend list: ");
+                foreach (var x in FriendList.Get())
+                {
+                    ImGuiEx.TextCopy(x.IsOnline ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudWhite,
+                        $"{x.Name} onl={x.OnlineStatus} home world={x.HomeWorld} current world={x.CurrentWorld} CID {x.ContentId:X16}");
+                    var sb = new List<string>();
+                    sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x.Data + 8, 14).Select(x => $"{x:X2}"));
+                    sb.Add("|");
+                    sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x.Data + 25, 8).Select(x => $"{x:X2}"));
+                    sb.Add("|");
+                    sb.AddRange(MemoryHelper.Read<byte>((IntPtr)x.Data + 71, 25).Select(x => $"{x:X2}"));
+                    ImGuiEx.TextCopy(sb.Join(" "));
+                }
             }
             if (ImGui.Button("Install invite to party hook"))
             {
@@ -104,7 +108,7 @@ internal unsafe class TabDebug
             }
             ImGuiEx.Text($"a1[48]: {*(byte*)((nint)AgentCharaCard.Instance() + 48)}");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.Log();
         }

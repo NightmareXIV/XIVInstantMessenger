@@ -103,4 +103,12 @@ public class Config : IPluginConfiguration
     public bool SplitLogging = false;
     public bool SplitAutoUnload = false;
     public HashSet<string> SplitBlacklist = [];
+
+    public bool UIShowHidden = false;
+    public bool UIShowGPose = false;
+    public bool UIShowCutscene = false;
+
+    public bool PMLEnable = true;
+    public int PMLMaxLines = 5;
+    public bool PMLScrollDown = true;
 }

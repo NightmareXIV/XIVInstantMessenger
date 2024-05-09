@@ -84,7 +84,7 @@ internal unsafe class QuickButton : Window
                     {
                         P.Hidden = false;
                         x.Value.ChatWindow.IsOpen = true;
-                        x.Value.SetFocus = true;
+                        x.Value.SetFocusAtNextFrame();
                         if (Svc.Condition[ConditionFlag.InCombat])
                         {
                             x.Value.ChatWindow.KeepInCombat = true;
