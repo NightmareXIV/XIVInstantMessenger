@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Authors>NightmareXIV</Authors>
-		<Version>1.4.0.1</Version>
+		<Version>1.4.0.2</Version>
 		<Configurations>Debug;Release</Configurations>
 	</PropertyGroup>
 
@@ -72,6 +72,9 @@
 	<ItemGroup>
 		<None Update="$(MSBuildProjectName).json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="images\emoji\**">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="images\icon.png">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>

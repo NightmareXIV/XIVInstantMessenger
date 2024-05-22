@@ -1,10 +1,12 @@
 ﻿using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Messenger.Services.MessageParsingService;
 
 namespace Messenger;
 
 internal class SavedMessage
 {
-    public string Message;
+		internal ParsedMessage ParsedMessage;
+		public string Message;
     public long Time = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     public bool IsIncoming;
     public string OverrideName = null;
@@ -16,5 +18,17 @@ internal class SavedMessage
     public bool IgnoreTranslation = false;
     public bool AwaitingTranslation = false;
 
-    public string GUID { get; } = Guid.NewGuid().ToString();
+		internal string GUID = Guid.NewGuid().ToString();
+
+    public void Draw(string prefix = "", string suffix = "")
+    {
+        if(ParsedMessage == null)
+        {
+						Utils.DrawWrappedText($"{prefix}{Message}{suffix}");
+				}
+        else
+        {
+            ParsedMessage.Draw();
+        }
+    }
 }

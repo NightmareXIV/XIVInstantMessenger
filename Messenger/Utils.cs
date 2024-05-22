@@ -21,42 +21,59 @@ namespace Messenger;
 
 internal unsafe static class Utils
 {
-    /*static float widgetWidth;
-    public static bool DrawInputPML(string label, ref string s)
+    static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
+
+    public static void DrawWrappedText(string str)
     {
-        widgetWidth = ImGui.GetContentRegionAvail().X / 3;
-        
-        //MemoryHelper.WriteString(P.TextMem, builder.ToString());
-        //var ret = ImGuiNative.igInputTextMultiline((byte*)P.LabelMem, (byte*)P.TextMem, 500, new(widgetWidth, 100), ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.CallbackAlways, null, null) != 0;
-        var ret = ImGui.InputTextMultiline(label, ref s, 500, new(widgetWidth, 100), ImGuiInputTextFlags.CallbackAlways, Callback);
-        return ret;
+        var max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
+        foreach (var s in str.Split("\n")) 
+        {
+            var canRestart = true;
+            Start:
+            var start = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (start >= s.Length) break;
+                var text = s[start..i];
+                var size = ImGui.CalcTextSize(text).X;
+                var avail = ImGui.GetContentRegionAvail().X - ScrollbarPadding; 
+								if (size > avail)
+                {
+                    //try to match wrapping symbol first
+                    for (int z = i; z >= start; z--)
+                    {
+                        if (WrapSymbols.Contains(s[z]))
+                        {
+                            ImGuiEx.Text(s[start..z]);
+                            canRestart = false;
+														start = z;
+                            //PluginLog.Information($"start is now {start}");
+                            break;
+                        }
+                        else if(z == start)
+                        {
+                            if(max > avail && canRestart)
+                            {
+                                //we can use more space at next line, restart everything
+                                ImGui.NewLine();
+                                canRestart = false;
+                                goto Start;
+														}
+                            //just wrap it
+                            ImGuiEx.Text(s[start..i]);
+                            start = i;
+                        }
+                    }
+                }
+            }
+            if(start < s.Length)
+            {
+								ImGuiEx.Text(s[start..]);
+						}
+        }
     }
 
-    static int Callback(ImGuiInputTextCallbackData* data)
-    {
-        var s = MemoryHelper.ReadString((nint)data->Buf, data->BufSize).Replace("\n", "");
-        var maxTextWidth = widgetWidth - ImGui.GetStyle().FramePadding.X * 2;
-        var splitText = s.Split(" ");
-        var builder = new StringBuilder();
-        var spaceSize = ImGui.CalcTextSize(" ");
-        var lineWidth = 0f;
-        for (int i = 0; i < splitText.Length; i++)
-        {
-            var text = splitText[i];
-            var partSize = ImGui.CalcTextSize(text);
-            if (i > 0) builder.Append(' ');
-            if (lineWidth + spaceSize.X + partSize.X > maxTextWidth)
-            {
-                builder.Append('\n');
-                lineWidth = 0;
-            }
-            lineWidth += partSize.X;
-            builder.Append(text);
-        }
-        var transformedString = builder.ToString();
-        MemoryHelper.WriteString((nint)data->Buf, transformedString);
-        data->bu
-    }*/
+    public static float ScrollbarPadding => ImGui.GetStyle().FramePadding.X * 2f;
 
     public static string GetAddonName(this string s)
     {

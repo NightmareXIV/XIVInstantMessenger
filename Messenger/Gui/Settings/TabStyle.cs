@@ -100,5 +100,10 @@ internal class TabStyle
         ImGuiEx.SliderInt("Maximum lines", ref C.PMLMaxLines.ValidateRange(1, 30), 1, 10);
         ImGui.Checkbox("Keep history scrolled down when typing reply", ref C.PMLScrollDown);
         ImGui.Unindent();
-    }
+        ImGui.Separator();
+				ImGui.SetNextItemWidth(100f);
+				ImGuiEx.SliderInt($"Newline spacing", ref C.MessageLineSpacing, -5, 5);
+				ImGui.SetNextItemWidth(100f);
+				ImGuiEx.SliderInt($"Extra spacing between messages", ref C.MessageSpacing, 0, 5);
+		}
 }

@@ -111,4 +111,7 @@ public class Config : IPluginConfiguration
     public bool PMLEnable = true;
     public int PMLMaxLines = 5;
     public bool PMLScrollDown = true;
+
+		public int MessageLineSpacing = 0;
+		public int MessageSpacing = 2;
 }

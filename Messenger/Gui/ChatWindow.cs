@@ -176,7 +176,7 @@ internal unsafe class ChatWindow : Window
         ImGui.BeginChild($"##ChatChild{subject}", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - fieldHeight));
         if(MessageHistory.Messages.Count == 0)
         {
-            ImGuiEx.TextWrapped($"This is the beginning of your chat with {subject}");
+            Utils.DrawWrappedText($"This is the beginning of your chat with {subject}");
         }
         bool? isIncoming = null;
         if (MessageHistory.LogLoaded && MessageHistory.LoadedMessages.Count > 0)
@@ -189,11 +189,14 @@ internal unsafe class ChatWindow : Window
             MessageHistory.LoadedMessages.Clear();
         }
         (int year, int day) currentDay = (0, 0);
-        foreach (var x in MessageHistory.Messages)
+				ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, C.MessageLineSpacing));
+				foreach (var x in MessageHistory.Messages)
         {
             if (x.IsSystem)
             {
-                ImGuiEx.TextWrapped(Cust.ColorGeneric, $"{x.Message}");
+                ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
+                x.Draw();
+								ImGui.PopStyleColor();
             }
             else
             {
@@ -203,7 +206,8 @@ internal unsafe class ChatWindow : Window
                     if (!(time.DayOfYear == currentDay.day && time.Year == currentDay.year))
                     {
                         ImGuiEx.Text(Cust.ColorGeneric, $"[{time.ToString(C.DateFormat)}]");
-                        currentDay = (time.Year, time.DayOfYear);
+												if (C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
+												currentDay = (time.Year, time.DayOfYear);
                     }
                 }
                 var timestamp = time.ToString(C.MessageTimestampFormat);
@@ -211,22 +215,16 @@ internal unsafe class ChatWindow : Window
                 {
                     var messageColor = x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage;
                     var subjectColor = x.IsIncoming ? Cust.ColorFromTitle : Cust.ColorToTitle;
-                    var cur1 = ImGui.GetCursorPos();
-                    var wdt = ImGuiEx.Measure(delegate
-                    {
-                        ImGuiEx.Text(Cust.ColorGeneric, $"{timestamp} ");
-                        ImGui.SameLine(0, 0);
-                        ImGuiEx.Text(messageColor, $"[");
-                        ImGui.SameLine(0, 0);
-                        ImGuiEx.Text(subjectColor, $"{x.OverrideName?.Split("@")[0] ?? (x.IsIncoming ? subjectNoWorld : me)}");
-                        ImGui.SameLine(0, 0);
-                        ImGuiEx.Text(messageColor, $"] ");
-                    }, false);
-                    
-                    var spaces = P.GetWhitespacesForLen(wdt);
-                    ImGui.PushStyleColor(ImGuiCol.Text, messageColor);
-                    ImGui.SetCursorPos(cur1);
-                    ImGuiEx.TextWrapped($"{spaces} {x.TranslatedMessage ?? x.Message}");
+										ImGuiEx.Text(Cust.ColorGeneric, $"{timestamp} ");
+										ImGui.SameLine(0, 0);
+										ImGuiEx.Text(messageColor, $"[");
+										ImGui.SameLine(0, 0);
+										ImGuiEx.Text(subjectColor, $"{x.OverrideName?.Split("@")[0] ?? (x.IsIncoming ? subjectNoWorld : me)}");
+										ImGui.SameLine(0, 0);
+										ImGuiEx.Text(messageColor, $"] ");
+                    ImGui.SameLine(0,0);
+										ImGui.PushStyleColor(ImGuiCol.Text, messageColor);
+                    x.Draw();
                     PostMessageFunctions(x);
                     ImGui.PopStyleColor();
                 }
@@ -237,20 +235,28 @@ internal unsafe class ChatWindow : Window
                         isIncoming = x.IsIncoming;
                         if (x.IsIncoming)
                         {
-                            ImGuiEx.TextWrapped(Cust.ColorFromTitle, $"From {x.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
+                            ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorFromTitle);
+                            Utils.DrawWrappedText($"From {x.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
+                            ImGui.PopStyleColor();
                         }
                         else
-                        {
-                            ImGuiEx.TextWrapped(Cust.ColorToTitle, $"From {x.OverrideName?.Split("@")[0] ?? me}");
+												{
+														ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorToTitle);
+														Utils.DrawWrappedText($"From {x.OverrideName?.Split("@")[0] ?? me}");
+                            ImGui.PopStyleColor();
                         }
                     }
                     ImGuiHelpers.ScaledDummy(new Vector2(20f, 1f));
                     ImGui.SameLine(0, 0);
-                    ImGuiEx.TextWrapped(x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage, $"[{timestamp}] {x.TranslatedMessage ?? x.Message}");
+                    ImGui.PushStyleColor(ImGuiCol.Text, x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage);
+                    x.Draw("[{timestamp}] ");
+										ImGui.PopStyleColor();
                     PostMessageFunctions(x);
                 }
             }
+            if (C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
         }
+        ImGui.PopStyleVar();
         if (MessageHistory.DoScroll > 0)
         {
             MessageHistory.DoScroll--;

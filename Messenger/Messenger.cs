@@ -10,6 +10,7 @@ using ECommons.Events;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.Singletons;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
@@ -96,6 +97,7 @@ public unsafe class Messenger : IDalamudPlugin
             RebuildTabSystems();
             ProperOnLogin.RegisterAvailable(OnLogin, true);
             ReapplyVisibilitySettings();
+            SingletonServiceManager.Initialize(typeof(S));
 				});
     }
 
@@ -385,7 +387,8 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = false,
                         Message = message.ToString(),
                         IsSystem = true,
-                        IgnoreTranslation = true
+                        IgnoreTranslation = true,
+                        ParsedMessage = new(message),
                     });
                     history.Scroll();
                     Logger.Log(new()
@@ -417,7 +420,8 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = type == XivChatType.TellIncoming,
                         Message = message.ToString(),
                         OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
-                        IgnoreTranslation = type == XivChatType.TellOutgoing && C.TranslateSelf
+                        IgnoreTranslation = type == XivChatType.TellOutgoing && C.TranslateSelf,
+                        ParsedMessage = new(message),
                     };
                     foreach (var payload in message.Payloads)
                     {
@@ -479,7 +483,8 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = incoming,
                         Message = message.ToString(),
                         OverrideName = s.GetPlayerName(),
-                        IgnoreTranslation = !incoming && C.TranslateSelf
+                        IgnoreTranslation = !incoming && C.TranslateSelf,
+                        ParsedMessage = new(message),
                     };
                     foreach (var payload in message.Payloads)
                     {

@@ -20,3 +20,4 @@ global using static Messenger.Messenger;
 global using Dalamud.Game.ClientState.Conditions;
 global using ECommons.DalamudServices.Legacy;
 global using Dalamud.Interface.Utility;
+global using S = Messenger.Services.ServiceManager;

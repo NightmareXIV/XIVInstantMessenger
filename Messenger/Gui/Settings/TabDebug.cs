@@ -18,8 +18,9 @@ internal unsafe class TabDebug
     string PMLMessage = "";
     PseudoMultilineInput PseudoMultilineInput = new();
     internal void Draw()
-    {
-        try
+		{
+				
+				try
         {
             if (ImGui.CollapsingHeader("PML"))
             {
