@@ -199,10 +199,11 @@ public unsafe partial class PseudoMultilineInput
                 ImGui.InputTextWithHint("##emjfltr", "Search...", ref EmojiSearch, 50);
             }, () =>
             {
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, enabled:EmojiSearch != ""))
+                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, enabled:EmojiSearch != "" && !S.EmojiLoader.DownloaderTaskRunning))
                 {
-                    
+                    S.EmojiLoader.Search(EmojiSearch.ToLower());
                 }
+                ImGuiEx.Tooltip($"Search for this emoji on BetterTTV");
             });
             foreach(var em in S.EmojiLoader.Emoji)
             {

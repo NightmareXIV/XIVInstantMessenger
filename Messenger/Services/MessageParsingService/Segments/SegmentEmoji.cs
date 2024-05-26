@@ -26,14 +26,36 @@ public class SegmentEmoji : ISegment
 				{
 						ImGui.NewLine();
 				}
-				var tex = S.EmojiLoader.Emoji[Emoji].GetTextureWrap();
+				var tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
 				if (tex != null)
 				{
 						ImGui.Image(tex.ImGuiHandle, size);
 				}
 				else
 				{
-						ImGui.Dummy(size);
+						
+						if (S.EmojiLoader.DownloaderTaskRunning)
+						{
+								if (S.EmojiLoader.Loading.GetTextureWrap() != null) 
+								{
+										ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size);
+								}
+								else
+								{
+										ImGui.Dummy(size);
+								}
+						}
+						else
+						{
+								if (S.EmojiLoader.Error.GetTextureWrap() != null)
+								{
+										ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size);
+								}
+								else
+								{
+										ImGui.Dummy(size);
+								}
+						}
 				}
 				ImGui.SameLine(0, 0);
 		}

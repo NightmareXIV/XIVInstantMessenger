@@ -21,7 +21,7 @@ public partial class ParsedMessage
 				List<ISegment> segments = [];
 				foreach(var str in splitMessage)
 				{
-						if(str.StartsWith(':') && str.EndsWith(':') && S.EmojiLoader.Emoji.ContainsKey(str[1..^1]))
+						if(str.StartsWith(':') && str.EndsWith(':'))
 						{
 								segments.Add(new SegmentEmoji(str[1..^1]));
 						}
