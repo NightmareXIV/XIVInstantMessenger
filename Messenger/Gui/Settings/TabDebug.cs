@@ -22,6 +22,26 @@ internal unsafe class TabDebug
 				
 				try
         {
+            if (ImGui.CollapsingHeader("Emoji"))
+            {
+                if(ImGui.Button("Rebuild cache"))
+                {
+                    S.EmojiLoader.BuildCache();
+								}
+                ImGui.Columns(4);
+								foreach (var x in S.EmojiLoader.Emoji)
+								{
+										var w = x.Value.GetTextureWrap();
+										if (w != null)
+										{
+												ImGui.Image(w.ImGuiHandle, new Vector2(24f));
+												ImGui.SameLine();
+										}
+										ImGuiEx.Text($"{x.Key}");
+                    ImGui.NextColumn();
+								}
+								ImGui.Columns(1);
+						}
             if (ImGui.CollapsingHeader("PML"))
             {
                 PseudoMultilineInput.DrawMultiline();

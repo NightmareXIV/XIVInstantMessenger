@@ -17,10 +17,11 @@ public partial class ParsedMessage
 		{
 				RawString = message.ExtractText();
 				var splitMessage = EmojiRegex().Split(RawString);
+				PluginLog.Debug($"Message parts: \n- {splitMessage.Print("\n- ")}");
 				List<ISegment> segments = [];
 				foreach(var str in splitMessage)
 				{
-						if(str.StartsWith(':') && str.EndsWith(':') && S.EmojiLoader.Emoji.Contains(str[1..^1]))
+						if(str.StartsWith(':') && str.EndsWith(':') && S.EmojiLoader.Emoji.ContainsKey(str[1..^1]))
 						{
 								segments.Add(new SegmentEmoji(str[1..^1]));
 						}
@@ -47,6 +48,6 @@ public partial class ParsedMessage
 				}
 		}
 
-		[GeneratedRegex(@"(:[a-z0-9_-]+:)")]
+		[GeneratedRegex(@"(:[a-z0-9_-]+:)", RegexOptions.IgnoreCase)]
 		private static partial Regex EmojiRegex();
 }

@@ -1,12 +1,14 @@
 ﻿using Dalamud.Memory;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Messenger.Gui;
-public unsafe class PseudoMultilineInput
+public unsafe partial class PseudoMultilineInput
 {
     private string Label = "PML";
     private uint MaxLength = 1500;
@@ -15,6 +17,11 @@ public unsafe class PseudoMultilineInput
     internal float? Width = null;
     private int? EnterPress = null;
     internal bool IsInputActive = false;
+    private bool IsSelectingEmoji = false;
+    private int EmojiStartCursor = 0;
+    private int EmojiEndCursor = 0;
+    private string EmojiSearch = "";
+    private int SetFocusAt = -1;
 
 		private int MaxLines => C.PMLMaxLines;
     public bool IsMultiline => C.PMLEnable;
@@ -68,7 +75,9 @@ public unsafe class PseudoMultilineInput
 				var cnt = Math.Max(1, Math.Min(newlines, MaxLines));
         var lheight = ImGui.CalcTextSize("A").Y;
         ImGui.InputTextMultiline($"##{Label}", ref Text, MaxLength, new(width, lheight * cnt + ImGui.GetStyle().FramePadding.X * 2), ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.CallbackAlways | ImGuiInputTextFlags.CallbackCharFilter | ImGuiInputTextFlags.NoUndoRedo, Callback);
+        if (SetFocusAt > -1) ImGui.SetKeyboardFocusHere(-1);
         IsInputActive = ImGui.IsItemActive();
+        DrawEmojiPopup();
     }
 
     private int Callback(ImGuiInputTextCallbackData* data)
@@ -82,6 +91,45 @@ public unsafe class PseudoMultilineInput
             }
             return 0;
         }
+        if(SetFocusAt > -1)
+        {
+            if(SetFocusAt <= data->BufTextLen)
+            {
+                data->CursorPos = SetFocusAt;
+            }
+            SetFocusAt = -1;
+        }
+        EmojiEndCursor = data->CursorPos;
+				IsSelectingEmoji = false;
+        for (int i = 0; i < EmojiEndCursor; i++)
+        {
+            if (data->Buf[i] == ':')
+						{
+								IsSelectingEmoji = !IsSelectingEmoji;
+								EmojiStartCursor = i;
+						}
+            else if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
+            {
+								IsSelectingEmoji = false;
+            }
+        }
+        if (IsSelectingEmoji)
+        {
+						for (int i = EmojiEndCursor; i < data->BufTextLen; i++)
+						{
+								if (data->Buf[i] == ':')
+								{
+										IsSelectingEmoji = false;
+								}
+								if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
+						}
+				}
+        if (IsSelectingEmoji)
+        {
+						EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
+				}
+
+
 				var space = ImGui.CalcTextSize(" ").X;
 				int numNewlines = 0;
 				void Process()
@@ -123,6 +171,74 @@ public unsafe class PseudoMultilineInput
 				}
         return 0;
     }
+
+    private void DrawEmojiPopup()
+    {
+        if (IsInputActive)
+        {
+            if (IsSelectingEmoji && !ImGui.IsPopupOpen("XIMEmojiSelect"))
+            {
+                ImGui.OpenPopup("XIMEmojiSelect");
+            }
+				}
+				if (ImGui.IsPopupOpen("XIMEmojiSelect"))
+				{
+						ImGuiHelpers.SetNextWindowPosRelativeMainViewport(ImGui.GetCursorScreenPos());
+						ImGui.SetNextWindowSizeConstraints(new(100, 100), new(500, 300));
+				}
+				if (ImGui.BeginPopup("XIMEmojiSelect", ImGuiWindowFlags.NoFocusOnAppearing))
+        {
+            if (ImGui.IsWindowAppearing())
+            {
+                CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
+            }
+            if (!IsSelectingEmoji) ImGui.CloseCurrentPopup();
+            var cnt = 0;
+            ImGuiEx.InputWithRightButtonsArea(() =>
+            {
+                ImGui.InputTextWithHint("##emjfltr", "Search...", ref EmojiSearch, 50);
+            }, () =>
+            {
+                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, enabled:EmojiSearch != ""))
+                {
+                    
+                }
+            });
+            foreach(var em in S.EmojiLoader.Emoji)
+            {
+                if (EmojiSearch != "" && !em.Key.Contains(EmojiSearch, StringComparison.OrdinalIgnoreCase)) continue;
+                cnt++;
+                if(em.Value.GetTextureWrap() != null)
+                {
+                    ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(32));
+                    ImGuiEx.Tooltip($":{em.Key}:");
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                        if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                        {
+                            SinglelineText = SinglelineText[0..EmojiStartCursor] + $":{em.Key}: " + SinglelineText[EmojiEndCursor..];
+                            SetFocusAt = EmojiStartCursor + em.Key.Length + 3;
+                        }
+                    }
+								}
+                else
+                {
+                    ImGui.Dummy(new(32));
+                }
+                ImGui.SameLine();
+                if(cnt % 12 == 0)
+                {
+                    ImGui.NewLine();
+                }
+            }
+            if(cnt == 0)
+            {
+                ImGuiEx.Text($"No emoji found...");
+            }
+            ImGui.EndPopup();
+        }
+    }
     
     private static string ReadUntilSpace(byte* array, int length, int start, out int spaceIndex)
     {
@@ -137,4 +253,7 @@ public unsafe class PseudoMultilineInput
         spaceIndex = -1;
         return MemoryHelper.ReadString(((nint)array) + start, length - start);
     }
+
+		[GeneratedRegex(@"^[a-z0-9_]{1}$", RegexOptions.IgnoreCase)]
+		private static partial Regex EmojiWhitelistedSymbols();
 }

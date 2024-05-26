@@ -26,7 +26,8 @@ public class SegmentEmoji : ISegment
 				{
 						ImGui.NewLine();
 				}
-				if (ThreadLoadImageHandler.TryGetTextureWrap(Path.Combine(S.EmojiLoader.EmojiFolder, $"{Emoji}.png"), out var tex))
+				var tex = S.EmojiLoader.Emoji[Emoji].GetTextureWrap();
+				if (tex != null)
 				{
 						ImGui.Image(tex.ImGuiHandle, size);
 				}
