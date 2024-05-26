@@ -6,7 +6,7 @@ namespace Messenger;
 
 internal class ContextMenuManager : IDisposable
 {
-    static readonly string[] ValidAddons = new string[]
+    private static readonly string[] ValidAddons = new string[]
     {
         null,
         "PartyMemberList",
@@ -22,9 +22,8 @@ internal class ContextMenuManager : IDisposable
         "SocialList",
         "ContactList",
     };
-
-    GameObjectContextMenuItem openMessenger;
-    DalamudContextMenu contextMenu;
+    private GameObjectContextMenuItem openMessenger;
+    private DalamudContextMenu contextMenu;
 
     internal ContextMenuManager()
     {
@@ -55,9 +54,9 @@ internal class ContextMenuManager : IDisposable
 
     private void OpenMessenger(GameObjectContextMenuItemSelectedArgs args)
     {
-        var player = args.Text.ToString();
-        var world = args.ObjectWorld;
-        var s = new Sender(player, world);
+        string player = args.Text.ToString();
+        ushort world = args.ObjectWorld;
+        Sender s = new(player, world);
         P.OpenMessenger(s);
         P.Chats[s].SetFocusAtNextFrame();
         P.Chats[s].Scroll();

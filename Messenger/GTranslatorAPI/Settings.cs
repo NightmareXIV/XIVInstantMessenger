@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
-
-using Newtonsoft.Json;
 
 namespace GTranslatorAPI
 {
@@ -43,7 +42,7 @@ namespace GTranslatorAPI
         /// <param name="settingsFilePath">path of the file settings</param>
         public static Settings CreateFromFile(string settingsFilePath)
         {
-            var settings = JsonConvert.DeserializeObject<Settings>(
+            Settings settings = JsonConvert.DeserializeObject<Settings>(
                 File.ReadAllText(settingsFilePath));
             if (settings == null)
                 throw new InvalidOperationException("failed to create settings");

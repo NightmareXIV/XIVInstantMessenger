@@ -2,7 +2,7 @@
 
 internal class TabSettings
 {
-    string NewTabSystem = "";
+    private string NewTabSystem = "";
     internal void Draw()
     {
         ImGuiEx.EzTabBar("TabSettingsTabs",
@@ -10,11 +10,11 @@ internal class TabSettings
             {
                 if (ImGui.Button("Open logs folder"))
                 {
-                    var logFolder = Utils.GetLogStorageFolder();
+                    string logFolder = Utils.GetLogStorageFolder();
                     ShellStart(logFolder);
                 }
                 ImGui.Checkbox("Enable context menu integration", ref C.ContextMenuEnable);
-                if(ImGui.Checkbox("Tabs instead of windows", ref C.Tabs))
+                if (ImGui.Checkbox("Tabs instead of windows", ref C.Tabs))
                 {
                     P.Tabs(C.Tabs);
                 }
@@ -33,7 +33,7 @@ internal class TabSettings
                     {
                         if (ImGui.Button("Create"))
                         {
-                            if(C.TabWindows.Contains(NewTabSystem))
+                            if (C.TabWindows.Contains(NewTabSystem))
                             {
                                 Notify.Error("This name already exists");
                             }
@@ -47,17 +47,17 @@ internal class TabSettings
                     ImGui.Separator();
                     ImGuiEx.Text($"Registered windows:");
                     string toRem = null;
-                    foreach(var x in C.TabWindows)
+                    foreach (string x in C.TabWindows)
                     {
                         ImGuiEx.Text($"{x} - {C.TabWindowAssociations.Count(z => z.Value == x)} chats associated");
                         ImGuiEx.Tooltip(C.TabWindowAssociations.Where(z => z.Value == x).Select(x => x.Key.ToString()).Join("\n"));
                         ImGui.SameLine();
-                        if(ImGui.SmallButton("Delete window##" + x))
+                        if (ImGui.SmallButton("Delete window##" + x))
                         {
                             toRem = x;
                         }
                     }
-                    if(toRem != null)
+                    if (toRem != null)
                     {
                         C.TabWindows.Remove(toRem);
                         P.RebuildTabSystems();
@@ -95,10 +95,10 @@ internal class TabSettings
                 ImGui.Checkbox("Auto-close all chat windows on logout", ref C.CloseLogout);
                 ImGui.Checkbox("Refocus text input after sending message", ref C.RefocusInputAfterSending);
                 ImGui.Checkbox("Skip link opening confirmation", ref C.NoWarningWhenOpenLinks);
-								if(ImGui.Checkbox("Display when game UI is hidden", ref C.UIShowHidden))P.ReapplyVisibilitySettings();
-								if(ImGui.Checkbox("Display in cutscenes", ref C.UIShowCutscene)) P.ReapplyVisibilitySettings();
-								if(ImGui.Checkbox("Display in group pose", ref C.UIShowGPose)) P.ReapplyVisibilitySettings();
-						}, null, true),
+                if (ImGui.Checkbox("Display when game UI is hidden", ref C.UIShowHidden)) P.ReapplyVisibilitySettings();
+                if (ImGui.Checkbox("Display in cutscenes", ref C.UIShowCutscene)) P.ReapplyVisibilitySettings();
+                if (ImGui.Checkbox("Display in group pose", ref C.UIShowGPose)) P.ReapplyVisibilitySettings();
+            }, null, true),
             ("Quick button", delegate
             {
                 ImGui.Checkbox("Display quick open button", ref C.QuickOpenButton);
@@ -166,7 +166,7 @@ internal class TabSettings
                 }
                 C.HistoryAmount.ValidateRange(0, 10000);
                 ImGui.Separator();
-                if(ImGui.Checkbox($"Write separate logs for each character", ref C.SplitLogging))
+                if (ImGui.Checkbox($"Write separate logs for each character", ref C.SplitLogging))
                 {
                     Utils.ReloadAllChat();
                 }
@@ -185,7 +185,7 @@ internal class TabSettings
                     }
                     ImGuiEx.Tooltip("All chats will be closed");
                 });
-                
+
             }, null, true),
             ("Hotkey", delegate
             {

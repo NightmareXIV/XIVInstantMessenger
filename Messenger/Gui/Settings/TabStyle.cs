@@ -23,7 +23,7 @@ internal class TabStyle
             ImGui.InputText("##i1", ref C.MessageTimestampFormat, 100);
         }, delegate
         {
-            if(ImGui.Button("12 hours"))
+            if (ImGui.Button("12 hours"))
             {
                 C.MessageTimestampFormat = "hh:mm:ss tt";
             }
@@ -101,9 +101,9 @@ internal class TabStyle
         ImGui.Checkbox("Keep history scrolled down when typing reply", ref C.PMLScrollDown);
         ImGui.Unindent();
         ImGui.Separator();
-				ImGui.SetNextItemWidth(100f);
-				ImGuiEx.SliderInt($"Newline spacing", ref C.MessageLineSpacing, -5, 5);
-				ImGui.SetNextItemWidth(100f);
-				ImGuiEx.SliderInt($"Extra spacing between messages", ref C.MessageSpacing, 0, 5);
-		}
+        ImGui.SetNextItemWidth(100f);
+        ImGuiEx.SliderInt($"Newline spacing", ref C.MessageLineSpacing, -5, 5);
+        ImGui.SetNextItemWidth(100f);
+        ImGuiEx.SliderInt($"Extra spacing between messages", ref C.MessageSpacing, 0, 5);
+    }
 }

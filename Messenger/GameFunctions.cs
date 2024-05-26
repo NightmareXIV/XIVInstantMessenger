@@ -22,22 +22,22 @@ internal unsafe class GameFunctions : IDisposable
     delegate* unmanaged<void*, int, IntPtr> _getTellHistory;*/
 
     [Signature("E8 ?? ?? ?? ?? 8B FD 8B CD", Fallibility = Fallibility.Infallible)]
-    delegate* unmanaged<IntPtr, uint, IntPtr> _getInfoProxyByIndex;
+    private delegate* unmanaged<IntPtr, uint, IntPtr> _getInfoProxyByIndex;
 
     [Signature("4C 8B 81 ?? ?? ?? ?? 4D 85 C0 74 17", Fallibility = Fallibility.Infallible)]
-    delegate* unmanaged<RaptureLogModule*, uint, ulong> _getContentIdForChatEntry;
+    private delegate* unmanaged<RaptureLogModule*, uint, ulong> _getContentIdForChatEntry;
 
     [Signature("8B 77 ?? 8D 46 01 89 47 14 81 FE ?? ?? ?? ?? 72 03 FF 47", Offset = 2, Fallibility = Fallibility.Infallible)]
-    byte? _currentChatEntryOffset;
+    private byte? _currentChatEntryOffset;
 
-    delegate IntPtr ResolveTextCommandPlaceholderDelegate(IntPtr a1, byte* placeholderText, byte a3, byte a4);
+    private delegate IntPtr ResolveTextCommandPlaceholderDelegate(IntPtr a1, byte* placeholderText, byte a3, byte a4);
 
     [Signature("E8 ?? ?? ?? ?? 49 8D 4F 18 4C 8B E0", DetourName = nameof(ResolveTextCommandPlaceholderDetour), Fallibility = Fallibility.Infallible)]
-    Hook<ResolveTextCommandPlaceholderDelegate>? ResolveTextCommandPlaceholderHook { get; init; }
+    private Hook<ResolveTextCommandPlaceholderDelegate>? ResolveTextCommandPlaceholderHook { get; init; }
 
-    delegate ulong PlaySoundDelegate(int id, ulong unk1, ulong unk2);
+    private delegate ulong PlaySoundDelegate(int id, ulong unk1, ulong unk2);
     [Signature("E8 ?? ?? ?? ?? 4D 39 BE", Fallibility = Fallibility.Infallible)]
-    PlaySoundDelegate PlaySoundFunction;
+    private PlaySoundDelegate PlaySoundFunction;
 
     [Signature("FF 90 ?? ?? ?? ?? 48 8B C8 BA ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B F0 48 85 C0 0F 84 ?? ?? ?? ?? 48 8B 10 33 ED", Offset = 2, Fallibility = Fallibility.Infallible)]
     private readonly int? _infoModuleVfunc;
@@ -120,17 +120,17 @@ internal unsafe class GameFunctions : IDisposable
         return InInstance() != 0;
     }
 
-    void ListCommand(string name, ushort world, string commandName)
+    private void ListCommand(string name, ushort world, string commandName)
     {
-        var row = Svc.Data.GetExcelSheet<World>()!.GetRow(world);
+        World row = Svc.Data.GetExcelSheet<World>()!.GetRow(world);
         if (row == null)
         {
             return;
         }
 
-        var worldName = row.Name.RawString;
-        this._replacementName = $"{name}@{worldName}";
-        Chat.Instance.SendMessage($"/{commandName} add {this._placeholder}");
+        string worldName = row.Name.RawString;
+        _replacementName = $"{name}@{worldName}";
+        Chat.Instance.SendMessage($"/{commandName} add {_placeholder}");
     }
 
     internal void SendFriendRequest(string name, ushort world)
@@ -142,7 +142,7 @@ internal unsafe class GameFunctions : IDisposable
         }
         else
         {
-            this.ListCommand(name, world, "friendlist");
+            ListCommand(name, world, "friendlist");
         }
     }
 
@@ -155,76 +155,74 @@ internal unsafe class GameFunctions : IDisposable
         }
         else
         {
-            this.ListCommand(name, world, "blist");
+            ListCommand(name, world, "blist");
         }
     }
 
     internal ulong? GetContentIdForEntry(uint index)
     {
-        if (this._getContentIdForChatEntry == null)
+        if (_getContentIdForChatEntry == null)
         {
             return null;
         }
 
-        return this._getContentIdForChatEntry(Framework.Instance()->GetUiModule()->GetRaptureLogModule(), index);
+        return _getContentIdForChatEntry(Framework.Instance()->GetUiModule()->GetRaptureLogModule(), index);
     }
 
 
     internal uint? GetCurrentChatLogEntryIndex()
     {
-        if (this._currentChatEntryOffset == null)
+        if (_currentChatEntryOffset == null)
         {
             return null;
         }
 
-        var log = (IntPtr)Framework.Instance()->GetUiModule()->GetRaptureLogModule();
-        return *(uint*)(log + this._currentChatEntryOffset.Value);
+        nint log = (IntPtr)Framework.Instance()->GetUiModule()->GetRaptureLogModule();
+        return *(uint*)(log + _currentChatEntryOffset.Value);
     }
 
-    IntPtr GetInfoModule()
+    private IntPtr GetInfoModule()
     {
-        if (this._infoModuleVfunc is not { } vfunc)
+        if (_infoModuleVfunc is not { } vfunc)
         {
             return IntPtr.Zero;
         }
 
-        var uiModule = Framework.Instance()->GetUiModule();
-        var getInfoModule = (delegate* unmanaged<UIModule*, IntPtr>)uiModule->vfunc[vfunc / 8];
+        UIModule* uiModule = Framework.Instance()->GetUiModule();
+        delegate* unmanaged<UIModule*, nint> getInfoModule = (delegate* unmanaged<UIModule*, IntPtr>)uiModule->vfunc[vfunc / 8];
         return getInfoModule(uiModule);
     }
 
 
     internal IntPtr GetInfoProxyByIndex(uint idx)
     {
-        var infoModule = GetInfoModule();
-        return infoModule == IntPtr.Zero ? IntPtr.Zero : this._getInfoProxyByIndex(infoModule, idx);
+        nint infoModule = GetInfoModule();
+        return infoModule == IntPtr.Zero ? IntPtr.Zero : _getInfoProxyByIndex(infoModule, idx);
     }
 
+    private IntPtr _placeholderNamePtr = Marshal.AllocHGlobal(128);
+    private string _placeholder = $"<{Guid.NewGuid():N}>";
+    private string? _replacementName;
 
-
-    IntPtr _placeholderNamePtr = Marshal.AllocHGlobal(128);
-    string _placeholder = $"<{Guid.NewGuid():N}>";
-    string? _replacementName;
-
-    IntPtr ResolveTextCommandPlaceholderDetour(IntPtr a1, byte* placeholderText, byte a3, byte a4)
+    private IntPtr ResolveTextCommandPlaceholderDetour(IntPtr a1, byte* placeholderText, byte a3, byte a4)
     {
-        if (this._replacementName == null)
+        if (_replacementName == null)
         {
             goto Original;
         }
 
-        var placeholder = MemoryHelper.ReadStringNullTerminated((IntPtr)placeholderText);
-        if (placeholder != this._placeholder)
+        string placeholder = MemoryHelper.ReadStringNullTerminated((IntPtr)placeholderText);
+        if (placeholder != _placeholder)
         {
             goto Original;
         }
 
-        MemoryHelper.WriteString(this._placeholderNamePtr, this._replacementName);
-        this._replacementName = null;
+        MemoryHelper.WriteString(_placeholderNamePtr, _replacementName);
+        _replacementName = null;
 
-        return this._placeholderNamePtr;
+        return _placeholderNamePtr;
 
     Original:
-        return this.ResolveTextCommandPlaceholderHook!.Original(a1, placeholderText, a3, a4);
+        return ResolveTextCommandPlaceholderHook!.Original(a1, placeholderText, a3, a4);
     }
 }

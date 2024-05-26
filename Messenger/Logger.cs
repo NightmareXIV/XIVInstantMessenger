@@ -6,15 +6,16 @@ namespace Messenger;
 
 internal class Logger : IDisposable
 {
-    BlockingCollection<LogTask> Tasks = [];
+    private BlockingCollection<LogTask> Tasks = [];
     internal Logger()
     {
         new Thread(() =>
         {
-            try { 
+            try
+            {
                 while (!Tasks.IsCompleted)
                 {
-                    var task = Tasks.Take();
+                    LogTask task = Tasks.Take();
                     while (!task.History.LogLoaded)
                     {
                         PluginLog.Debug("Waiting for log to be loaded first...");
@@ -29,7 +30,7 @@ internal class Logger : IDisposable
             catch (InvalidOperationException)
             {
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 e.Log();
             }

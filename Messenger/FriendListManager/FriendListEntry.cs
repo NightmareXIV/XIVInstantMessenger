@@ -52,7 +52,7 @@ public unsafe struct FriendListEntry
     {
         get
         {
-            return MemoryHelper.ReadSeStringNullTerminated((nint)this.RawName);
+            return MemoryHelper.ReadSeStringNullTerminated((nint)RawName);
         }
     }
     /// <summary>
@@ -62,7 +62,7 @@ public unsafe struct FriendListEntry
     {
         get
         {
-            return MemoryHelper.ReadSeStringNullTerminated((nint)this.RawFreeCompany);
+            return MemoryHelper.ReadSeStringNullTerminated((nint)RawFreeCompany);
         }
     }
 

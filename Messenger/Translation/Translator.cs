@@ -13,12 +13,11 @@ namespace Messenger.Translation
     {
         internal List<ITranslationProvider> RegisteredProviders;
         internal ITranslationProvider CurrentProvider;
-
-        volatile bool IsRunning = false;
-        volatile bool Terminate = false;
+        private volatile bool IsRunning = false;
+        private volatile bool Terminate = false;
         internal ConcurrentDictionary<string, string> TranslationResults = [];
-        ConcurrentQueue<string> TranslationQueue = new();
-        
+        private ConcurrentQueue<string> TranslationQueue = new();
+
         internal Translator()
         {
             RegisteredProviders =
@@ -50,7 +49,7 @@ namespace Messenger.Translation
             CurrentProvider?.Dispose();
         }
 
-        void StartThread()
+        private void StartThread()
         {
             IsRunning = true;
             new Thread(() =>
@@ -60,14 +59,14 @@ namespace Messenger.Translation
                 {
                     while (!Terminate && Idle < 1000)
                     {
-                        if(TranslationQueue.TryDequeue(out var msg))
+                        if (TranslationQueue.TryDequeue(out string msg))
                         {
                             Idle = 0;
                             try
                             {
                                 TranslationResults[msg] = CurrentProvider.TranslateSynchronous(msg);
                             }
-                            catch(Exception e)
+                            catch (Exception e)
                             {
                                 e.Log();
                             }
@@ -79,7 +78,7 @@ namespace Messenger.Translation
                         }
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     e.Log();
                 }

@@ -73,7 +73,7 @@ namespace Messenger.Gui.Settings
 
         internal void Draw()
         {
-            if(ImGui.BeginTable("##table", 2, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.Borders))
+            if (ImGui.BeginTable("##table", 2, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.Borders))
             {
                 ImGui.TableSetupColumn("col1");
                 ImGui.TableSetupColumn("col2");
@@ -109,7 +109,7 @@ namespace Messenger.Gui.Settings
                     ImGui.Separator();
                     if (Selected != XivChatType.None)
                     {
-                        if (C.SpecificChannelCustomizations.TryGetValue(Selected, out var customizations))
+                        if (C.SpecificChannelCustomizations.TryGetValue(Selected, out ChannelCustomization customizations))
                         {
                             if (ImGui.Button("Copy to clipboard"))
                             {

@@ -12,15 +12,15 @@ namespace Messenger.Gui.Settings
         {
             ImGuiEx.TextWrapped(EColor.Red, $"Warning: this feature is deprecated and scheduled to be discontinued.");
             ImGuiEx.Text("Select translation provider:");
-            if(ImGui.BeginCombo("##trans", C.TranslationProvider))
+            if (ImGui.BeginCombo("##trans", C.TranslationProvider))
             {
-                if(ImGui.Selectable("Do not use translation"))
+                if (ImGui.Selectable("Do not use translation"))
                 {
                     C.TranslationProvider = "Do not use translation";
                     P.Translator.Dispose();
                     P.Translator = new();
                 }
-                foreach(var x in P.Translator.RegisteredProviders)
+                foreach (Translation.ITranslationProvider x in P.Translator.RegisteredProviders)
                 {
                     if (ImGui.Selectable(x.DisplayName))
                     {
@@ -31,7 +31,7 @@ namespace Messenger.Gui.Settings
                 }
                 ImGui.EndCombo();
             }
-            if(P.Translator.CurrentProvider != null)
+            if (P.Translator.CurrentProvider != null)
             {
                 ImGuiEx.Text($"Provider settings:");
                 P.Translator.CurrentProvider.DrawSettings();

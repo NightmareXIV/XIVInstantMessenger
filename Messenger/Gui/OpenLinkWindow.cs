@@ -2,8 +2,8 @@
 
 internal class OpenLinkWindow : Window
 {
-    string Link = "";
-    bool flash = false;
+    private string Link = "";
+    private bool flash = false;
     public OpenLinkWindow(string link) : base($"XIVInstantMessenger: warning##{ImGui.GetFrameCount()}", ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.AlwaysAutoResize)
     {
         if (C.NoWarningWhenOpenLinks)
@@ -11,13 +11,13 @@ internal class OpenLinkWindow : Window
             ShellStart(link);
             return;
         }
-        this.IsOpen = true;
-        this.SizeConstraints = new()
+        IsOpen = true;
+        SizeConstraints = new()
         {
             MinimumSize = new(300, 200),
             MaximumSize = new(600, 400)
         };
-        this.Link = link;
+        Link = link;
         P.WindowSystemMain.AddWindow(this);
     }
 
@@ -41,15 +41,15 @@ internal class OpenLinkWindow : Window
         ImGui.Separator();
         ImGuiEx.LineCentered($"openlink{Link}", delegate
         {
-            if(ImGui.Button("Open link"))
+            if (ImGui.Button("Open link"))
             {
                 ShellStart(Link);
-                this.IsOpen = false;
+                IsOpen = false;
             }
             ImGui.SameLine();
             if (ImGui.Button("Cancel"))
             {
-                this.IsOpen = false;
+                IsOpen = false;
             }
         });
     }

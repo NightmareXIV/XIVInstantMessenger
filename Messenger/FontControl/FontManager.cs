@@ -17,7 +17,7 @@ public unsafe class FontManager
         {
             FontConfiguration = EzConfig.LoadConfiguration<FontConfiguration>("FontConfiguration.json");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             FontConfiguration = new();
             Notify.Error($"Failed to load font configuration.\nFont settings have been reset.");
@@ -52,14 +52,14 @@ public unsafe class FontManager
 
     public void PushFont()
     {
-        if(FontPushed)
+        if (FontPushed)
         {
             DuoLog.Error($"A critical error occurred. Please send logs to developer.");
             throw new InvalidOperationException("Font is already pushed.");
         }
         if (C.UseCustomFont)
         {
-            if(Handle != null && Handle.Available)
+            if (Handle != null && Handle.Available)
             {
                 Handle.Push();
                 FontPushed = true;

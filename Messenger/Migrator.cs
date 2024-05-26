@@ -16,10 +16,10 @@ namespace Messenger
 
         private static void MigrateConfiguration1()
         {
-            if(C.DefaultChannelCustomization == null)
+            if (C.DefaultChannelCustomization == null)
             {
                 C.DefaultChannelCustomization = new ChannelCustomization();
-                foreach(var x in  C.DefaultChannelCustomization.GetType().GetFields())
+                foreach (System.Reflection.FieldInfo x in C.DefaultChannelCustomization.GetType().GetFields())
                 {
                     PluginLog.Information($"Setting {x.Name} to {C.GetFoP(x.Name)}");
                     C.DefaultChannelCustomization.SetFoP(x.Name, C.GetFoP(x.Name));

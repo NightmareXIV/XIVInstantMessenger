@@ -112,8 +112,8 @@ public class Config : IPluginConfiguration
     public int PMLMaxLines = 5;
     public bool PMLScrollDown = true;
 
-		public int MessageLineSpacing = 0;
-		public int MessageSpacing = 2;
+    public int MessageLineSpacing = 0;
+    public int MessageSpacing = 2;
 
     public long LastBetterTTVUpdate = 0;
     public Dictionary<string, string> BetterTTVEmojiCache = [];

@@ -5,8 +5,8 @@ namespace Messenger;
 
 internal class SavedMessage
 {
-		internal ParsedMessage ParsedMessage;
-		public string Message;
+    internal ParsedMessage ParsedMessage;
+    public string Message;
     public long Time = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     public bool IsIncoming;
     public string OverrideName = null;
@@ -18,14 +18,14 @@ internal class SavedMessage
     public bool IgnoreTranslation = false;
     public bool AwaitingTranslation = false;
 
-		internal string GUID = Guid.NewGuid().ToString();
+    internal string GUID = Guid.NewGuid().ToString();
 
     public void Draw(string prefix = "", string suffix = "")
     {
-        if(ParsedMessage == null)
+        if (ParsedMessage == null)
         {
-						Utils.DrawWrappedText($"{prefix}{Message}{suffix}");
-				}
+            Utils.DrawWrappedText($"{prefix}{Message}{suffix}");
+        }
         else
         {
             ParsedMessage.Draw();

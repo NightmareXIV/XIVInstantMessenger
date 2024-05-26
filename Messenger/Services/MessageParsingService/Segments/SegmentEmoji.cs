@@ -10,53 +10,53 @@ using System.Threading.Tasks;
 namespace Messenger.Services.MessageParsingService.Segments;
 public class SegmentEmoji : ISegment
 {
-		public string Emoji;
+    public string Emoji;
 
-		public SegmentEmoji(string emoji)
-		{
-				Emoji = emoji ?? throw new ArgumentNullException(nameof(emoji));
-		}
+    public SegmentEmoji(string emoji)
+    {
+        Emoji = emoji ?? throw new ArgumentNullException(nameof(emoji));
+    }
 
-		public void Draw()
-		{
-				var size = new Vector2(MathF.Floor(ImGui.CalcTextSize(" ").Y));
-				ImGui.SameLine(0, 0);
-				//PluginLog.Information($"{ImGui.GetContentRegionAvail().X} >= {size.X}");
-				if(ImGui.GetContentRegionAvail().X < size.X)
-				{
-						ImGui.NewLine();
-				}
-				var tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
-				if (tex != null)
-				{
-						ImGui.Image(tex.ImGuiHandle, size);
-				}
-				else
-				{
-						
-						if (S.EmojiLoader.DownloaderTaskRunning)
-						{
-								if (S.EmojiLoader.Loading.GetTextureWrap() != null) 
-								{
-										ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size);
-								}
-								else
-								{
-										ImGui.Dummy(size);
-								}
-						}
-						else
-						{
-								if (S.EmojiLoader.Error.GetTextureWrap() != null)
-								{
-										ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size);
-								}
-								else
-								{
-										ImGui.Dummy(size);
-								}
-						}
-				}
-				ImGui.SameLine(0, 0);
-		}
+    public void Draw()
+    {
+        Vector2 size = new(MathF.Floor(ImGui.CalcTextSize(" ").Y));
+        ImGui.SameLine(0, 0);
+        //PluginLog.Information($"{ImGui.GetContentRegionAvail().X} >= {size.X}");
+        if (ImGui.GetContentRegionAvail().X < size.X)
+        {
+            ImGui.NewLine();
+        }
+        Dalamud.Interface.Internal.IDalamudTextureWrap tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
+        if (tex != null)
+        {
+            ImGui.Image(tex.ImGuiHandle, size);
+        }
+        else
+        {
+
+            if (S.EmojiLoader.DownloaderTaskRunning)
+            {
+                if (S.EmojiLoader.Loading.GetTextureWrap() != null)
+                {
+                    ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size);
+                }
+                else
+                {
+                    ImGui.Dummy(size);
+                }
+            }
+            else
+            {
+                if (S.EmojiLoader.Error.GetTextureWrap() != null)
+                {
+                    ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size);
+                }
+                else
+                {
+                    ImGui.Dummy(size);
+                }
+            }
+        }
+        ImGui.SameLine(0, 0);
+    }
 }

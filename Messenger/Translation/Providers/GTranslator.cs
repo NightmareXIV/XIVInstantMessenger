@@ -9,12 +9,12 @@ namespace Messenger.Translation.Providers
 {
     internal class GTranslator : ITranslationProvider
     {
-        GTranslatorAPI.Translator GTranslatorInstance;
+        private GTranslatorAPI.Translator GTranslatorInstance;
         public string DisplayName => "Google Translate";
 
         public void Dispose()
         {
-            
+
         }
 
         public void DrawSettings()

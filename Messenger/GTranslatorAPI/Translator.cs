@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GTranslatorAPI
 {
@@ -16,7 +15,7 @@ namespace GTranslatorAPI
         /// <summary>
         /// network utility
         /// </summary>
-        readonly NetUtil _net;
+        private readonly NetUtil _net;
 
         /// <summary>
         /// API settings 
@@ -50,7 +49,7 @@ namespace GTranslatorAPI
             if (Settings.SplitStringBeforeTranslate)
                 splits = SplitText(text);
             else
-                splits = new List<string> { text };
+                splits = [text];
 
             Translation? translation = null;
 
@@ -59,9 +58,9 @@ namespace GTranslatorAPI
                 splits.Select(textSplit => RunTranslateQueryAsync(
                     sourceLanguage, targetLanguage, textSplit));
 
-            var trTasks = trTasksQuery.ToArray();
+            Task<Translation>[] trTasks = trTasksQuery.ToArray();
             await Task.WhenAll(trTasks);
-            foreach (var tr in trTasks)
+            foreach (Task<Translation> tr in trTasks)
             {
                 if (translation == null)
                     translation = tr.Result;
@@ -72,24 +71,24 @@ namespace GTranslatorAPI
             return translation;
         }
 
-        static readonly char[] _splitSymbols = new char[] { '.', ',', ';', '!', '?', '\n' };
+        private static readonly char[] _splitSymbols = new char[] { '.', ',', ';', '!', '?', '\n' };
 
         /// <summary>
         /// split text into segments according to the rules of division
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        static IEnumerable<string> SplitText(string text)
+        private static IEnumerable<string> SplitText(string text)
         {
             text = NormalizeLineBreaks(text);
-            var result = new List<string>();
+            List<string> result = [];
 
             int i = 0;
             int j = 0;
 
             while (i < text.Length && j != -1)
             {
-                var indexs = _splitSymbols.Select
+                IEnumerable<int> indexs = _splitSymbols.Select
                     (splitChar => text.IndexOf(splitChar, i))
                     .Where(index => index > -1);
                 j = indexs.Any() ? indexs.Min() : -1;
@@ -110,7 +109,7 @@ namespace GTranslatorAPI
         /// </summary>
         /// <param name="text">text</param>
         /// <returns>text with simple (\n) line breaks</returns>
-        static string NormalizeLineBreaks(string text)
+        private static string NormalizeLineBreaks(string text)
             => text.Replace("\r\n", "\n").Replace("\n\r", "\n");
 
         /// <summary>
@@ -120,14 +119,14 @@ namespace GTranslatorAPI
         /// <param name="targetLanguage">target language</param>
         /// <param name="text">text to be translated</param>
         /// <returns>translated text or errored task</returns>
-        async Task<Translation> RunTranslateQueryAsync(
+        private async Task<Translation> RunTranslateQueryAsync(
             Languages sourceLanguage,
             Languages targetLanguage,
             string text
             )
         {
-            var q = BuildServiceUriPathAndQuery(text, sourceLanguage, targetLanguage);
-            var r = await _net.GetQueryResponseAsync(q);
+            string q = BuildServiceUriPathAndQuery(text, sourceLanguage, targetLanguage);
+            Tuple<string, string, Exception> r = await _net.GetQueryResponseAsync(q);
             if (!string.IsNullOrWhiteSpace(r.Item1))
             {
                 if (JsonConvert.DeserializeObject(r.Item1) is JArray o)
@@ -136,8 +135,8 @@ namespace GTranslatorAPI
                     {
 #pragma warning disable CS8602
 #pragma warning disable CS8604
-                        var translatedText = o[0][0][0].Value<string>();
-                        var originalText = o[0][0][1].Value<string>();
+                        string translatedText = o[0][0][0].Value<string>();
+                        string originalText = o[0][0][1].Value<string>();
 #pragma warning restore CS8602
 #pragma warning restore CS8604
                         return new Translation()
@@ -162,13 +161,13 @@ namespace GTranslatorAPI
         /// <param name="sourceLanguage">source language</param>
         /// <param name="targetLanguage">target language</param>
         /// <returns>query uri</returns>
-        string BuildServiceUriPathAndQuery(
+        private string BuildServiceUriPathAndQuery(
             string text,
             Languages sourceLanguage,
             Languages targetLanguage)
         {
             CheckIsNotNull(text, "text");
-            var q =
+            string q =
                 Settings.GTranslatorAPIURL
                 .Replace("{srcl}", LanguagesUtil.GetId(sourceLanguage))
                 .Replace("{tgtl}", LanguagesUtil.GetId(targetLanguage))
@@ -189,8 +188,8 @@ namespace GTranslatorAPI
             string text
             )
         {
-            var srcLng = LanguagesUtil.GetLanguageCode(sourceLanguageName);
-            var tgtLng = LanguagesUtil.GetLanguageCode(targetLanguageName);
+            Languages? srcLng = LanguagesUtil.GetLanguageCode(sourceLanguageName);
+            Languages? tgtLng = LanguagesUtil.GetLanguageCode(targetLanguageName);
             CheckCodeIsValid(srcLng);
             CheckCodeIsValid(tgtLng);
             return await TranslateAsync(
@@ -212,8 +211,8 @@ namespace GTranslatorAPI
             string text
             )
         {
-            var srcLng = LanguagesUtil.GetLanguageCodeFromLanguageId(sourceLanguageId);
-            var tgtLng = LanguagesUtil.GetLanguageCodeFromLanguageId(targetLanguageId);
+            Languages? srcLng = LanguagesUtil.GetLanguageCodeFromLanguageId(sourceLanguageId);
+            Languages? tgtLng = LanguagesUtil.GetLanguageCodeFromLanguageId(targetLanguageId);
             CheckCodeIsValid(srcLng);
             CheckCodeIsValid(tgtLng);
             return await TranslateAsync(
@@ -227,7 +226,7 @@ namespace GTranslatorAPI
         /// </summary>
         /// <param name="obj">object to be checked</param>
         /// <param name="name">name of the object</param>
-        static void CheckIsNotNull(object? obj, string name)
+        private static void CheckIsNotNull(object? obj, string name)
         {
             if (obj == null)
                 throw new ArgumentNullException(name);
@@ -237,7 +236,7 @@ namespace GTranslatorAPI
         /// check if a language code is valid. abort if false
         /// </summary>
         /// <param name="languageCode"></param>
-        static void CheckCodeIsValid(Languages? languageCode)
+        private static void CheckCodeIsValid(Languages? languageCode)
         {
             if (languageCode == null)
                 throw new ArgumentNullException($"language is not defined: {languageCode}");

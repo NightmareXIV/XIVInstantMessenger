@@ -11,7 +11,7 @@ namespace Messenger.Gui.Settings;
 
 internal class TabFonts
 {
-    bool Changed = false;
+    private bool Changed = false;
 
     internal void Draw()
     {
@@ -35,7 +35,7 @@ internal class TabFonts
             }
         }
         ImGui.Separator();
-        var col = Changed;
+        bool col = Changed;
         if (col) ImGui.PushStyleColor(ImGuiCol.Text, GradientColor.Get(ImGuiColors.DalamudYellow, ImGuiColors.DalamudRed));
         if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Check, "Apply Settings"))
         {
@@ -49,10 +49,10 @@ internal class TabFonts
         if (col) ImGui.PopStyleColor();
     }
 
-    void DisplayFontSelector()
+    private void DisplayFontSelector()
     {
-        var chooser = SingleFontChooserDialog.CreateAuto(Svc.PluginInterface.UiBuilder);
-        chooser.SelectedFontSpecChanged += this.Chooser_SelectedFontSpecChanged;
+        SingleFontChooserDialog chooser = SingleFontChooserDialog.CreateAuto(Svc.PluginInterface.UiBuilder);
+        chooser.SelectedFontSpecChanged += Chooser_SelectedFontSpecChanged;
     }
 
     private void Chooser_SelectedFontSpecChanged(SingleFontSpec font)

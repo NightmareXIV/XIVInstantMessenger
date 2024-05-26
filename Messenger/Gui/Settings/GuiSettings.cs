@@ -14,7 +14,7 @@ internal class GuiSettings : Window
 
     public GuiSettings() : base($"{P.Name} settings")
     {
-        this.SizeConstraints = new()
+        SizeConstraints = new()
         {
             MaximumSize = new(99999, 99999),
             MinimumSize = new(500, 300)

@@ -12,8 +12,8 @@ public unsafe partial class PseudoMultilineInput
 {
     private string Label = "PML";
     private uint MaxLength = 1500;
-		private string Text = "";
-		private float TextWidth = 0f;
+    private string Text = "";
+    private float TextWidth = 0f;
     internal float? Width = null;
     private int? EnterPress = null;
     internal bool IsInputActive = false;
@@ -23,10 +23,10 @@ public unsafe partial class PseudoMultilineInput
     private string EmojiSearch = "";
     private int SetFocusAt = -1;
 
-		private int MaxLines => C.PMLMaxLines;
+    private int MaxLines => C.PMLMaxLines;
     public bool IsMultiline => C.PMLEnable;
 
-		public string SinglelineText 
+    public string SinglelineText
     {
         get => Text.Replace("\r", "").Replace("\n", " ");
         set => Text = value;
@@ -50,15 +50,15 @@ public unsafe partial class PseudoMultilineInput
     }
 
     public void DrawSingleline()
-		{
-				EnterPress = null;
-				if (Text.Contains('\n'))
+    {
+        EnterPress = null;
+        if (Text.Contains('\n'))
         {
             Text = Text.Replace("\n", " ");
-				}
-				var width = Width ?? ImGui.GetContentRegionAvail().X;
-				ImGui.SetNextItemWidth(width);
-        var ret = ImGui.InputText($"##{Label}", ref Text, MaxLength, ImGuiInputTextFlags.EnterReturnsTrue);
+        }
+        float width = Width ?? ImGui.GetContentRegionAvail().X;
+        ImGui.SetNextItemWidth(width);
+        bool ret = ImGui.InputText($"##{Label}", ref Text, MaxLength, ImGuiInputTextFlags.EnterReturnsTrue);
         IsInputActive = ImGui.IsItemActive();
         if (ret)
         {
@@ -68,12 +68,12 @@ public unsafe partial class PseudoMultilineInput
 
     public void DrawMultiline()
     {
-				EnterPress = null;
-				var width = Width ?? ImGui.GetContentRegionAvail().X;
+        EnterPress = null;
+        float width = Width ?? ImGui.GetContentRegionAvail().X;
         TextWidth = width - ImGui.GetStyle().FramePadding.X * 2;
-        var newlines = Text.Split("\n").Length;
-				var cnt = Math.Max(1, Math.Min(newlines, MaxLines));
-        var lheight = ImGui.CalcTextSize("A").Y;
+        int newlines = Text.Split("\n").Length;
+        int cnt = Math.Max(1, Math.Min(newlines, MaxLines));
+        float lheight = ImGui.CalcTextSize("A").Y;
         ImGui.InputTextMultiline($"##{Label}", ref Text, MaxLength, new(width, lheight * cnt + ImGui.GetStyle().FramePadding.X * 2), ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.CallbackAlways | ImGuiInputTextFlags.CallbackCharFilter | ImGuiInputTextFlags.NoUndoRedo, Callback);
         if (SetFocusAt > -1) ImGui.SetKeyboardFocusHere(-1);
         IsInputActive = ImGui.IsItemActive();
@@ -82,73 +82,73 @@ public unsafe partial class PseudoMultilineInput
 
     private int Callback(ImGuiInputTextCallbackData* data)
     {
-				if(data->EventFlag == ImGuiInputTextFlags.CallbackCharFilter)
+        if (data->EventFlag == ImGuiInputTextFlags.CallbackCharFilter)
         {
-            if(data->EventChar == '\n')
+            if (data->EventChar == '\n')
             {
-								EnterPress = ImGui.GetFrameCount();
-								return 1;
+                EnterPress = ImGui.GetFrameCount();
+                return 1;
             }
             return 0;
         }
-        if(SetFocusAt > -1)
+        if (SetFocusAt > -1)
         {
-            if(SetFocusAt <= data->BufTextLen)
+            if (SetFocusAt <= data->BufTextLen)
             {
                 data->CursorPos = SetFocusAt;
             }
             SetFocusAt = -1;
         }
         EmojiEndCursor = data->CursorPos;
-				IsSelectingEmoji = false;
+        IsSelectingEmoji = false;
         for (int i = 0; i < EmojiEndCursor; i++)
         {
             if (data->Buf[i] == ':')
-						{
-								IsSelectingEmoji = !IsSelectingEmoji;
-								EmojiStartCursor = i;
-						}
+            {
+                IsSelectingEmoji = !IsSelectingEmoji;
+                EmojiStartCursor = i;
+            }
             else if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
             {
-								IsSelectingEmoji = false;
+                IsSelectingEmoji = false;
             }
         }
         if (IsSelectingEmoji)
         {
-						for (int i = EmojiEndCursor; i < data->BufTextLen; i++)
-						{
-								if (data->Buf[i] == ':')
-								{
-										IsSelectingEmoji = false;
-								}
-								if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
-						}
-				}
+            for (int i = EmojiEndCursor; i < data->BufTextLen; i++)
+            {
+                if (data->Buf[i] == ':')
+                {
+                    IsSelectingEmoji = false;
+                }
+                if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
+            }
+        }
         if (IsSelectingEmoji)
         {
-						EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
-				}
+            EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
+        }
 
 
-				var space = ImGui.CalcTextSize(" ").X;
-				int numNewlines = 0;
-				void Process()
+        float space = ImGui.CalcTextSize(" ").X;
+        int numNewlines = 0;
+        void Process()
         {
             for (int i = 0; i < data->BufTextLen; i++)
             {
-                var symbol = data->Buf[i];
+                byte symbol = data->Buf[i];
                 if (symbol == '\n')
                 {
                     data->Buf[i] = (byte)' ';
                 }
             }
-            var cursor = 0;
-            var width = TextWidth;
-            var prevSpaceIndex = -1;
+            int cursor = 0;
+            float width = TextWidth;
+            int prevSpaceIndex = -1;
             while (cursor < data->BufTextLen)
             {
-                var word = ReadUntilSpace(data->Buf, data->BufTextLen, cursor, out var spaceIndex);
-                var wordWidth = ImGui.CalcTextSize(word).X;
+                string word = ReadUntilSpace(data->Buf, data->BufTextLen, cursor, out int spaceIndex);
+                float wordWidth = ImGui.CalcTextSize(word).X;
                 {
                     width -= wordWidth + (spaceIndex == -1 ? 0 : space);
                     if (width < 0 && prevSpaceIndex > -1)
@@ -164,11 +164,11 @@ public unsafe partial class PseudoMultilineInput
             data->BufDirty = 1;
         }
         Process();
-        if(numNewlines >= MaxLines)
+        if (numNewlines >= MaxLines)
         {
             TextWidth -= ImGui.GetStyle().ScrollbarSize;
             Process();
-				}
+        }
         return 0;
     }
 
@@ -180,36 +180,36 @@ public unsafe partial class PseudoMultilineInput
             {
                 ImGui.OpenPopup("XIMEmojiSelect");
             }
-				}
-				if (ImGui.IsPopupOpen("XIMEmojiSelect"))
-				{
-						ImGuiHelpers.SetNextWindowPosRelativeMainViewport(ImGui.GetCursorScreenPos());
-						ImGui.SetNextWindowSizeConstraints(new(100, 100), new(500, 300));
-				}
-				if (ImGui.BeginPopup("XIMEmojiSelect", ImGuiWindowFlags.NoFocusOnAppearing))
+        }
+        if (ImGui.IsPopupOpen("XIMEmojiSelect"))
+        {
+            ImGuiHelpers.SetNextWindowPosRelativeMainViewport(ImGui.GetCursorScreenPos());
+            ImGui.SetNextWindowSizeConstraints(new(100, 100), new(500, 300));
+        }
+        if (ImGui.BeginPopup("XIMEmojiSelect", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             if (ImGui.IsWindowAppearing())
             {
                 CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
             }
             if (!IsSelectingEmoji) ImGui.CloseCurrentPopup();
-            var cnt = 0;
+            int cnt = 0;
             ImGuiEx.InputWithRightButtonsArea(() =>
             {
                 ImGui.InputTextWithHint("##emjfltr", "Search...", ref EmojiSearch, 50);
             }, () =>
             {
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, enabled:EmojiSearch != "" && !S.EmojiLoader.DownloaderTaskRunning))
+                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, enabled: EmojiSearch != "" && !S.EmojiLoader.DownloaderTaskRunning))
                 {
                     S.EmojiLoader.Search(EmojiSearch.ToLower());
                 }
                 ImGuiEx.Tooltip($"Search for this emoji on BetterTTV");
             });
-            foreach(var em in S.EmojiLoader.Emoji)
+            foreach (KeyValuePair<string, Services.EmojiLoaderService.ImageFile> em in S.EmojiLoader.Emoji)
             {
                 if (EmojiSearch != "" && !em.Key.Contains(EmojiSearch, StringComparison.OrdinalIgnoreCase)) continue;
                 cnt++;
-                if(em.Value.GetTextureWrap() != null)
+                if (em.Value.GetTextureWrap() != null)
                 {
                     ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(32));
                     ImGuiEx.Tooltip($":{em.Key}:");
@@ -222,25 +222,25 @@ public unsafe partial class PseudoMultilineInput
                             SetFocusAt = EmojiStartCursor + em.Key.Length + 3;
                         }
                     }
-								}
+                }
                 else
                 {
                     ImGui.Dummy(new(32));
                 }
                 ImGui.SameLine();
-                if(cnt % 12 == 0)
+                if (cnt % 12 == 0)
                 {
                     ImGui.NewLine();
                 }
             }
-            if(cnt == 0)
+            if (cnt == 0)
             {
                 ImGuiEx.Text($"No emoji found...");
             }
             ImGui.EndPopup();
         }
     }
-    
+
     private static string ReadUntilSpace(byte* array, int length, int start, out int spaceIndex)
     {
         for (int i = start; i < length; i++)
@@ -255,6 +255,6 @@ public unsafe partial class PseudoMultilineInput
         return MemoryHelper.ReadString(((nint)array) + start, length - start);
     }
 
-		[GeneratedRegex(@"^[a-z0-9_]{1}$", RegexOptions.IgnoreCase)]
-		private static partial Regex EmojiWhitelistedSymbols();
+    [GeneratedRegex(@"^[a-z0-9_]{1}$", RegexOptions.IgnoreCase)]
+    private static partial Regex EmojiWhitelistedSymbols();
 }

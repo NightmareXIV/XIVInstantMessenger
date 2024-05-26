@@ -21,7 +21,7 @@ namespace Messenger.Translation.Providers
 
         public void Dispose()
         {
-            
+
         }
 
         public void DrawSettings()

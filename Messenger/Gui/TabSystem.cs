@@ -5,27 +5,27 @@ namespace Messenger.Gui;
 
 internal class TabSystem : Window
 {
-    float Transparency = C.TransMax;
-    bool IsTransparent = true;
-    bool IsTitleColored = false;
+    private float Transparency = C.TransMax;
+    private bool IsTransparent = true;
+    private bool IsTitleColored = false;
     internal string Name = null;
     internal IEnumerable<ChatWindow> Windows => P.WindowSystemChat.Windows.Cast<ChatWindow>().Where(x => (Name == null && !C.TabWindows.Contains(x.OwningTab)) || x.OwningTab == Name);
 
     public TabSystem(string name) : base($"XIV Instant Messenger - {name ?? "Default Window"}")
     {
-        this.RespectCloseHotkey = false;
-        this.IsOpen = true;
-        this.SizeConstraints = new()
+        RespectCloseHotkey = false;
+        IsOpen = true;
+        SizeConstraints = new()
         {
             MinimumSize = new(300, 200),
             MaximumSize = new(9999, 9999)
         };
-        this.Name = name;
+        Name = name;
     }
 
     internal void SetTransparency(bool isTransparent)
     {
-        this.Transparency = !isTransparent ? C.TransMax : C.TransMin;
+        Transparency = !isTransparent ? C.TransMax : C.TransMin;
     }
 
     public override bool DrawConditions()
@@ -35,37 +35,37 @@ internal class TabSystem : Window
 
     public override void OnClose()
     {
-        foreach(var w in Windows)
+        foreach (ChatWindow w in Windows)
         {
             w.IsOpen = false;
         }
-        this.IsOpen = true;
+        IsOpen = true;
     }
 
     public override void PreDraw()
     {
         if (C.NoResize && !ImGui.GetIO().KeyCtrl)
         {
-            this.Flags |= ImGuiWindowFlags.NoResize;
+            Flags |= ImGuiWindowFlags.NoResize;
         }
         else
         {
-            this.Flags &= ~ImGuiWindowFlags.NoResize;
+            Flags &= ~ImGuiWindowFlags.NoResize;
         }
         if (C.NoMove && !ImGui.GetIO().KeyCtrl)
         {
-            this.Flags |= ImGuiWindowFlags.NoMove;
+            Flags |= ImGuiWindowFlags.NoMove;
         }
         else
         {
-            this.Flags &= ~ImGuiWindowFlags.NoMove;
+            Flags &= ~ImGuiWindowFlags.NoMove;
         }
         IsTransparent = Transparency < 1f;
         if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
-        if(!C.FontNoTabs) P.FontManager.PushFont();
-        if(C.ColorTitleFlashTab && Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
+        if (!C.FontNoTabs) P.FontManager.PushFont();
+        if (C.ColorTitleFlashTab && Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
         {
-            this.IsTitleColored = true;
+            IsTitleColored = true;
             ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor(C.DefaultChannelCustomization));
             ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ImGuiCol.TitleBgActive.GetFlashColor(C.DefaultChannelCustomization));
             ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiCol.TitleBgCollapsed.GetFlashColor(C.DefaultChannelCustomization));
@@ -74,7 +74,7 @@ internal class TabSystem : Window
 
     public override void Draw()
     {
-        if(P.FontManager.FontPushed && !P.FontManager.FontReady)
+        if (P.FontManager.FontPushed && !P.FontManager.FontReady)
         {
             ImGuiEx.Text($"Loading font, please wait...");
             return;
@@ -96,7 +96,7 @@ internal class TabSystem : Window
         }
         if (ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
         {
-            foreach (var w in Windows)
+            foreach (ChatWindow w in Windows)
             {
                 {
                     void Associate()
@@ -113,7 +113,7 @@ internal class TabSystem : Window
                                 C.TabWindowAssociations.Remove(w.MessageHistory.Player.ToString());
                             }
                             ImGui.PopStyleColor();
-                            foreach (var x in C.TabWindows)
+                            foreach (string x in C.TabWindows)
                             {
                                 if (ImGui.Selectable(x))
                                 {
@@ -124,13 +124,13 @@ internal class TabSystem : Window
                         }
                     }
 
-                    var isOpen = w.IsOpen;
-                    var flags = ImGuiTabItemFlags.None;
+                    bool isOpen = w.IsOpen;
+                    ImGuiTabItemFlags flags = ImGuiTabItemFlags.None;
                     if (w.MessageHistory.ShouldSetFocus())
                     {
                         flags = ImGuiTabItemFlags.SetSelected;
                     }
-                    var titleColored = false;
+                    bool titleColored = false;
                     if (w.Unread)
                     {
                         titleColored = true;
@@ -175,10 +175,10 @@ internal class TabSystem : Window
     {
         if (!C.FontNoTabs) P.FontManager.PopFont();
         if (IsTransparent) ImGui.PopStyleVar();
-        if (this.IsTitleColored)
+        if (IsTitleColored)
         {
             ImGui.PopStyleColor(3);
-            this.IsTitleColored = false;
+            IsTitleColored = false;
         }
     }
 }

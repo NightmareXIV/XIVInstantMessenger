@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 namespace Messenger.Services.MessageParsingService.Segments;
 public interface ISegment
 {
-		public void Draw();
+    public void Draw();
 }

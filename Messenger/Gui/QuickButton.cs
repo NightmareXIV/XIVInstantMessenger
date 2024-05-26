@@ -4,26 +4,26 @@ namespace Messenger.Gui;
 
 internal unsafe class QuickButton : Window
 {
-    internal QuickButton() : base("MessengerQuickButton", 
+    internal QuickButton() : base("MessengerQuickButton",
         ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.AlwaysUseWindowPadding
         , true)
     {
-        this.IsOpen = true;
-        this.RespectCloseHotkey = false;
+        IsOpen = true;
+        RespectCloseHotkey = false;
     }
 
     public override bool DrawConditions()
     {
         AtkUnitBase* addon = null;
-        var ret = C.QuickOpenButton
+        bool ret = C.QuickOpenButton
             && (C.AddonName == string.Empty || (TryGetAddonByName(C.AddonName, out addon)
             && addon->IsVisible));
         if (ret)
         {
-            this.Position = new Vector2(C.QuickOpenPositionX2, C.QuickOpenPositionY2);
+            Position = new Vector2(C.QuickOpenPositionX2, C.QuickOpenPositionY2);
             if (addon != null)
             {
-                this.Position += new Vector2(addon->X, addon->Y);
+                Position += new Vector2(addon->X, addon->Y);
             }
         }
         return ret;
@@ -44,8 +44,8 @@ internal unsafe class QuickButton : Window
         ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
-        var col = false;
-        if(P.Hidden)
+        bool col = false;
+        if (P.Hidden)
         {
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiCol.Text.GetFlashColor(C.DefaultChannelCustomization));
             col = true;
@@ -75,11 +75,11 @@ internal unsafe class QuickButton : Window
                         Svc.Commands.ProcessCommand("/xim close");
                     }
                 });
-                var tsize = ImGui.CalcTextSize("");
+                Vector2 tsize = ImGui.CalcTextSize("");
                 Sender? toRem = null;
-                foreach (var x in P.Chats)
+                foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
                 {
-                    var cur = ImGui.GetCursorPos();
+                    Vector2 cur = ImGui.GetCursorPos();
                     if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count})", false, ImGuiSelectableFlags.None, new Vector2(200f.Scale(), tsize.Y)))
                     {
                         P.Hidden = false;

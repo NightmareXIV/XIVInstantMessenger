@@ -1,43 +1,43 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text;
-using Lumina.Excel.GeneratedSheets;
-using Messenger.FontControl;
-using ECommons.Configuration;
 using Dalamud.Game.Gui.PartyFinder.Types;
-using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using Messenger.Gui.Settings;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
 using ECommons.Automation;
-using FFXIVClientStructs.FFXIV.Client.System.String;
+using ECommons.Configuration;
 using ECommons.Events;
-using ECommons.GameHelpers;
 using ECommons.ExcelServices;
+using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using Lumina.Excel.GeneratedSheets;
+using Messenger.FontControl;
+using Messenger.Gui.Settings;
 using System.IO;
 
 namespace Messenger;
 
-internal unsafe static class Utils
+internal static unsafe class Utils
 {
-    static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
+    private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
 
     public static void DrawWrappedText(string str)
     {
-        var max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
-        foreach (var s in str.Split("\n")) 
+        float max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
+        foreach (string s in str.Split("\n"))
         {
-            var canRestart = true;
-            Start:
-            var start = 0;
+            bool canRestart = true;
+        Start:
+            int start = 0;
             for (int i = 0; i < s.Length; i++)
             {
                 if (start >= s.Length) break;
-                var text = s[start..i];
-                var size = ImGui.CalcTextSize(text).X;
-                var avail = ImGui.GetContentRegionAvail().X - ScrollbarPadding; 
-								if (size > avail)
+                string text = s[start..i];
+                float size = ImGui.CalcTextSize(text).X;
+                float avail = ImGui.GetContentRegionAvail().X - ScrollbarPadding;
+                if (size > avail)
                 {
                     //try to match wrapping symbol first
                     for (int z = i; z >= start; z--)
@@ -46,19 +46,19 @@ internal unsafe static class Utils
                         {
                             ImGuiEx.Text(s[start..z]);
                             canRestart = false;
-														start = z;
+                            start = z;
                             //PluginLog.Information($"start is now {start}");
                             break;
                         }
-                        else if(z == start)
+                        else if (z == start)
                         {
-                            if(max > avail && canRestart)
+                            if (max > avail && canRestart)
                             {
                                 //we can use more space at next line, restart everything
                                 ImGui.NewLine();
                                 canRestart = false;
                                 goto Start;
-														}
+                            }
                             //just wrap it
                             ImGuiEx.Text(s[start..i]);
                             start = i;
@@ -66,10 +66,10 @@ internal unsafe static class Utils
                     }
                 }
             }
-            if(start < s.Length)
+            if (start < s.Length)
             {
-								ImGuiEx.Text(s[start..]);
-						}
+                ImGuiEx.Text(s[start..]);
+            }
         }
     }
 
@@ -88,9 +88,9 @@ internal unsafe static class Utils
     {
         if (s.IsGenericChannel())
         {
-            if (Enum.TryParse<XivChatType>(s.Name, out var e))
+            if (Enum.TryParse<XivChatType>(s.Name, out XivChatType e))
             {
-                if (C.SpecificChannelCustomizations.TryGetValue(e, out var cust))
+                if (C.SpecificChannelCustomizations.TryGetValue(e, out ChannelCustomization cust))
                 {
                     return cust;
                 }
@@ -98,7 +98,7 @@ internal unsafe static class Utils
         }
         else
         {
-            if (C.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out var cust))
+            if (C.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out ChannelCustomization cust))
             {
                 return cust;
             }
@@ -108,7 +108,7 @@ internal unsafe static class Utils
 
     public static string GetName(this XivChatType type)
     {
-        var affix = string.Empty;
+        string affix = string.Empty;
         /*if(type.EqualsAny(XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4, XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8))
         {
             var num = int.Parse(type.ToString()[^1..]);
@@ -121,13 +121,13 @@ internal unsafe static class Utils
             }
         }*/
 
-        if(type.EqualsAny(XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8))
+        if (type.EqualsAny(XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8))
         {
-            var num = int.Parse(type.ToString()[^1..]);
-            var proxy = (InfoProxyCrossWorldLinkShell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkShell);
-            var name = proxy->CWLSArraySpan[num-1].Name;
-            var str = MemoryHelper.ReadSeString(&name).ExtractText();
-            if(str != "")
+            int num = int.Parse(type.ToString()[^1..]);
+            InfoProxyCrossWorldLinkShell* proxy = (InfoProxyCrossWorldLinkShell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkShell);
+            Utf8String name = proxy->CWLSArraySpan[num - 1].Name;
+            string str = MemoryHelper.ReadSeString(&name).ExtractText();
+            if (str != "")
             {
                 return $"(CWLS{num}) {str}";
             }
@@ -171,7 +171,7 @@ internal unsafe static class Utils
 
     public static string GetChannelName(this Sender s, bool includeWorld = true)
     {
-        if (s.IsGenericChannel(out var t))
+        if (s.IsGenericChannel(out XivChatType t))
         {
             return t.GetName();
         }
@@ -195,7 +195,7 @@ internal unsafe static class Utils
 
     public static bool IsGenericChannel(this Sender s, out XivChatType type)
     {
-        if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out var z))
+        if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out XivChatType z))
         {
             type = z;
             return true;
@@ -214,7 +214,8 @@ internal unsafe static class Utils
             throw new Exception("Tried to link NULL item.");
         }
 
-        var payloadList = new List<Payload> {
+        List<Payload> payloadList =
+        [
             new UIForegroundPayload((ushort) (0x223 + item.Rarity * 2)),
             new UIGlowPayload((ushort) (0x224 + item.Rarity * 2)),
             new ItemPayload(item.RowId, item.CanBeHq && hq),
@@ -226,7 +227,7 @@ internal unsafe static class Utils
             new TextPayload(item.Name + (item.CanBeHq && hq ? $" {(char)SeIconChar.HighQuality}" : "")),
             new RawPayload(new byte[] {0x02, 0x27, 0x07, 0xCF, 0x01, 0x01, 0x01, 0xFF, 0x01, 0x03}),
             new RawPayload(new byte[] {0x02, 0x13, 0x02, 0xEC, 0x03})
-        };
+        ];
 
         return payloadList;
     }
@@ -234,8 +235,8 @@ internal unsafe static class Utils
 
     public static long GetLatestMessageTime(this MessageHistory history)
     {
-        var timeCurrent = 0L;
-        if (history.Messages.TryGetLast(x => !x.IsSystem, out var currentLastMessage))
+        long timeCurrent = 0L;
+        if (history.Messages.TryGetLast(x => !x.IsSystem, out SavedMessage currentLastMessage))
         {
             timeCurrent = currentLastMessage.Time;
         }
@@ -244,13 +245,13 @@ internal unsafe static class Utils
 
     public static bool TryGetSender(this string value, out Sender sender)
     {
-        var a = value.Split("@");
+        string[] a = value.Split("@");
         if (a.Length != 2)
         {
             sender = default;
             return false;
         }
-        if(Svc.Data.GetExcelSheet<World>().TryGetFirst(x => x.Name.ToString().EqualsIgnoreCase(a[1]), out var world))
+        if (Svc.Data.GetExcelSheet<World>().TryGetFirst(x => x.Name.ToString().EqualsIgnoreCase(a[1]), out World world))
         {
             sender = new(a[0], world.RowId);
             return true;
@@ -271,8 +272,8 @@ internal unsafe static class Utils
 
     public static byte[] ToTerminatedBytes(this string s)
     {
-        var utf8 = Encoding.UTF8;
-        var bytes = new byte[utf8.GetByteCount(s) + 1];
+        Encoding utf8 = Encoding.UTF8;
+        byte[] bytes = new byte[utf8.GetByteCount(s) + 1];
         utf8.GetBytes(s, 0, s.Length, bytes, 0);
         bytes[^1] = 0;
         return bytes;
@@ -290,7 +291,7 @@ internal unsafe static class Utils
             senderStruct = default;
             return false;
         }
-        foreach (var x in sender.Payloads)
+        foreach (Payload x in sender.Payloads)
         {
             if (x is PlayerPayload p)
             {
@@ -309,8 +310,8 @@ internal unsafe static class Utils
 
     public static (int current, int max) GetLength(string destination, string message)
     {
-        var cmd = Encoding.UTF8.GetBytes($"/tell {destination} ").Length;
-        var msg = Encoding.UTF8.GetBytes(message).Length;
+        int cmd = Encoding.UTF8.GetBytes($"/tell {destination} ").Length;
+        int msg = Encoding.UTF8.GetBytes(message).Length;
         return (msg, 500 - cmd);
     }
 
@@ -318,7 +319,7 @@ internal unsafe static class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (var x in P.Chats)
+            foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
             {
                 P.WindowSystemChat.RemoveWindow(x.Value.ChatWindow);
             }
@@ -331,7 +332,7 @@ internal unsafe static class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (var x in P.Chats)
+            foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
             {
                 x.Value.LoadHistory();
             }
@@ -341,7 +342,7 @@ internal unsafe static class Utils
 
     public static string GetLogStorageFolder()
     {
-        var baseFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
+        string baseFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
         if (C.SplitLogging && P.CurrentPlayer != null && !C.SplitBlacklist.Contains(P.CurrentPlayer))
         {
             baseFolder = Path.Combine(baseFolder, P.CurrentPlayer);
@@ -350,7 +351,7 @@ internal unsafe static class Utils
         {
             Directory.CreateDirectory(baseFolder);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.Log();
         }
