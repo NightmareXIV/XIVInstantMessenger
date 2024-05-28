@@ -303,6 +303,17 @@ internal unsafe class ChatWindow : Window
         ImGui.SameLine(0, 0);
         Vector2 icur1 = ImGui.GetCursorPos();
         ImGui.Dummy(Vector2.Zero);
+        ImGui.SameLine(0, 2);
+
+        if (true)
+        {
+            if (ImGuiEx.IconButton(FontAwesomeIcon.SmileWink, "Insert emoji"))
+            {
+                Input.OpenEmojiSelector();
+            }
+            ImGuiEx.Tooltip("Open Emoji selector");
+        }
+
         if (C.ButtonSend)
         {
             ImGui.SameLine(0, 2);

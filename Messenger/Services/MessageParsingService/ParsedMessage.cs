@@ -16,14 +16,36 @@ public partial class ParsedMessage
     public ParsedMessage(SeString message)
     {
         RawString = message.ExtractText();
-        string[] splitMessage = EmojiRegex().Split(RawString);
+        string[] splitMessage = EmojiRegex().Split(RawString).Where(x => x.Length > 0).ToArray();
         PluginLog.Debug($"Message parts: \n- {splitMessage.Print("\n- ")}");
         List<ISegment> segments = [];
         foreach (string str in splitMessage)
         {
             if (str.StartsWith(':') && str.EndsWith(':'))
             {
-                segments.Add(new SegmentEmoji(str[1..^1]));
+                var e = str[1..^1];
+                if (e.StartsWith("s-"))
+                {
+                    if (splitMessage.Length == 1)
+                    {
+                        segments.Add(new SegmentSticker(e[2..]));
+                    }
+                    else
+                    {
+                        segments.Add(new SegmentEmoji(e[2..]));
+                    }
+                }
+                else
+                {
+                    if(splitMessage.Length == 1)
+                    {
+                        segments.Add(new SegmentDoubleEmoji(e));
+                    }
+                    else
+                    {
+                        segments.Add(new SegmentEmoji(e));
+                    }
+                }
             }
             else
             {

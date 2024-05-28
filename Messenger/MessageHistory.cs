@@ -82,7 +82,7 @@ internal partial class MessageHistory
                                     Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
                                     OverrideName = name,
                                     IgnoreTranslation = true,
-                                    ParsedMessage = new(matches[4].ToString()),
+                                    ParsedMessage = new(matches[4].ToString().ReplaceLineEndings("")),
                                 });
                             }
                         }, PluginLog.Warning);
@@ -102,7 +102,7 @@ internal partial class MessageHistory
                                 LoadedMessages.Insert(0, new()
                                 {
                                     IsIncoming = false,
-                                    Message = matches[2].ToString(),
+                                    Message = matches[2].ToString().ReplaceLineEndings(""),
                                     Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
                                     IsSystem = true,
                                     IgnoreTranslation = true,

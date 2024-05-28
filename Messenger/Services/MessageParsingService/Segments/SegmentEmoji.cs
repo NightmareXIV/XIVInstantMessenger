@@ -17,7 +17,9 @@ public class SegmentEmoji : ISegment
         Emoji = emoji ?? throw new ArgumentNullException(nameof(emoji));
     }
 
-    public void Draw()
+    public virtual void Draw() => Draw(1f);
+
+    public void Draw(float sizeMult)
     {
         Vector2 size = new(MathF.Floor(ImGui.CalcTextSize(" ").Y));
         ImGui.SameLine(0, 0);
@@ -29,7 +31,8 @@ public class SegmentEmoji : ISegment
         Dalamud.Interface.Internal.IDalamudTextureWrap tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
         if (tex != null)
         {
-            ImGui.Image(tex.ImGuiHandle, size);
+            ImGui.Image(tex.ImGuiHandle, size * sizeMult);
+            ImGuiEx.Tooltip(Emoji);
         }
         else
         {
@@ -38,23 +41,25 @@ public class SegmentEmoji : ISegment
             {
                 if (S.EmojiLoader.Loading.GetTextureWrap() != null)
                 {
-                    ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size);
+                    ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size * sizeMult);
                 }
                 else
                 {
-                    ImGui.Dummy(size);
+                    ImGui.Dummy(size * sizeMult);
                 }
+                ImGuiEx.Tooltip("Loading: "+Emoji);
             }
             else
             {
                 if (S.EmojiLoader.Error.GetTextureWrap() != null)
                 {
-                    ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size);
+                    ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size * sizeMult);
                 }
                 else
                 {
-                    ImGui.Dummy(size);
+                    ImGui.Dummy(size * sizeMult);
                 }
+                ImGuiEx.Tooltip("Emoji not found: " + Emoji);
             }
         }
         ImGui.SameLine(0, 0);

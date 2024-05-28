@@ -79,7 +79,7 @@ public sealed class EmojiLoader : IDisposable
                             foreach (BetterTTWEmoji.EmoteData e in emoji)
                             {
                                 PluginLog.Debug($"    Emoji: {e.code}");
-                                DownloadEmojiToCache(e.id, e.imageType, e.code, true);
+                                DownloadEmojiToCache(e.id, e.imageType, e.code, true, C.DynamicBetterTTVEmojiCache);
                             }
                         }
                         catch (Exception e)
@@ -105,7 +105,7 @@ public sealed class EmojiLoader : IDisposable
     private EmojiLoader()
     {
         LoadDefaultEmoji();
-        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > C.LastBetterTTVUpdate + TimeSpan.FromDays(7).TotalMilliseconds)
+        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > C.LastStaticBetterTTVUpdate + TimeSpan.FromDays(7).TotalMilliseconds)
         {
             BuildCache();
         }
@@ -117,7 +117,7 @@ public sealed class EmojiLoader : IDisposable
 
     public void BuildCache()
     {
-        C.BetterTTVEmojiCache.Clear();
+        C.StaticBetterTTVEmojiCache.Clear();
         Task.Run(() =>
         {
             try
@@ -129,12 +129,12 @@ public sealed class EmojiLoader : IDisposable
                 PluginLog.Debug($"Emote info received: \n{data.Print("\n")}");
                 foreach (BetterTTWEmoji e in data)
                 {
-                    DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false);
+                    DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false, C.StaticBetterTTVEmojiCache);
                 }
                 Svc.Framework.RunOnFrameworkThread(() =>
                 {
                     LoadEmojiCache();
-                    C.LastBetterTTVUpdate = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    C.LastStaticBetterTTVUpdate = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 });
             }
             catch (Exception e)
@@ -144,9 +144,9 @@ public sealed class EmojiLoader : IDisposable
         });
     }
 
-    private void DownloadEmojiToCache(string id, string imageType, string code, bool skipExisting)
+    private void DownloadEmojiToCache(string id, string imageType, string code, bool skipExisting, Dictionary<string, string> cache)
     {
-        string url = $"https://cdn.betterttv.net/emote/{id}/2x.{imageType}";
+        string url = $"https://cdn.betterttv.net/emote/{id}/3x.{imageType}";
         PluginLog.Debug($" Downloading {url}");
         byte[] file = Client.GetByteArrayAsync(url).Result;
         string fname = $"{id}.{imageType}";
@@ -154,14 +154,14 @@ public sealed class EmojiLoader : IDisposable
         Svc.Framework.RunOnFrameworkThread(() =>
         {
             string key = code;
-            if (skipExisting && C.BetterTTVEmojiCache.ContainsKey(key)) return;
+            if (skipExisting && cache.ContainsKey(key)) return;
             int i = 1;
-            while (C.BetterTTVEmojiCache.ContainsKey(key))
+            while (cache.ContainsKey(key))
             {
                 key = $"{code}{i}";
                 i++;
             }
-            C.BetterTTVEmojiCache[key] = fname;
+            cache[key] = fname;
             Emoji[key] = new(Path.Combine(CachePath, fname));
         });
     }
@@ -188,7 +188,11 @@ public sealed class EmojiLoader : IDisposable
     {
         Emoji.Clear();
         LoadDefaultEmoji();
-        foreach (KeyValuePair<string, string> x in C.BetterTTVEmojiCache)
+        foreach (KeyValuePair<string, string> x in C.StaticBetterTTVEmojiCache)
+        {
+            Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
+        }
+        foreach (KeyValuePair<string, string> x in C.DynamicBetterTTVEmojiCache)
         {
             Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
         }

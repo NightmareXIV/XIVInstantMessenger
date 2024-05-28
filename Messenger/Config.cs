@@ -115,6 +115,8 @@ public class Config : IPluginConfiguration
     public int MessageLineSpacing = 0;
     public int MessageSpacing = 2;
 
-    public long LastBetterTTVUpdate = 0;
-    public Dictionary<string, string> BetterTTVEmojiCache = [];
+    public long LastStaticBetterTTVUpdate = 0;
+    public Dictionary<string, string> StaticBetterTTVEmojiCache = [];
+    public Dictionary<string, string> DynamicBetterTTVEmojiCache = [];
+    public List<string> FavoriteEmoji = [];
 }
