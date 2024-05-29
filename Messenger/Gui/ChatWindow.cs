@@ -1,16 +1,19 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using ECommons;
 using ECommons.Automation;
 using ECommons.GameFunctions;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
+using Messenger.Gui.TitleButtons;
+using SixLabors.ImageSharp.Metadata;
 using System.IO;
 using static FFXIVClientStructs.FFXIV.Client.Graphics.Kernel.VertexShader;
 
 namespace Messenger.Gui;
 
-internal unsafe class ChatWindow : Window
+public unsafe class ChatWindow : Window
 {
     private static int CascadingPosition = 0;
     internal MessageHistory MessageHistory;
@@ -29,6 +32,12 @@ internal unsafe class ChatWindow : Window
 
     internal ChannelCustomization Cust => MessageHistory.Player.GetCustomization();
 
+    private InviteToPartyButton InviteToPartyButton;
+    private AddFriendButton AddFriendButton;
+    private AddToBlacklistButton AddToBlacklistButton;
+    private OpenLogButton OpenLogButton;
+    private OpenCharaCardButton OpenCharaCardButton;
+
     public ChatWindow(MessageHistory messageHistory) :
         base($"Chat with {messageHistory.Player.GetChannelName()}###Messenger - {messageHistory.Player.Name}{messageHistory.Player.HomeWorld}"
             , ImGuiWindowFlags.NoFocusOnAppearing)
@@ -39,6 +48,21 @@ internal unsafe class ChatWindow : Window
             MinimumSize = new(200, 200),
             MaximumSize = new(9999, 9999)
         };
+        InviteToPartyButton = new(this);
+        AddFriendButton = new(this);
+        AddToBlacklistButton = new(this);
+        OpenLogButton = new(this);
+        OpenCharaCardButton = new(this);
+    }
+
+    public void UpdateTitleButtons(Window window)
+    {
+        window.TitleBarButtons.Clear();
+        if (InviteToPartyButton.ShouldDisplay()) window.TitleBarButtons.Add(InviteToPartyButton.Button);
+        if (AddFriendButton.ShouldDisplay()) window.TitleBarButtons.Add(AddFriendButton.Button);
+        if (AddToBlacklistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToBlacklistButton.Button);
+        if (OpenLogButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenLogButton.Button);
+        if (OpenCharaCardButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenCharaCardButton.Button);
     }
 
     internal void SetTransparency(bool isTransparent)
@@ -87,6 +111,11 @@ internal unsafe class ChatWindow : Window
             //Notify.Info("Cascading has been reset");
             ChatWindow.CascadingPosition = 0;
         }
+    }
+
+    public override void Update()
+    {
+        this.TitleBarButtons.Clear();
     }
 
     public override void PreDraw()
@@ -140,6 +169,8 @@ internal unsafe class ChatWindow : Window
 
     public override void Draw()
     {
+        InviteToPartyButton.DrawPopup();
+        this.UpdateTitleButtons(this);
         if (P.FontManager.FontPushed && !P.FontManager.FontReady)
         {
             ImGuiEx.Text($"Loading font, please wait...");
@@ -334,145 +365,6 @@ internal unsafe class ChatWindow : Window
                 ImGuiEx.Tooltip("Send message");
             }
         }
-        if (C.ButtonInvite && !MessageHistory.Player.IsGenericChannel())
-        {
-            ImGui.SameLine(0, 2);
-            if (ImGuiEx.IconButton(FontAwesomeIcon.DoorOpen, "InviteToParty"))
-            {
-                if (Svc.Objects.Any(c => c is PlayerCharacter pc
-                    && pc.HomeWorld.Id == MessageHistory.Player.HomeWorld && pc.Name.ToString() == MessageHistory.Player.Name))
-                {
-                    string result = P.InviteToParty(MessageHistory.Player, true);
-                    if (result != null)
-                    {
-                        Notify.Error(result);
-                    }
-                    else
-                    {
-                        Notify.Info($"Inviting through World");
-                    }
-                }
-                else
-                {
-                    bool flSuccess = false;
-                    foreach (FriendListEntry x in FriendList.Get())
-                    {
-                        if (flSuccess) break;
-                        if (x.Name.ToString() == MessageHistory.Player.Name && x.HomeWorld == MessageHistory.Player.HomeWorld)
-                        {
-                            flSuccess = true;
-                            if (x.IsOnline)
-                            {
-                                bool sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x.CurrentWorld;
-                                string result = P.InviteToParty(MessageHistory.Player, sameWorld, x.ContentId);
-                                if (result != null)
-                                {
-                                    Notify.Error(result);
-                                }
-                                else
-                                {
-                                    Notify.Info($"Inviting through FrieldList ({(sameWorld ? "same world" : "different world")})");
-                                }
-                            }
-                            else if (P.CIDlist.ContainsValue(x.ContentId))
-                            {
-                                string result = P.InviteToParty(MessageHistory.Player, true);
-                                if (result != null)
-                                {
-                                    Notify.Error(result);
-                                }
-                                else
-                                {
-                                    Notify.Info($"Inviting through Chat History");
-                                }
-                            }
-                            else
-                            {
-                                Notify.Error("Target appears to be offline.");
-                            }
-                        }
-                    }
-                    if (!flSuccess)
-                    {
-                        {
-                            ImGui.OpenPopup("Invite");
-                        }
-                    }
-                }
-            }
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-            {
-                ImGui.OpenPopup("Invite");
-            }
-            ImGuiEx.Tooltip("Invite to party (right click for extra options)");
-            if (ImGui.BeginPopup("Invite"))
-            {
-                ImGuiEx.Text("Unable to determine player's current world.");
-                if (ImGui.Selectable("Same world"))
-                {
-                    P.InviteToParty(MessageHistory.Player, true);
-                }
-                if (ImGui.Selectable("Different world"))
-                {
-                    if (P.IsFriend(MessageHistory.Player))
-                    {
-                        P.InviteToParty(MessageHistory.Player, false);
-                    }
-                    else
-                    {
-                        Notify.Error("This action is only possible for your friends.");
-                    }
-                }
-                ImGui.EndPopup();
-            }
-        }
-
-        if (!MessageHistory.Player.IsGenericChannel() && !P.IsFriend(MessageHistory.Player))
-        {
-            if (C.ButtonFriend)
-            {
-                ImGui.SameLine(0, 2);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Smile, "AddFriend"))
-                {
-                    P.GameFunctions.SendFriendRequest(MessageHistory.Player.Name, (ushort)MessageHistory.Player.HomeWorld);
-                }
-                ImGuiEx.Tooltip("Add to friend list");
-            }
-            if (C.ButtonBlack)
-            {
-                ImGui.SameLine(0, 2);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Frown, "AddBlacklist"))
-                {
-                    P.GameFunctions.AddToBlacklist(MessageHistory.Player.Name, (ushort)MessageHistory.Player.HomeWorld);
-                }
-                ImGuiEx.Tooltip("Add to blacklist");
-            }
-        }
-        if (C.ButtonLog)
-        {
-            ImGui.SameLine(0, 2);
-            if (ImGuiEx.IconButton(FontAwesomeIcon.Book, "Log"))
-            {
-                if (File.Exists(MessageHistory.LogFile))
-                {
-                    ShellStart(MessageHistory.LogFile);
-                }
-                else
-                {
-                    Notify.Error("No log exist yet");
-                }
-            }
-            ImGuiEx.Tooltip("Open text log");
-        }
-        if (C.ButtonCharaCard)
-        {
-            ImGui.SameLine(0, 2);
-            if (ImGuiEx.IconButton(FontAwesomeIcon.IdCard, "OpenCharaCard"))
-            {
-                P.OpenCharaCard(MessageHistory.Player);
-            }
-            ImGuiEx.Tooltip("Open adventurer plate");
-        }
         ImGui.SameLine(0, 0);
         afterInputWidth = ImGui.GetCursorPosX() - icur1.X;
         ImGui.Dummy(Vector2.Zero);
@@ -591,6 +483,7 @@ internal unsafe class ChatWindow : Window
             ImGui.PopStyleColor();
         }
     }
+
 
     public override void PostDraw()
     {

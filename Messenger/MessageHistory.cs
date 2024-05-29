@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Messenger;
 
-internal partial class MessageHistory
+public partial class MessageHistory
 {
     private const int LoadBytes = 128 * 1024;
     internal Sender Player;

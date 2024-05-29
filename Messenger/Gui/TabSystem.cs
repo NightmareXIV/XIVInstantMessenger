@@ -149,6 +149,7 @@ internal class TabSystem : Window
                         w.SetPosition = false;
                         if (C.FontNoTabs) P.FontManager.PushFont();
                         w.Draw();
+                        this.TitleBarButtons = w.TitleBarButtons;
                         if (C.FontNoTabs) P.FontManager.PopFont();
                         ImGui.EndTabItem();
                     }
@@ -169,6 +170,13 @@ internal class TabSystem : Window
             }
             ImGui.EndTabBar();
         }
+    }
+
+    public readonly List<TitleBarButton> EmptyTitleBarList = [];
+
+    public override void Update()
+    {
+        this.TitleBarButtons = EmptyTitleBarList;
     }
 
     public override void PostDraw()
