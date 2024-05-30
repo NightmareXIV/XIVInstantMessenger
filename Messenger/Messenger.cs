@@ -125,7 +125,7 @@ public unsafe class Messenger : IDalamudPlugin
     {
         if (C.CloseLogout)
         {
-            foreach (KeyValuePair<Sender, MessageHistory> x in Chats)
+            foreach (var x in Chats)
             {
                 x.Value.ChatWindow.IsOpen = false;
             }
@@ -136,7 +136,7 @@ public unsafe class Messenger : IDalamudPlugin
     {
         TabSystems.Each(WindowSystemMain.RemoveWindow);
         TabSystems.Clear();
-        foreach (string x in C.TabWindows)
+        foreach (var x in C.TabWindows)
         {
             TabSystems.Add(new(x));
         }
@@ -179,14 +179,14 @@ public unsafe class Messenger : IDalamudPlugin
     internal MessageHistory GetPreviousMessageHistory(MessageHistory current)
     {
         MessageHistory previous = null;
-        long timeDiff = long.MaxValue;
-        long timeCurrent = current.GetLatestMessageTime();
-        foreach (MessageHistory x in Chats.Values)
+        var timeDiff = long.MaxValue;
+        var timeCurrent = current.GetLatestMessageTime();
+        foreach (var x in Chats.Values)
         {
-            long latest = x.GetLatestMessageTime();
+            var latest = x.GetLatestMessageTime();
             if (latest != 0)
             {
-                long curDiff = timeCurrent - latest;
+                var curDiff = timeCurrent - latest;
                 if (curDiff < timeDiff && curDiff > 0)
                 {
                     timeDiff = curDiff;
@@ -201,9 +201,9 @@ public unsafe class Messenger : IDalamudPlugin
     {
         MessageHistory chat = null;
         long time = 0;
-        foreach (MessageHistory x in Chats.Values)
+        foreach (var x in Chats.Values)
         {
-            long latest = x.GetLatestMessageTime();
+            var latest = x.GetLatestMessageTime();
             if (latest > time && (exclude == null || exclude.Value != x.Player))
             {
                 chat = x;
@@ -215,14 +215,14 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal string GetWhitespacesForLen(float len)
     {
-        if (WhitespaceMap.TryGetValue(len, out string x))
+        if (WhitespaceMap.TryGetValue(len, out var x))
         {
             return x;
         }
         else
         {
-            string spc = " ";
-            for (int i = 0; i < 500; i++)
+            var spc = " ";
+            for (var i = 0; i < 500; i++)
             {
                 if (ImGui.CalcTextSize(spc).X < len)
                 {
@@ -252,7 +252,7 @@ public unsafe class Messenger : IDalamudPlugin
         }
         else if (args.EqualsAny("close", "c"))
         {
-            foreach (MessageHistory x in Chats.Values)
+            foreach (var x in Chats.Values)
             {
                 x.ChatWindow.IsOpen = false;
             }
@@ -260,7 +260,7 @@ public unsafe class Messenger : IDalamudPlugin
         }
         else
         {
-            foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
+            foreach (var x in P.Chats)
             {
                 if (x.Key.GetChannelName().Contains(args, StringComparison.OrdinalIgnoreCase))
                 {
@@ -274,16 +274,16 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 Safe(delegate
                 {
-                    string logFolder = Utils.GetLogStorageFolder();
-                    string[] files = Directory.GetFiles(logFolder);
-                    foreach (string file in files)
+                    var logFolder = Utils.GetLogStorageFolder();
+                    var files = Directory.GetFiles(logFolder);
+                    foreach (var file in files)
                     {
                         FileInfo fileInfo = new(file);
                         if (file.EndsWith(".txt") && file.Contains("@") && fileInfo.Length > 0
                         && fileInfo.Name.Contains(args, StringComparison.OrdinalIgnoreCase))
                         {
-                            string[] t = fileInfo.Name.Replace(".txt", "").Split("@");
-                            if (ExcelWorldHelper.TryGet(t[1], out World world))
+                            var t = fileInfo.Name.Replace(".txt", "").Split("@");
+                            if (ExcelWorldHelper.TryGet(t[1], out var world))
                             {
                                 new TickScheduler(delegate
                                 {
@@ -309,10 +309,10 @@ public unsafe class Messenger : IDalamudPlugin
                 && ModifierKeyMatch(C.ModifierKey))
             {
                 Svc.KeyState.SetRawValue(C.Key, 0);
-                MessageHistory toOpen = lastHistory;
+                var toOpen = lastHistory;
                 if (C.CycleChatHotkey)
                 {
-                    foreach (MessageHistory x in Chats.Values)
+                    foreach (var x in Chats.Values)
                     {
                         if (x.ChatWindow.IsFocused)
                         {
@@ -371,12 +371,12 @@ public unsafe class Messenger : IDalamudPlugin
         {
             if (type == XivChatType.ErrorMessage && RecentReceiver != null)
             {
-                string pattern = $"Message to {RecentReceiver.Value.Name} could not be sent.";
+                var pattern = $"Message to {RecentReceiver.Value.Name} could not be sent.";
                 if (message.ToString().EqualsAny(
                     pattern,
                     "Unable to send /tell. Recipient is in a restricted area.",
                     "Your message was not heard. You must wait before using /tell, /say, /yell, or /shout again."
-                    ) && Chats.TryGetValue(RecentReceiver.Value, out MessageHistory history))
+                    ) && Chats.TryGetValue(RecentReceiver.Value, out var history))
                 {
                     history.Messages.Add(new()
                     {
@@ -399,11 +399,11 @@ public unsafe class Messenger : IDalamudPlugin
                 }
                 RecentReceiver = null;
             }
-            if (Utils.DecodeSender(sender, out Sender s))
+            if (Utils.DecodeSender(sender, out var s))
             {
                 if (type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
                 {
-                    bool isOpen = Chats.TryGetValue(s, out MessageHistory sHist) && sHist.ChatWindow.IsOpen;
+                    var isOpen = Chats.TryGetValue(s, out var sHist) && sHist.ChatWindow.IsOpen;
                     OpenMessenger(s,
                         (!Svc.Condition[ConditionFlag.InCombat] || Config.AutoReopenAfterCombat) &&
                         (
@@ -418,7 +418,7 @@ public unsafe class Messenger : IDalamudPlugin
                         OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
                         ParsedMessage = new(message),
                     };
-                    foreach (Payload payload in message.Payloads)
+                    foreach (var payload in message.Payloads)
                     {
                         if (payload.Type == PayloadType.MapLink)
                         {
@@ -463,9 +463,9 @@ public unsafe class Messenger : IDalamudPlugin
                 else if (type.GetCommand() != null && C.Channels.Contains(type))
                 {
                     //generic
-                    bool incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
+                    var incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
                     Sender genericSender = new(type.ToString(), 0);
-                    bool isOpen = Chats.TryGetValue(genericSender, out MessageHistory sHist) && sHist.ChatWindow.IsOpen;
+                    var isOpen = Chats.TryGetValue(genericSender, out var sHist) && sHist.ChatWindow.IsOpen;
                     OpenMessenger(genericSender,
                         (!Svc.Condition[ConditionFlag.InCombat] || Config.AutoReopenAfterCombat) &&
                         (
@@ -480,7 +480,7 @@ public unsafe class Messenger : IDalamudPlugin
                         OverrideName = s.GetPlayerName(),
                         ParsedMessage = new(message),
                     };
-                    foreach (Payload payload in message.Payloads)
+                    foreach (var payload in message.Payloads)
                     {
                         if (payload.Type == PayloadType.MapLink)
                         {
@@ -526,10 +526,10 @@ public unsafe class Messenger : IDalamudPlugin
                         isHandled = true;
                     }
                 }
-                uint? idx = GameFunctions.GetCurrentChatLogEntryIndex();
+                var idx = GameFunctions.GetCurrentChatLogEntryIndex();
                 if (idx != null)
                 {
-                    ulong? cid = GameFunctions.GetContentIdForEntry(idx.Value - 1);
+                    var cid = GameFunctions.GetContentIdForEntry(idx.Value - 1);
                     if (cid != null && cid.Value != 0)
                     {
                         PluginLog.Debug($"Player {s.GetPlayerName()} CID={cid:X16}");
@@ -549,7 +549,7 @@ public unsafe class Messenger : IDalamudPlugin
         PluginLog.Debug($"Sender is {s.Name}");
         if (s.Name != null)
         {
-            if (!Chats.TryGetValue(s, out MessageHistory value))
+            if (!Chats.TryGetValue(s, out var value))
             {
                 value = new(s);
                 Chats[s] = value;
@@ -566,11 +566,11 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 return "Not logged in";
             }
-            if (TryGetAddonByName<AtkUnitBase>("ChatLog", out AtkUnitBase* addon) && addon->IsVisible)
+            if (TryGetAddonByName<AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
             {
                 if (generic)
                 {
-                    string c = $"/{destination} {message}";
+                    var c = $"/{destination} {message}";
                     PluginLog.Verbose($"Sending command generic: {c}");
                     Chat.Instance.SendMessage(c);
                 }
@@ -578,13 +578,13 @@ public unsafe class Messenger : IDalamudPlugin
                 {
                     if (destination == P.LastReceivedMessage.GetPlayerName())
                     {
-                        string c = $"/r {message}";
+                        var c = $"/r {message}";
                         PluginLog.Verbose($"Sending via reply: {c}");
                         Chat.Instance.SendMessage(c);
                     }
                     else
                     {
-                        string c = $"/tell {destination} {message}";
+                        var c = $"/tell {destination} {message}";
                         PluginLog.Verbose($"Sending command: {c}");
                         Chat.Instance.SendMessage(c);
                     }
@@ -605,7 +605,7 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal bool TryGetCID(Sender s, out ulong cid)
     {
-        foreach (FriendListEntry x in FriendList.Get())
+        foreach (var x in FriendList.Get())
         {
             if (x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
             {
@@ -620,7 +620,7 @@ public unsafe class Messenger : IDalamudPlugin
     {
         if (fromFriendList)
         {
-            foreach (FriendListEntry x in FriendList.Get())
+            foreach (var x in FriendList.Get())
             {
                 if (x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
                 {
@@ -634,7 +634,7 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal bool IsFriend(Sender s)
     {
-        foreach (FriendListEntry x in FriendList.Get())
+        foreach (var x in FriendList.Get())
         {
             if (x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
             {
@@ -650,7 +650,7 @@ public unsafe class Messenger : IDalamudPlugin
         {
             Notify.Error("Please patiently wait while character card is being opened!");
         }
-        foreach (Dalamud.Game.ClientState.Objects.Types.GameObject x in Svc.Objects)
+        foreach (var x in Svc.Objects)
         {
             if (x is PlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable)
             {
@@ -659,7 +659,7 @@ public unsafe class Messenger : IDalamudPlugin
                 return;
             }
         }
-        if (TryGetCID(player, out ulong cid))
+        if (TryGetCID(player, out var cid))
         {
             AgentCharaCard.Instance()->OpenCharaCard(cid);
             PluginLog.Debug($"Opening characard via cid {cid}");
@@ -688,14 +688,14 @@ public unsafe class Messenger : IDalamudPlugin
         {
             return "Target is located in different data center";
         }
-        if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out AtkUnitBase* addon) && addon->IsVisible)
+        if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
         {
-            Dalamud.Plugin.Services.IPartyList party = Svc.Party;
-            ulong? leader = (ulong?)party[(int)party.PartyLeaderIndex]?.ContentId;
-            bool isLeader = party.Length == 0 || Svc.ClientState.LocalContentId == leader;
+            var party = Svc.Party;
+            var leader = (ulong?)party[(int)party.PartyLeaderIndex]?.ContentId;
+            var isLeader = party.Length == 0 || Svc.ClientState.LocalContentId == leader;
             Dalamud.Game.ClientState.Party.PartyMember member = party.FirstOrDefault(member => member.Name.TextValue == player.Name && member.World.Id == player.HomeWorld);
-            bool isInParty = member != default;
-            bool inInstance = GameFunctions.IsInInstance();
+            var isInParty = member != default;
+            var inInstance = GameFunctions.IsInInstance();
             //var inPartyInstance = Svc.Data.GetExcelSheet<TerritoryType>()!.GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse is (41 or 47 or 48 or 52 or 53);
             if (isLeader)
             {
@@ -717,7 +717,7 @@ public unsafe class Messenger : IDalamudPlugin
                                 PartyFunctions.InviteOtherWorld(cidOverride.Value, (ushort)player.HomeWorld);
                                 return null;
                             }
-                            else if (TryGetCID(player, out ulong cid))
+                            else if (TryGetCID(player, out var cid))
                             {
                                 if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                                 PartyFunctions.InviteOtherWorld(cid, (ushort)player.HomeWorld);

@@ -54,8 +54,8 @@ internal class ContextMenuManager : IDisposable
 
     private void OpenMessenger(GameObjectContextMenuItemSelectedArgs args)
     {
-        string player = args.Text.ToString();
-        ushort world = args.ObjectWorld;
+        var player = args.Text.ToString();
+        var world = args.ObjectWorld;
         Sender s = new(player, world);
         P.OpenMessenger(s);
         P.Chats[s].SetFocusAtNextFrame();

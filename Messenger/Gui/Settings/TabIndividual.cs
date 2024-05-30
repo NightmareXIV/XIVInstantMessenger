@@ -83,7 +83,7 @@ namespace Messenger.Gui.Settings
                 if (ImGui.BeginChild("Col1"))
                 {
                     ImGuiEx.Text($"Process following generic channels:");
-                    for (int i = 1; i < Types.Length; i++)
+                    for (var i = 1; i < Types.Length; i++)
                     {
                         ImGuiEx.CollectionCheckbox($"{Names[i]}", Types[i], C.Channels);
                     }
@@ -96,7 +96,7 @@ namespace Messenger.Gui.Settings
                     ImGuiEx.SetNextItemFullWidth();
                     if (ImGui.BeginCombo("###custom", Selected == XivChatType.None ? "Customize settings for specific channel..." : $"Customize settings for: {Selected.GetName()}"))
                     {
-                        for (int i = 0; i < Types.Length; i++)
+                        for (var i = 0; i < Types.Length; i++)
                         {
                             if (i != 0 && !C.Channels.Contains(Types[i])) continue;
                             if (ImGui.Selectable($"{Names[i]}"))
@@ -109,7 +109,7 @@ namespace Messenger.Gui.Settings
                     ImGui.Separator();
                     if (Selected != XivChatType.None)
                     {
-                        if (C.SpecificChannelCustomizations.TryGetValue(Selected, out ChannelCustomization customizations))
+                        if (C.SpecificChannelCustomizations.TryGetValue(Selected, out var customizations))
                         {
                             if (ImGui.Button("Copy to clipboard"))
                             {

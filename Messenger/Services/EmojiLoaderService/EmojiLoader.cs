@@ -36,18 +36,18 @@ public sealed class EmojiLoader : IDisposable
     public ImageFile GetEmoji(string id)
     {
         {
-            if (Emoji.TryGetValue(id, out ImageFile image))
+            if (Emoji.TryGetValue(id, out var image))
             {
                 return image;
             }
         }
         {
-            if (Emoji.TryGetFirst(x => x.Key.EqualsIgnoreCase(id), out KeyValuePair<string, ImageFile> image))
+            if (Emoji.TryGetFirst(x => x.Key.EqualsIgnoreCase(id), out var image))
             {
                 return image.Value;
             }
         }
-        string lowerId = id.ToLower();
+        var lowerId = id.ToLower();
         if (!PastEmojiSearchRequests.Contains(lowerId) && C.DownloadUnknownEmoji)
         {
             Search(lowerId);
@@ -63,20 +63,20 @@ public sealed class EmojiLoader : IDisposable
             PluginLog.Debug($"Begin emoji downloader thread");
             try
             {
-                int idle = 0;
+                var idle = 0;
                 while (idle < 100)
                 {
-                    if (EmojiSearchRequests.TryDequeue(out string request))
+                    if (EmojiSearchRequests.TryDequeue(out var request))
                     {
                         try
                         {
                             PluginLog.Debug($"  Request dequeued: {request}");
                             idle = 0;
                             Client ??= new();
-                            string result = Client.GetStringAsync("https://api.betterttv.net/3/emotes/shared/search?query=" + request).Result;
+                            var result = Client.GetStringAsync("https://api.betterttv.net/3/emotes/shared/search?query=" + request).Result;
                             PluginLog.Debug($"  Result: {result}");
-                            List<BetterTTWEmoji.EmoteData> emoji = JsonConvert.DeserializeObject<List<BetterTTWEmoji.EmoteData>>(result);
-                            foreach (BetterTTWEmoji.EmoteData e in emoji)
+                            var emoji = JsonConvert.DeserializeObject<List<BetterTTWEmoji.EmoteData>>(result);
+                            foreach (var e in emoji)
                             {
                                 PluginLog.Debug($"    Emoji: {e.code}");
                                 DownloadEmojiToCache(e.id, e.imageType, e.code, true, C.DynamicBetterTTVEmojiCache);
@@ -126,7 +126,7 @@ public sealed class EmojiLoader : IDisposable
         }
     }
 
-    volatile bool BuildingCache = false;
+    private volatile bool BuildingCache = false;
     public void BuildCache()
     {
         if (BuildingCache) return;
@@ -137,11 +137,11 @@ public sealed class EmojiLoader : IDisposable
             try
             {
                 Client ??= new();
-                HttpResponseMessage result = Client.GetAsync("https://api.betterttv.net/3/emotes/shared/top?limit=100").Result;
+                var result = Client.GetAsync("https://api.betterttv.net/3/emotes/shared/top?limit=100").Result;
                 result.EnsureSuccessStatusCode();
-                List<BetterTTWEmoji> data = JsonConvert.DeserializeObject<List<BetterTTWEmoji>>(result.Content.ReadAsStringAsync().Result);
+                var data = JsonConvert.DeserializeObject<List<BetterTTWEmoji>>(result.Content.ReadAsStringAsync().Result);
                 PluginLog.Debug($"Emote info received: \n{data.Print("\n")}");
-                foreach (BetterTTWEmoji e in data)
+                foreach (var e in data)
                 {
                     DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false, C.StaticBetterTTVEmojiCache);
                 }
@@ -161,16 +161,16 @@ public sealed class EmojiLoader : IDisposable
 
     private void DownloadEmojiToCache(string id, string imageType, string code, bool skipExisting, Dictionary<string, string> cache)
     {
-        string url = $"https://cdn.betterttv.net/emote/{id}/3x.{imageType}";
+        var url = $"https://cdn.betterttv.net/emote/{id}/3x.{imageType}";
         PluginLog.Debug($" Downloading {url}");
-        byte[] file = Client.GetByteArrayAsync(url).Result;
-        string fname = $"{id}.{imageType}";
+        var file = Client.GetByteArrayAsync(url).Result;
+        var fname = $"{id}.{imageType}";
         File.WriteAllBytes(Path.Combine(CachePath, fname), file);
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            string key = code;
+            var key = code;
             if (skipExisting && cache.ContainsKey(key)) return;
-            int i = 1;
+            var i = 1;
             while (cache.ContainsKey(key))
             {
                 key = $"{code}{i}";
@@ -184,7 +184,7 @@ public sealed class EmojiLoader : IDisposable
     public void Dispose()
     {
         Client?.Dispose();
-        foreach (KeyValuePair<string, ImageFile> x in Emoji)
+        foreach (var x in Emoji)
         {
             x.Value.Dispose();
         }
@@ -192,8 +192,8 @@ public sealed class EmojiLoader : IDisposable
 
     private void LoadDefaultEmoji()
     {
-        string defaultEmojiFolder = Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "images", "emoji");
-        foreach (string f in Directory.GetFiles(defaultEmojiFolder))
+        var defaultEmojiFolder = Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "images", "emoji");
+        foreach (var f in Directory.GetFiles(defaultEmojiFolder))
         {
             Emoji[Path.GetFileNameWithoutExtension(f)] = new(f);
         }
@@ -203,11 +203,11 @@ public sealed class EmojiLoader : IDisposable
     {
         Emoji.Clear();
         LoadDefaultEmoji();
-        foreach (KeyValuePair<string, string> x in C.StaticBetterTTVEmojiCache)
+        foreach (var x in C.StaticBetterTTVEmojiCache)
         {
             Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
         }
-        foreach (KeyValuePair<string, string> x in C.DynamicBetterTTVEmojiCache)
+        foreach (var x in C.DynamicBetterTTVEmojiCache)
         {
             Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
         }

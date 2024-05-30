@@ -25,22 +25,22 @@ internal static unsafe class Utils
 
     public static void DrawWrappedText(string str)
     {
-        float max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
-        foreach (string s in str.Split("\n"))
+        var max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
+        foreach (var s in str.Split("\n"))
         {
-            bool canRestart = true;
+            var canRestart = true;
         Start:
-            int start = 0;
-            for (int i = 0; i < s.Length; i++)
+            var start = 0;
+            for (var i = 0; i < s.Length; i++)
             {
                 if (start >= s.Length) break;
-                string text = s[start..i];
-                float size = ImGui.CalcTextSize(text).X;
-                float avail = ImGui.GetContentRegionAvail().X - ScrollbarPadding;
+                var text = s[start..i];
+                var size = ImGui.CalcTextSize(text).X;
+                var avail = ImGui.GetContentRegionAvail().X - ScrollbarPadding;
                 if (size > avail)
                 {
                     //try to match wrapping symbol first
-                    for (int z = i; z >= start; z--)
+                    for (var z = i; z >= start; z--)
                     {
                         if (WrapSymbols.Contains(s[z]))
                         {
@@ -88,9 +88,9 @@ internal static unsafe class Utils
     {
         if (s.IsGenericChannel())
         {
-            if (Enum.TryParse<XivChatType>(s.Name, out XivChatType e))
+            if (Enum.TryParse<XivChatType>(s.Name, out var e))
             {
-                if (C.SpecificChannelCustomizations.TryGetValue(e, out ChannelCustomization cust))
+                if (C.SpecificChannelCustomizations.TryGetValue(e, out var cust))
                 {
                     return cust;
                 }
@@ -98,7 +98,7 @@ internal static unsafe class Utils
         }
         else
         {
-            if (C.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out ChannelCustomization cust))
+            if (C.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out var cust))
             {
                 return cust;
             }
@@ -108,7 +108,7 @@ internal static unsafe class Utils
 
     public static string GetName(this XivChatType type)
     {
-        string affix = string.Empty;
+        var affix = string.Empty;
         /*if(type.EqualsAny(XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4, XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8))
         {
             var num = int.Parse(type.ToString()[^1..]);
@@ -123,10 +123,10 @@ internal static unsafe class Utils
 
         if (type.EqualsAny(XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8))
         {
-            int num = int.Parse(type.ToString()[^1..]);
-            InfoProxyCrossWorldLinkShell* proxy = (InfoProxyCrossWorldLinkShell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkShell);
-            Utf8String name = proxy->CWLSArraySpan[num - 1].Name;
-            string str = MemoryHelper.ReadSeString(&name).ExtractText();
+            var num = int.Parse(type.ToString()[^1..]);
+            var proxy = (InfoProxyCrossWorldLinkShell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkShell);
+            var name = proxy->CWLSArraySpan[num - 1].Name;
+            var str = MemoryHelper.ReadSeString(&name).ExtractText();
             if (str != "")
             {
                 return $"(CWLS{num}) {str}";
@@ -171,7 +171,7 @@ internal static unsafe class Utils
 
     public static string GetChannelName(this Sender s, bool includeWorld = true)
     {
-        if (s.IsGenericChannel(out XivChatType t))
+        if (s.IsGenericChannel(out var t))
         {
             return t.GetName();
         }
@@ -195,7 +195,7 @@ internal static unsafe class Utils
 
     public static bool IsGenericChannel(this Sender s, out XivChatType type)
     {
-        if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out XivChatType z))
+        if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out var z))
         {
             type = z;
             return true;
@@ -235,8 +235,8 @@ internal static unsafe class Utils
 
     public static long GetLatestMessageTime(this MessageHistory history)
     {
-        long timeCurrent = 0L;
-        if (history.Messages.TryGetLast(x => !x.IsSystem, out SavedMessage currentLastMessage))
+        var timeCurrent = 0L;
+        if (history.Messages.TryGetLast(x => !x.IsSystem, out var currentLastMessage))
         {
             timeCurrent = currentLastMessage.Time;
         }
@@ -245,13 +245,13 @@ internal static unsafe class Utils
 
     public static bool TryGetSender(this string value, out Sender sender)
     {
-        string[] a = value.Split("@");
+        var a = value.Split("@");
         if (a.Length != 2)
         {
             sender = default;
             return false;
         }
-        if (Svc.Data.GetExcelSheet<World>().TryGetFirst(x => x.Name.ToString().EqualsIgnoreCase(a[1]), out World world))
+        if (Svc.Data.GetExcelSheet<World>().TryGetFirst(x => x.Name.ToString().EqualsIgnoreCase(a[1]), out var world))
         {
             sender = new(a[0], world.RowId);
             return true;
@@ -272,8 +272,8 @@ internal static unsafe class Utils
 
     public static byte[] ToTerminatedBytes(this string s)
     {
-        Encoding utf8 = Encoding.UTF8;
-        byte[] bytes = new byte[utf8.GetByteCount(s) + 1];
+        var utf8 = Encoding.UTF8;
+        var bytes = new byte[utf8.GetByteCount(s) + 1];
         utf8.GetBytes(s, 0, s.Length, bytes, 0);
         bytes[^1] = 0;
         return bytes;
@@ -291,7 +291,7 @@ internal static unsafe class Utils
             senderStruct = default;
             return false;
         }
-        foreach (Payload x in sender.Payloads)
+        foreach (var x in sender.Payloads)
         {
             if (x is PlayerPayload p)
             {
@@ -310,8 +310,8 @@ internal static unsafe class Utils
 
     public static (int current, int max) GetLength(string destination, string message)
     {
-        int cmd = Encoding.UTF8.GetBytes($"/tell {destination} ").Length;
-        int msg = Encoding.UTF8.GetBytes(message).Length;
+        var cmd = Encoding.UTF8.GetBytes($"/tell {destination} ").Length;
+        var msg = Encoding.UTF8.GetBytes(message).Length;
         return (msg, 500 - cmd);
     }
 
@@ -319,7 +319,7 @@ internal static unsafe class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
+            foreach (var x in P.Chats)
             {
                 P.WindowSystemChat.RemoveWindow(x.Value.ChatWindow);
             }
@@ -332,7 +332,7 @@ internal static unsafe class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
+            foreach (var x in P.Chats)
             {
                 x.Value.LoadHistory();
             }
@@ -342,7 +342,7 @@ internal static unsafe class Utils
 
     public static string GetLogStorageFolder()
     {
-        string baseFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
+        var baseFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
         if (C.SplitLogging && P.CurrentPlayer != null && !C.SplitBlacklist.Contains(P.CurrentPlayer))
         {
             baseFolder = Path.Combine(baseFolder, P.CurrentPlayer);

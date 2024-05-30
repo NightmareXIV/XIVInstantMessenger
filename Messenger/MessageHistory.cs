@@ -47,7 +47,7 @@ public partial class MessageHistory
 
         LogFile = Path.Combine(Utils.GetLogStorageFolder(), Player.GetPlayerName() + ".txt");
 
-        string subject = Player.GetPlayerName();
+        var subject = Player.GetPlayerName();
         Task.Run(delegate
         {
             Safe(delegate
@@ -58,22 +58,22 @@ public partial class MessageHistory
                     reader.Seek(-LoadBytes, SeekOrigin.End);
                 }
                 using StreamReader reader2 = new(reader);
-                foreach (string x in reader2.ReadToEnd().Split("\n"))
+                foreach (var x in reader2.ReadToEnd().Split("\n"))
                 {
                     PluginLog.Debug("Have read line: " + x);
                     //[Mon, 20 Jun 2022 12:44:41 GMT] To Falalala lala@Omega: fgdfgdfg
-                    Match parsed = MessageRegex().Match(x);
+                    var parsed = MessageRegex().Match(x);
                     if (parsed.Success)
                     {
                         Safe(delegate
                         {
-                            int i = 0;
+                            var i = 0;
                             PluginLog.Debug($"Parsed line: {parsed.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
-                            Group[] matches = parsed.Groups.Values.ToArray();
+                            var matches = parsed.Groups.Values.ToArray();
                             if (matches.Length == 5)
                             {
-                                string name = matches[2].ToString() + "@" + matches[3].ToString();
+                                var name = matches[2].ToString() + "@" + matches[3].ToString();
                                 PluginLog.Debug($"name: {name}, subject: {subject}");
                                 LoadedMessages.Insert(0, new()
                                 {
@@ -89,13 +89,13 @@ public partial class MessageHistory
                     }
                     else
                     {
-                        Match systemMessage = SystemMessageRegex().Match(x);
+                        var systemMessage = SystemMessageRegex().Match(x);
                         if (systemMessage.Success) Safe(delegate
                         {
-                            int i = 0;
+                            var i = 0;
                             PluginLog.Debug($"Parsed system message line: {systemMessage.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
-                            Group[] matches = systemMessage.Groups.Values.ToArray();
+                            var matches = systemMessage.Groups.Values.ToArray();
                             if (matches.Length == 3)
                             {
                                 PluginLog.Debug($"subject: {subject}");

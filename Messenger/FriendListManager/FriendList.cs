@@ -17,15 +17,15 @@ public static unsafe class FriendList
         List<FriendListEntry> l = [];
         try
         {
-            FFXIVClientStructs.FFXIV.Client.UI.Info.InfoProxyFriendList* p = AgentFriendList.Instance()->InfoProxy;
+            var p = AgentFriendList.Instance()->InfoProxy;
             for (uint i = 0; i < p->InfoProxyCommonList.DataSize; i++)
             {
-                FFXIVClientStructs.FFXIV.Client.UI.Info.InfoProxyCommonList.CharacterData* entry = p->InfoProxyCommonList.GetEntry(i);
+                var entry = p->InfoProxyCommonList.GetEntry(i);
                 if (entry == null || entry->ContentId == 0) continue;
                 l.Add(new(entry));
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.LogInternal();
         }

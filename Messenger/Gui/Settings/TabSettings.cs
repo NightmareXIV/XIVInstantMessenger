@@ -10,7 +10,7 @@ internal class TabSettings
             {
                 if (ImGui.Button("Open logs folder"))
                 {
-                    string logFolder = Utils.GetLogStorageFolder();
+                    var logFolder = Utils.GetLogStorageFolder();
                     ShellStart(logFolder);
                 }
                 ImGui.Checkbox("Enable context menu integration", ref C.ContextMenuEnable);
@@ -47,7 +47,7 @@ internal class TabSettings
                     ImGui.Separator();
                     ImGuiEx.Text($"Registered windows:");
                     string toRem = null;
-                    foreach (string x in C.TabWindows)
+                    foreach (var x in C.TabWindows)
                     {
                         ImGuiEx.Text($"{x} - {C.TabWindowAssociations.Count(z => z.Value == x)} chats associated");
                         ImGuiEx.Tooltip(C.TabWindowAssociations.Where(z => z.Value == x).Select(x => x.Key.ToString()).Join("\n"));
@@ -204,9 +204,9 @@ internal class TabSettings
             }, null, true),
             ("Emoji", delegate
             {
-                if(ImGui.Checkbox("Enable Emoji support", ref C.EnableEmoji)) S.EmojiLoader.Initialize();
+                if (ImGui.Checkbox("Enable Emoji support", ref C.EnableEmoji)) S.EmojiLoader.Initialize();
                 ImGui.Checkbox("Enable Emoji picker", ref C.EnableEmojiPicker);
-                if(ImGui.Checkbox("Enable BetterTTV Emoji support", ref C.EnableBetterTTV)) S.EmojiLoader.Initialize();
+                if (ImGui.Checkbox("Enable BetterTTV Emoji support", ref C.EnableBetterTTV)) S.EmojiLoader.Initialize();
                 ImGui.Checkbox("Attempt to search for unknown emoji on BetterTTV", ref C.DownloadUnknownEmoji);
             }, null, true)
         );

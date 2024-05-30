@@ -122,13 +122,13 @@ internal unsafe class GameFunctions : IDisposable
 
     private void ListCommand(string name, ushort world, string commandName)
     {
-        World row = Svc.Data.GetExcelSheet<World>()!.GetRow(world);
+        var row = Svc.Data.GetExcelSheet<World>()!.GetRow(world);
         if (row == null)
         {
             return;
         }
 
-        string worldName = row.Name.RawString;
+        var worldName = row.Name.RawString;
         _replacementName = $"{name}@{worldName}";
         Chat.Instance.SendMessage($"/{commandName} add {_placeholder}");
     }
@@ -177,7 +177,7 @@ internal unsafe class GameFunctions : IDisposable
             return null;
         }
 
-        nint log = (IntPtr)Framework.Instance()->GetUiModule()->GetRaptureLogModule();
+        var log = (IntPtr)Framework.Instance()->GetUiModule()->GetRaptureLogModule();
         return *(uint*)(log + _currentChatEntryOffset.Value);
     }
 
@@ -188,15 +188,15 @@ internal unsafe class GameFunctions : IDisposable
             return IntPtr.Zero;
         }
 
-        UIModule* uiModule = Framework.Instance()->GetUiModule();
-        delegate* unmanaged<UIModule*, nint> getInfoModule = (delegate* unmanaged<UIModule*, IntPtr>)uiModule->vfunc[vfunc / 8];
+        var uiModule = Framework.Instance()->GetUiModule();
+        var getInfoModule = (delegate* unmanaged<UIModule*, IntPtr>)uiModule->vfunc[vfunc / 8];
         return getInfoModule(uiModule);
     }
 
 
     internal IntPtr GetInfoProxyByIndex(uint idx)
     {
-        nint infoModule = GetInfoModule();
+        var infoModule = GetInfoModule();
         return infoModule == IntPtr.Zero ? IntPtr.Zero : _getInfoProxyByIndex(infoModule, idx);
     }
 
@@ -211,7 +211,7 @@ internal unsafe class GameFunctions : IDisposable
             goto Original;
         }
 
-        string placeholder = MemoryHelper.ReadStringNullTerminated((IntPtr)placeholderText);
+        var placeholder = MemoryHelper.ReadStringNullTerminated((IntPtr)placeholderText);
         if (placeholder != _placeholder)
         {
             goto Original;

@@ -14,7 +14,7 @@ public abstract class ChatWindowTitleButton
     public ChatWindowTitleButton(ChatWindow chatWindow)
     {
         ChatWindow = chatWindow;
-        this.Button = new()
+        Button = new()
         {
             Icon = Icon,
             Click = (m) =>

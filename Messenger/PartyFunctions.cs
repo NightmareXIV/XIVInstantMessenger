@@ -56,7 +56,7 @@ internal sealed unsafe class PartyFunctions : IDisposable
 
     internal void InviteSameWorld(string name, ushort world, ulong contentId)
     {
-        nint a1 = P.GameFunctions.GetInfoProxyByIndex(2);
+        var a1 = P.GameFunctions.GetInfoProxyByIndex(2);
         fixed (byte* namePtr = name.ToTerminatedBytes())
         {
             // this only works if target is on the same world
@@ -66,7 +66,7 @@ internal sealed unsafe class PartyFunctions : IDisposable
     internal void InviteOtherWorld(ulong contentId, ushort world)
     {
         // 6.11: 214A55
-        nint a1 = P.GameFunctions.GetInfoProxyByIndex(2);
+        var a1 = P.GameFunctions.GetInfoProxyByIndex(2);
         if (contentId != 0)
         {
             // third param is world, but it requires a specific world

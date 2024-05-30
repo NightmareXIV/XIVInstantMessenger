@@ -15,7 +15,7 @@ internal unsafe class QuickButton : Window
     public override bool DrawConditions()
     {
         AtkUnitBase* addon = null;
-        bool ret = C.QuickOpenButton
+        var ret = C.QuickOpenButton
             && (C.AddonName == string.Empty || (TryGetAddonByName(C.AddonName, out addon)
             && addon->IsVisible));
         if (ret)
@@ -44,7 +44,7 @@ internal unsafe class QuickButton : Window
         ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
-        bool col = false;
+        var col = false;
         if (P.Hidden)
         {
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiCol.Text.GetFlashColor(C.DefaultChannelCustomization));
@@ -75,11 +75,11 @@ internal unsafe class QuickButton : Window
                         Svc.Commands.ProcessCommand("/xim close");
                     }
                 });
-                Vector2 tsize = ImGui.CalcTextSize("");
+                var tsize = ImGui.CalcTextSize("");
                 Sender? toRem = null;
-                foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
+                foreach (var x in P.Chats)
                 {
-                    Vector2 cur = ImGui.GetCursorPos();
+                    var cur = ImGui.GetCursorPos();
                     if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count})", false, ImGuiSelectableFlags.None, new Vector2(200f.Scale(), tsize.Y)))
                     {
                         P.Hidden = false;

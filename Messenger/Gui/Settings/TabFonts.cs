@@ -35,7 +35,7 @@ internal class TabFonts
             }
         }
         ImGui.Separator();
-        bool col = Changed;
+        var col = Changed;
         if (col) ImGui.PushStyleColor(ImGuiCol.Text, GradientColor.Get(ImGuiColors.DalamudYellow, ImGuiColors.DalamudRed));
         if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Check, "Apply Settings"))
         {
@@ -51,7 +51,7 @@ internal class TabFonts
 
     private void DisplayFontSelector()
     {
-        SingleFontChooserDialog chooser = SingleFontChooserDialog.CreateAuto(Svc.PluginInterface.UiBuilder);
+        var chooser = SingleFontChooserDialog.CreateAuto(Svc.PluginInterface.UiBuilder);
         chooser.SelectedFontSpecChanged += Chooser_SelectedFontSpecChanged;
     }
 

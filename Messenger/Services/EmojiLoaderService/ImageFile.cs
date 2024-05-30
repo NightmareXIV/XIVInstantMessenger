@@ -31,20 +31,20 @@ public sealed class ImageFile : IDisposable
         try
         {
             //PluginLog.Information($"Loading image {Path}");
-            byte[] bytes = File.ReadAllBytes(Path);
-            Image image = Image.Load(bytes);
+            var bytes = File.ReadAllBytes(Path);
+            var image = Image.Load(bytes);
             if (image.Frames.Count > 1)
             {
                 PngEncoder pngEncoder = new();
                 //PluginLog.Information($" Animation detected");
-                for (int i = 0; i < image.Frames.Count; i++)
+                for (var i = 0; i < image.Frames.Count; i++)
                 {
-                    Image frame = image.Frames.CloneFrame(i);
-                    GifFrameMetadata meta = image.Frames[i].Metadata.GetGifMetadata();
+                    var frame = image.Frames.CloneFrame(i);
+                    var meta = image.Frames[i].Metadata.GetGifMetadata();
                     using MemoryStream frameData = new();
                     frame.Save(frameData, pngEncoder);
                     //PluginLog.Information($"  Loading frame {i}");
-                    int delay = meta.FrameDelay == 0 ? 5 : meta.FrameDelay;
+                    var delay = meta.FrameDelay == 0 ? 5 : meta.FrameDelay;
                     Data.Add(new(Svc.PluginInterface.UiBuilder.LoadImage(frameData.ToArray()), delay * 10));
                 }
                 TotalLength = (int)Data.Sum(x => x.DelayMS);
@@ -77,9 +77,9 @@ public sealed class ImageFile : IDisposable
             }
             else if (Data.Count > 1)
             {
-                long currentDelay = Environment.TickCount64 % TotalLength;
-                int pos = 0;
-                for (int i = 0; i < Data.Count; i++)
+                var currentDelay = Environment.TickCount64 % TotalLength;
+                var pos = 0;
+                for (var i = 0; i < Data.Count; i++)
                 {
                     pos += Data[i].DelayMS;
                     if (currentDelay < pos) return Data[i].Texture;
@@ -91,7 +91,7 @@ public sealed class ImageFile : IDisposable
 
     public void Dispose()
     {
-        foreach (FrameData x in Data)
+        foreach (var x in Data)
         {
             x.Texture.Dispose();
         }

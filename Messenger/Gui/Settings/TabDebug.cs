@@ -29,9 +29,9 @@ internal unsafe class TabDebug
                     S.EmojiLoader.BuildCache();
                 }
                 ImGui.Columns(4);
-                foreach (KeyValuePair<string, Services.EmojiLoaderService.ImageFile> x in S.EmojiLoader.Emoji)
+                foreach (var x in S.EmojiLoader.Emoji)
                 {
-                    Dalamud.Interface.Internal.IDalamudTextureWrap w = x.Value.GetTextureWrap();
+                    var w = x.Value.GetTextureWrap();
                     if (w != null)
                     {
                         ImGui.Image(w.ImGuiHandle, new Vector2(24f));
@@ -48,7 +48,7 @@ internal unsafe class TabDebug
             }
             if (ImGui.CollapsingHeader("Senders"))
             {
-                foreach (KeyValuePair<Sender, MessageHistory> x in P.Chats)
+                foreach (var x in P.Chats)
                 {
                     ImGuiEx.Text($"{x.Key.Name}@{x.Key.HomeWorld}, {x.Key.IsGenericChannel()}");
                 }
@@ -61,13 +61,13 @@ internal unsafe class TabDebug
             ImGui.InputText($"Message", ref MMessage, 500);
             if (ImGui.Button("Fire event"))
             {
-                SeString s = SeString.Empty;
+                var s = SeString.Empty;
                 if (MName != "")
                 {
                     s = new SeStringBuilder().Add(new PlayerPayload(MName, (uint)MWorld)).Build();
                 }
-                bool n = false;
-                SeString m = new SeStringBuilder().AddText(MMessage).Build();
+                var n = false;
+                var m = new SeStringBuilder().AddText(MMessage).Build();
                 P.OnChatMessage(MType, 0, ref s, ref m, ref n);
             }
             ImGui.Separator();
@@ -75,13 +75,13 @@ internal unsafe class TabDebug
             ImGuiEx.Text($"Last received message: {P.LastReceivedMessage.GetPlayerName()}");
             if (ImGui.Button("Mark all as unread"))
             {
-                foreach (MessageHistory x in P.Chats.Values)
+                foreach (var x in P.Chats.Values)
                 {
                     x.ChatWindow.Unread = true;
                 }
             }
             ImGuiEx.Text("CID map:");
-            foreach (KeyValuePair<Sender, ulong> x in P.CIDlist)
+            foreach (var x in P.CIDlist)
             {
                 ImGuiEx.Text($"{x.Key.Name}@{x.Key.HomeWorld}={x.Value:X16}");
             }
@@ -89,7 +89,7 @@ internal unsafe class TabDebug
             if (ImGui.CollapsingHeader("Friends"))
             {
                 ImGuiEx.Text("Friend list: ");
-                foreach (FriendListEntry x in FriendList.Get())
+                foreach (var x in FriendList.Get())
                 {
                     ImGuiEx.TextCopy(x.IsOnline ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudWhite,
                         $"{x.Name} onl={x.OnlineStatus} home world={x.HomeWorld} current world={x.CurrentWorld} CID {x.ContentId:X16}");
@@ -114,14 +114,14 @@ internal unsafe class TabDebug
             }
             ImGui.Separator();
             ImGuiEx.Text("Target commands");
-            foreach (string x in P.TargetCommands)
+            foreach (var x in P.TargetCommands)
             {
                 ImGuiEx.Text(x);
             }
             ImGui.Separator();
             ImGuiEx.Text("Width-to-spaces");
 
-            foreach (KeyValuePair<float, string> x in P.WhitespaceMap)
+            foreach (var x in P.WhitespaceMap)
             {
                 ImGuiEx.Text($"{x.Key} => {x.Value.Length}x");
             }

@@ -34,7 +34,7 @@ public class SegmentEmoji : ISegment
         {
             ImGui.NewLine();
         }
-        Dalamud.Interface.Internal.IDalamudTextureWrap tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
+        var tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
         if (tex != null)
         {
             ImGui.Image(tex.ImGuiHandle, size * sizeMult);
@@ -53,7 +53,7 @@ public class SegmentEmoji : ISegment
                 {
                     ImGui.Dummy(size * sizeMult);
                 }
-                ImGuiEx.Tooltip("Loading: "+Emoji);
+                ImGuiEx.Tooltip("Loading: " + Emoji);
             }
             else
             {

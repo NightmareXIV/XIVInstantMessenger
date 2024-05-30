@@ -35,7 +35,7 @@ internal class TabSystem : Window
 
     public override void OnClose()
     {
-        foreach (ChatWindow w in Windows)
+        foreach (var w in Windows)
         {
             w.IsOpen = false;
         }
@@ -96,7 +96,7 @@ internal class TabSystem : Window
         }
         if (ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
         {
-            foreach (ChatWindow w in Windows)
+            foreach (var w in Windows)
             {
                 {
                     void Associate()
@@ -113,7 +113,7 @@ internal class TabSystem : Window
                                 C.TabWindowAssociations.Remove(w.MessageHistory.Player.ToString());
                             }
                             ImGui.PopStyleColor();
-                            foreach (string x in C.TabWindows)
+                            foreach (var x in C.TabWindows)
                             {
                                 if (ImGui.Selectable(x))
                                 {
@@ -124,13 +124,13 @@ internal class TabSystem : Window
                         }
                     }
 
-                    bool isOpen = w.IsOpen;
-                    ImGuiTabItemFlags flags = ImGuiTabItemFlags.None;
+                    var isOpen = w.IsOpen;
+                    var flags = ImGuiTabItemFlags.None;
                     if (w.MessageHistory.ShouldSetFocus())
                     {
                         flags = ImGuiTabItemFlags.SetSelected;
                     }
-                    bool titleColored = false;
+                    var titleColored = false;
                     if (w.Unread)
                     {
                         titleColored = true;
@@ -149,7 +149,7 @@ internal class TabSystem : Window
                         w.SetPosition = false;
                         if (C.FontNoTabs) P.FontManager.PushFont();
                         w.Draw();
-                        this.TitleBarButtons = w.TitleBarButtons;
+                        TitleBarButtons = w.TitleBarButtons;
                         if (C.FontNoTabs) P.FontManager.PopFont();
                         ImGui.EndTabItem();
                     }
@@ -176,7 +176,7 @@ internal class TabSystem : Window
 
     public override void Update()
     {
-        this.TitleBarButtons = EmptyTitleBarList;
+        TitleBarButtons = EmptyTitleBarList;
     }
 
     public override void PostDraw()

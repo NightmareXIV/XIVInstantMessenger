@@ -16,10 +16,10 @@ public partial class ParsedMessage
     public ParsedMessage(SeString message)
     {
         RawString = message.ExtractText();
-        string[] splitMessage = EmojiRegex().Split(RawString).Where(x => x.Length > 0).ToArray();
+        var splitMessage = EmojiRegex().Split(RawString).Where(x => x.Length > 0).ToArray();
         PluginLog.Debug($"Message parts: \n- {splitMessage.Print("\n- ")}");
         List<ISegment> segments = [];
-        foreach (string str in splitMessage)
+        foreach (var str in splitMessage)
         {
             if (str.StartsWith(':') && str.EndsWith(':'))
             {
@@ -37,7 +37,7 @@ public partial class ParsedMessage
                 }
                 else
                 {
-                    if(splitMessage.Length == 1)
+                    if (splitMessage.Length == 1)
                     {
                         segments.Add(new SegmentDoubleEmoji(e));
                     }
@@ -64,7 +64,7 @@ public partial class ParsedMessage
 
     public void Draw()
     {
-        foreach (ISegment x in Segments)
+        foreach (var x in Segments)
         {
             x.Draw();
         }
