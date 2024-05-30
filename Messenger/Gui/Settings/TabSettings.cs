@@ -201,6 +201,13 @@ internal class TabSettings
                     ImGuiEx.EnumCombo("##modkey2", ref C.Key);
                     ImGui.Checkbox("Enable cycling between recent chats on sequential keypresses", ref C.CycleChatHotkey);
                 }
+            }, null, true),
+            ("Emoji", delegate
+            {
+                if(ImGui.Checkbox("Enable Emoji support", ref C.EnableEmoji)) S.EmojiLoader.Initialize();
+                ImGui.Checkbox("Enable Emoji picker", ref C.EnableEmojiPicker);
+                if(ImGui.Checkbox("Enable BetterTTV Emoji support", ref C.EnableBetterTTV)) S.EmojiLoader.Initialize();
+                ImGui.Checkbox("Attempt to search for unknown emoji on BetterTTV", ref C.DownloadUnknownEmoji);
             }, null, true)
         );
     }

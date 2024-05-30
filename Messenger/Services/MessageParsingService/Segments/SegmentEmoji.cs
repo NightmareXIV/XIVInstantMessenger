@@ -21,6 +21,12 @@ public class SegmentEmoji : ISegment
 
     public void Draw(float sizeMult)
     {
+        if (!C.EnableEmoji)
+        {
+            ImGuiEx.Text($":{Emoji}:");
+            ImGui.SameLine(0, 0);
+            return;
+        }
         Vector2 size = new(MathF.Floor(ImGui.CalcTextSize(" ").Y));
         ImGui.SameLine(0, 0);
         //PluginLog.Information($"{ImGui.GetContentRegionAvail().X} >= {size.X}");

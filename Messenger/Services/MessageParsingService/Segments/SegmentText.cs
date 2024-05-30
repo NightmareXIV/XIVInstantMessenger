@@ -17,5 +17,6 @@ public class SegmentText : ISegment
     public void Draw()
     {
         Utils.DrawWrappedText(Text);
+        ImGui.SameLine(0, 0);
     }
 }

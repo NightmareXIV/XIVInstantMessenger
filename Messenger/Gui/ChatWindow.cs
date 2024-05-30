@@ -335,10 +335,10 @@ public unsafe class ChatWindow : Window
         ImGui.SameLine(0, 0);
         Vector2 icur1 = ImGui.GetCursorPos();
         ImGui.Dummy(Vector2.Zero);
-        ImGui.SameLine(0, 2);
 
-        if (true)
+        if (C.EnableEmoji && C.EnableEmojiPicker)
         {
+            ImGui.SameLine(0, 2);
             if (ImGuiEx.IconButton(FontAwesomeIcon.SmileWink, "Insert emoji"))
             {
                 if(!BlockEmojiSelection) Input.OpenEmojiSelector();

@@ -122,37 +122,40 @@ public unsafe partial class PseudoMultilineInput
             }
             EmojiEndCursor = data->CursorPos;
             IsSelectingEmoji = false;
-            for (var i = 0; i < EmojiEndCursor; i++)
+            if (C.EnableEmoji && C.EnableEmojiPicker)
             {
-                if (data->Buf[i] == ':')
-                {
-                    IsSelectingEmoji = !IsSelectingEmoji;
-                    EmojiStartCursor = i;
-                }
-                else if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
-                {
-                    IsSelectingEmoji = false;
-                }
-            }
-            if (IsSelectingEmoji)
-            {
-                if (EmojiEndCursor - EmojiStartCursor < 3) IsSelectingEmoji = false;
-            }
-            if (IsSelectingEmoji)
-            {
-                for (var i = EmojiEndCursor; i < data->BufTextLen; i++)
+                for (var i = 0; i < EmojiEndCursor; i++)
                 {
                     if (data->Buf[i] == ':')
                     {
+                        IsSelectingEmoji = !IsSelectingEmoji;
+                        EmojiStartCursor = i;
+                    }
+                    else if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
+                    {
                         IsSelectingEmoji = false;
                     }
-                    if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
                 }
-            }
-            if (IsSelectingEmoji)
-            {
-                EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
-                this.EmojiListMode = true;
+                if (IsSelectingEmoji)
+                {
+                    if (EmojiEndCursor - EmojiStartCursor < 3) IsSelectingEmoji = false;
+                }
+                if (IsSelectingEmoji)
+                {
+                    for (var i = EmojiEndCursor; i < data->BufTextLen; i++)
+                    {
+                        if (data->Buf[i] == ':')
+                        {
+                            IsSelectingEmoji = false;
+                        }
+                        if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
+                    }
+                }
+                if (IsSelectingEmoji)
+                {
+                    EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
+                    this.EmojiListMode = true;
+                }
             }
 
 
@@ -267,7 +270,7 @@ public unsafe partial class PseudoMultilineInput
                         {
                             ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(emojiSize));
                             ImGuiEx.Tooltip($":{em.Key}:");
-                            HandleEmojiRightClick(em);
+                            HandleEmojiRightClick(em, -1);
                         }
                         else
                         {
@@ -292,16 +295,17 @@ public unsafe partial class PseudoMultilineInput
                 var all = S.EmojiLoader.Emoji.Where(x => !C.FavoriteEmoji.Contains(x.Key));
                 if (fav.Any())
                 {
+                    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedGold);
                     DrawEmojiSet(fav, "fav");
+                    ImGui.PopStyleColor();
                     ImGui.SameLine();
                     ImGui.NewLine();
-                    ImGui.Separator();
                 }
                 DrawEmojiSet(all, "all");
                 void DrawEmojiSet(IEnumerable<KeyValuePair<string, ImageFile>> emojiSet, string id)
                 {
                     List<Action> PostDrawAction = [];
-                    if(ImGui.BeginTable($"EmojiTable{id}", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.BordersOuter | ImGuiTableFlags.BordersInnerH))
+                    if(ImGui.BeginTable($"EmojiTable{id}", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.BordersInnerH))
                     {
                         ImGui.TableSetupColumn("image");
                         ImGui.TableSetupColumn("emojiText", ImGuiTableColumnFlags.WidthStretch);
@@ -312,6 +316,7 @@ public unsafe partial class PseudoMultilineInput
                             if(index == this.EmojiSelectorRow)
                             {
                                 ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGuiEx.Vector4FromRGBA(0xffffff33).ToUint());
+                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGuiEx.Vector4FromRGBA(0xffffff33).ToUint());
                                 this.EmojiSelectorRow = -1;
                             }
                             ImGui.TableNextColumn();
@@ -322,7 +327,7 @@ public unsafe partial class PseudoMultilineInput
                             {
                                 ImGui.SetCursorPos(cur);
                                 ImGui.Dummy(new(ImGuiEx.GetWindowContentRegionWidth(), emojiSize));
-                                HandleEmojiRightClick(em);
+                                HandleEmojiRightClick(em, index2);
                             });
 
                             if (em.Value.GetTextureWrap() != null)
@@ -348,10 +353,11 @@ public unsafe partial class PseudoMultilineInput
         }
     }
 
-    void HandleEmojiRightClick(KeyValuePair<string, ImageFile> em)
+    void HandleEmojiRightClick(KeyValuePair<string, ImageFile> em, int index)
     {
         if (ImGui.IsItemHovered())
         {
+            EmojiSelectorRow = index;
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {

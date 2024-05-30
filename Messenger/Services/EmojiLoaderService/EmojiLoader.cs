@@ -48,7 +48,7 @@ public sealed class EmojiLoader : IDisposable
             }
         }
         string lowerId = id.ToLower();
-        if (!PastEmojiSearchRequests.Contains(lowerId))
+        if (!PastEmojiSearchRequests.Contains(lowerId) && C.DownloadUnknownEmoji)
         {
             Search(lowerId);
         }
@@ -104,19 +104,33 @@ public sealed class EmojiLoader : IDisposable
 
     private EmojiLoader()
     {
-        LoadDefaultEmoji();
-        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > C.LastStaticBetterTTVUpdate + TimeSpan.FromDays(7).TotalMilliseconds)
+        Initialize();
+    }
+
+    public void Initialize()
+    {
+        if (C.EnableEmoji)
         {
-            BuildCache();
-        }
-        else
-        {
-            LoadEmojiCache();
+            LoadDefaultEmoji();
+            if (C.EnableBetterTTV)
+            {
+                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > C.LastStaticBetterTTVUpdate + TimeSpan.FromDays(7).TotalMilliseconds)
+                {
+                    BuildCache();
+                }
+                else
+                {
+                    LoadEmojiCache();
+                }
+            }
         }
     }
 
+    volatile bool BuildingCache = false;
     public void BuildCache()
     {
+        if (BuildingCache) return;
+        BuildingCache = true;
         C.StaticBetterTTVEmojiCache.Clear();
         Task.Run(() =>
         {
@@ -141,6 +155,7 @@ public sealed class EmojiLoader : IDisposable
             {
                 e.Log();
             }
+            BuildingCache = false;
         });
     }
 
