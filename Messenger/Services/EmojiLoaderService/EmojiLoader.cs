@@ -79,7 +79,7 @@ public sealed class EmojiLoader : IDisposable
                             foreach (var e in emoji)
                             {
                                 PluginLog.Debug($"    Emoji: {e.code}");
-                                DownloadEmojiToCache(e.id, e.imageType, e.code, true, C.DynamicBetterTTVEmojiCache);
+                                DownloadEmojiToCache(e.id, e.imageType, e.code, true, C.DynamicBetterTTVEmojiCache, request);
                             }
                         }
                         catch (Exception e)
@@ -143,7 +143,7 @@ public sealed class EmojiLoader : IDisposable
                 PluginLog.Debug($"Emote info received: \n{data.Print("\n")}");
                 foreach (var e in data)
                 {
-                    DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false, C.StaticBetterTTVEmojiCache);
+                    DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false, C.StaticBetterTTVEmojiCache, null);
                 }
                 Svc.Framework.RunOnFrameworkThread(() =>
                 {
@@ -159,7 +159,7 @@ public sealed class EmojiLoader : IDisposable
         });
     }
 
-    private void DownloadEmojiToCache(string id, string imageType, string code, bool skipExisting, Dictionary<string, string> cache)
+    private void DownloadEmojiToCache(string id, string imageType, string code, bool skipExisting, Dictionary<string, string> cache, string overwrite)
     {
         var url = $"https://cdn.betterttv.net/emote/{id}/3x.{imageType}";
         PluginLog.Debug($" Downloading {url}");
@@ -169,7 +169,17 @@ public sealed class EmojiLoader : IDisposable
         Svc.Framework.RunOnFrameworkThread(() =>
         {
             var key = code;
-            if (skipExisting && cache.ContainsKey(key)) return;
+            if (skipExisting && cache.ContainsKey(key))
+            {
+                if(key == overwrite)
+                {
+                    cache.Remove(key);
+                }
+                else
+                {
+                    return;
+                }
+            }
             var i = 1;
             while (cache.ContainsKey(key))
             {

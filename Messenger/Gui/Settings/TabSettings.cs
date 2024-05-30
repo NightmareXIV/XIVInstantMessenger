@@ -208,6 +208,14 @@ internal class TabSettings
                 ImGui.Checkbox("Enable Emoji picker", ref C.EnableEmojiPicker);
                 if (ImGui.Checkbox("Enable BetterTTV Emoji support", ref C.EnableBetterTTV)) S.EmojiLoader.Initialize();
                 ImGui.Checkbox("Attempt to search for unknown emoji on BetterTTV", ref C.DownloadUnknownEmoji);
+                ImGuiEx.TextWrapped("""
+                    Adding your custom emoji:
+                    1) Login to betterttv.com with your twitter account;
+                    2) Go to your dashboard and it will let you upload emojis;
+                    3) When uploading your emojis make sure you mark them as "Allow emote to be shared with other channels.".
+                    
+                    Once they are uploaded, you can now search for them in the picker by typing in the "emote code" you set when uploading and hitting the search icon on the right. It will now show up by default when searching for it from now on for you. Recipients who have enabled "Attempt to search for unknown emoji on BetterTTV" will also be able to see your custom emoji.
+                    """);
             }, null, true)
         );
     }
