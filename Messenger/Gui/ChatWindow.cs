@@ -395,25 +395,6 @@ public unsafe class ChatWindow : Window
 
     private void PostMessageFunctions(SavedMessage x)
     {
-        if (P.Translator.CurrentProvider != null)
-        {
-            if (x.AwaitingTranslation)
-            {
-                if (P.Translator.TranslationResults.TryGetValue(x.Message, out string tm))
-                {
-                    x.TranslatedMessage = tm;
-                    x.AwaitingTranslation = false;
-                    PluginLog.Verbose($"Message {x.Message} translation found {x.TranslatedMessage}");
-                }
-            }
-            if (!x.IgnoreTranslation)
-            {
-                x.AwaitingTranslation = true;
-                x.IgnoreTranslation = true;
-                P.Translator.EnqueueTranslation(x.Message);
-                PluginLog.Verbose($"Message {x.Message} translation enqueued");
-            }
-        }
         if (C.ClickToOpenLink && ImGui.IsItemHovered())
         {
             foreach (string s in x.Message.Split(" "))
@@ -484,15 +465,6 @@ public unsafe class ChatWindow : Window
                     {
                         Svc.Chat.Print(new SeStringBuilder().Add(Utils.GetItemPayload(x.Item.Item, x.Item.IsHQ)).BuiltString);
                     });
-                }
-            }
-            if (P.Translator.CurrentProvider != null)
-            {
-                if (ImGui.Selectable(x.TranslatedMessage == null ? "Translate" : "Translate again"))
-                {
-                    P.Translator.TranslationResults.Remove(x.Message, out _);
-                    x.AwaitingTranslation = false;
-                    x.IgnoreTranslation = false;
                 }
             }
             ImGui.EndPopup();

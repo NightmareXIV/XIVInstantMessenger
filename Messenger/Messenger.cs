@@ -20,7 +20,6 @@ using Messenger.FontControl;
 using Messenger.FriendListManager;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
-using Messenger.Translation;
 using SharpDX.DXGI;
 using System.IO;
 
@@ -50,7 +49,6 @@ public unsafe class Messenger : IDalamudPlugin
     internal Dictionary<float, string> WhitespaceMap = [];
     internal Sender LastReceivedMessage;
     internal TabSystem TabSystem;
-    internal Translator Translator;
     internal List<TabSystem> TabSystems = [];
     public string CurrentPlayer = null;
 
@@ -92,7 +90,6 @@ public unsafe class Messenger : IDalamudPlugin
             WindowSystemMain.AddWindow(TabSystem);
             Tabs(C.Tabs);
             Svc.ClientState.Logout += ClientState_Logout;
-            Translator = new();
             FontManager = new();
             RebuildTabSystems();
             ProperOnLogin.RegisterAvailable(OnLogin, true);
@@ -163,7 +160,6 @@ public unsafe class Messenger : IDalamudPlugin
         Safe(() => PartyFunctions.Dispose());
         if (FontManager != null) Safe(() => FontManager.Dispose());
         Svc.ClientState.Logout -= ClientState_Logout;
-        Safe(() => Translator.Dispose());
         ECommonsMain.Dispose();
         P = null;
     }
@@ -420,7 +416,6 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = type == XivChatType.TellIncoming,
                         Message = message.ToString(),
                         OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
-                        IgnoreTranslation = type == XivChatType.TellOutgoing && C.TranslateSelf,
                         ParsedMessage = new(message),
                     };
                     foreach (Payload payload in message.Payloads)
@@ -483,7 +478,6 @@ public unsafe class Messenger : IDalamudPlugin
                         IsIncoming = incoming,
                         Message = message.ToString(),
                         OverrideName = s.GetPlayerName(),
-                        IgnoreTranslation = !incoming && C.TranslateSelf,
                         ParsedMessage = new(message),
                     };
                     foreach (Payload payload in message.Payloads)

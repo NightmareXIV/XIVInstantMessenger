@@ -9,7 +9,6 @@ internal class GuiSettings : Window
     internal readonly TabStyle TabStyle = new();
     internal readonly TabFonts TabFonts = new();
     internal readonly TabIndividual TabIndividual = new();
-    internal readonly TabTranslation TabTranslation = new();
     internal readonly TabDebug TabDebug = new();
 
     public GuiSettings() : base($"{P.Name} settings")
@@ -30,7 +29,6 @@ internal class GuiSettings : Window
             ("Style", TabStyle.Draw, null, true),
             ("Fonts", TabFonts.Draw, null, true),
             ("Generic channels", TabIndividual.Draw, null, true),
-            ("Translation", TabTranslation.Draw, null, true),
             ("Log", InternalLog.PrintImgui, ImGuiColors.DalamudGrey3, false),
             ("Debug", TabDebug.Draw, ImGuiColors.DalamudGrey3, true)
             );
