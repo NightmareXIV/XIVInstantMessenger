@@ -15,14 +15,18 @@ public unsafe partial class PseudoMultilineInput
     private uint MaxLength = 1500;
     private string Text = "";
     private float TextWidth = 0f;
-    internal float? Width = null;
+    public float? Width = null;
     private int? EnterPress = null;
-    internal bool IsInputActive = false;
-    private bool IsSelectingEmoji = false;
+    public bool IsInputActive = false;
+    public bool IsSelectingEmoji = false;
     private int EmojiStartCursor = 0;
     private int EmojiEndCursor = 0;
     private string EmojiSearch = "";
     private int SetFocusAt = -1;
+    private bool EmojiListMode = false;
+    private int EmojiSelectorRow = -1;
+    private int FrameCharsProcessed = 0;
+    private bool CloseEmojiPopup = false;
 
     private int MaxLines => C.PMLMaxLines;
     public bool IsMultiline => C.PMLEnable;
@@ -42,6 +46,7 @@ public unsafe partial class PseudoMultilineInput
     {
         EmojiStartCursor = -1;
         IsSelectingEmoji = true;
+        this.EmojiListMode = false;
         ImGui.OpenPopup("XIMEmojiSelect");
     }
 
@@ -76,6 +81,7 @@ public unsafe partial class PseudoMultilineInput
 
     public void DrawMultiline()
     {
+        FrameCharsProcessed = 0;
         EnterPress = null;
         var width = Width ?? ImGui.GetContentRegionAvail().X;
         TextWidth = width - ImGui.GetStyle().FramePadding.X * 2;
@@ -92,100 +98,111 @@ public unsafe partial class PseudoMultilineInput
     {
         if (data->EventFlag == ImGuiInputTextFlags.CallbackCharFilter)
         {
+            FrameCharsProcessed++;
+            if (FrameCharsProcessed > 1) EnterPress = null;
             if (data->EventChar == '\n')
             {
-                EnterPress = ImGui.GetFrameCount();
-                return 1;
+                if (FrameCharsProcessed == 1)
+                {
+                    EnterPress = ImGui.GetFrameCount();
+                    return 1;
+                }
             }
             return 0;
         }
-        if (SetFocusAt > -1)
+        if (data->EventFlag == ImGuiInputTextFlags.CallbackAlways)
         {
-            if (SetFocusAt <= data->BufTextLen)
+            if (SetFocusAt > -1)
             {
-                data->CursorPos = SetFocusAt;
+                if (SetFocusAt <= data->BufTextLen)
+                {
+                    data->CursorPos = SetFocusAt;
+                }
+                SetFocusAt = -1;
             }
-            SetFocusAt = -1;
-        }
-        EmojiEndCursor = data->CursorPos;
-        IsSelectingEmoji = false;
-        for (var i = 0; i < EmojiEndCursor; i++)
-        {
-            if (data->Buf[i] == ':')
-            {
-                IsSelectingEmoji = !IsSelectingEmoji;
-                EmojiStartCursor = i;
-            }
-            else if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
-            {
-                IsSelectingEmoji = false;
-            }
-        }
-        if (IsSelectingEmoji)
-        {
-            if (EmojiEndCursor - EmojiStartCursor < 3) IsSelectingEmoji = false;
-        }
-        if (IsSelectingEmoji)
-        {
-            for (var i = EmojiEndCursor; i < data->BufTextLen; i++)
+            EmojiEndCursor = data->CursorPos;
+            IsSelectingEmoji = false;
+            for (var i = 0; i < EmojiEndCursor; i++)
             {
                 if (data->Buf[i] == ':')
                 {
+                    IsSelectingEmoji = !IsSelectingEmoji;
+                    EmojiStartCursor = i;
+                }
+                else if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
+                {
                     IsSelectingEmoji = false;
                 }
-                if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
             }
-        }
-        if (IsSelectingEmoji)
-        {
-            EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
-        }
-
-
-        var space = ImGui.CalcTextSize(" ").X;
-        var numNewlines = 0;
-        void Process()
-        {
-            for (var i = 0; i < data->BufTextLen; i++)
+            if (IsSelectingEmoji)
             {
-                var symbol = data->Buf[i];
-                if (symbol == '\n')
+                if (EmojiEndCursor - EmojiStartCursor < 3) IsSelectingEmoji = false;
+            }
+            if (IsSelectingEmoji)
+            {
+                for (var i = EmojiEndCursor; i < data->BufTextLen; i++)
                 {
-                    data->Buf[i] = (byte)' ';
+                    if (data->Buf[i] == ':')
+                    {
+                        IsSelectingEmoji = false;
+                    }
+                    if (!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
                 }
             }
-            var cursor = 0;
-            var width = TextWidth;
-            var prevSpaceIndex = -1;
-            while (cursor < data->BufTextLen)
+            if (IsSelectingEmoji)
             {
-                var word = ReadUntilSpace(data->Buf, data->BufTextLen, cursor, out var spaceIndex);
-                var wordWidth = ImGui.CalcTextSize(word).X;
+                EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
+                this.EmojiListMode = true;
+            }
+
+
+            var space = ImGui.CalcTextSize(" ").X;
+            var numNewlines = 0;
+            void Process()
+            {
+                for (var i = 0; i < data->BufTextLen; i++)
                 {
-                    width -= wordWidth + (spaceIndex == -1 ? 0 : space);
-                    if (width < 0 && prevSpaceIndex > -1)
+                    var symbol = data->Buf[i];
+                    if (symbol == '\n')
                     {
-                        data->Buf[prevSpaceIndex] = (byte)'\n';
-                        numNewlines++;
-                        width = TextWidth - wordWidth - (spaceIndex == -1 ? 0 : space);
+                        data->Buf[i] = (byte)' ';
                     }
                 }
-                cursor = spaceIndex == -1 ? data->BufTextLen : spaceIndex + 1;
-                prevSpaceIndex = spaceIndex;
+                var cursor = 0;
+                var width = TextWidth;
+                var prevSpaceIndex = -1;
+                while (cursor < data->BufTextLen)
+                {
+                    var word = ReadUntilSpace(data->Buf, data->BufTextLen, cursor, out var spaceIndex);
+                    var wordWidth = ImGui.CalcTextSize(word).X;
+                    {
+                        width -= wordWidth + (spaceIndex == -1 ? 0 : space);
+                        if (width < 0 && prevSpaceIndex > -1)
+                        {
+                            data->Buf[prevSpaceIndex] = (byte)'\n';
+                            numNewlines++;
+                            width = TextWidth - wordWidth - (spaceIndex == -1 ? 0 : space);
+                        }
+                    }
+                    cursor = spaceIndex == -1 ? data->BufTextLen : spaceIndex + 1;
+                    prevSpaceIndex = spaceIndex;
+                }
+                data->BufDirty = 1;
             }
-            data->BufDirty = 1;
-        }
-        Process();
-        if (numNewlines >= MaxLines)
-        {
-            TextWidth -= ImGui.GetStyle().ScrollbarSize;
             Process();
+            if (numNewlines >= MaxLines)
+            {
+                TextWidth -= ImGui.GetStyle().ScrollbarSize;
+                Process();
+            }
+            return 0;
         }
         return 0;
     }
 
     private void DrawEmojiPopup()
     {
+        var emojiSize = 32f;
         if (IsInputActive)
         {
             if (IsSelectingEmoji && !ImGui.IsPopupOpen("XIMEmojiSelect"))
@@ -195,8 +212,12 @@ public unsafe partial class PseudoMultilineInput
         }
         if (ImGui.IsPopupOpen("XIMEmojiSelect"))
         {
-            ImGuiHelpers.SetNextWindowPosRelativeMainViewport(ImGui.GetCursorScreenPos());
-            ImGui.SetNextWindowSizeConstraints(new(100, 100), new(500, 300));
+            ImGui.SetNextWindowPos(new(ImGui.GetWindowPos().X, ImGui.GetCursorScreenPos().Y));
+            ImGui.SetNextWindowSizeConstraints(new(ImGui.GetWindowSize().X, 100), new(ImGui.GetWindowSize().X, 300));
+        }
+        else
+        {
+            IsSelectingEmoji = false;
         }
         if (ImGui.BeginPopup("XIMEmojiSelect", ImGuiWindowFlags.NoFocusOnAppearing))
         {
@@ -204,80 +225,154 @@ public unsafe partial class PseudoMultilineInput
             {
                 CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
             }
+            if (CloseEmojiPopup)
+            {
+                CloseEmojiPopup= false;
+                ImGui.SetWindowFocus();
+            }
             if (!IsSelectingEmoji) ImGui.CloseCurrentPopup();
-            var cnt = 0;
-            ImGuiEx.InputWithRightButtonsArea(() =>
+            if (!EmojiListMode)
             {
-                ImGui.InputTextWithHint("##emjfltr", "Search...", ref EmojiSearch, 50);
-            }, () =>
-            {
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, enabled: EmojiSearch != "" && !S.EmojiLoader.DownloaderTaskRunning))
+                var cnt = 0;
+                ImGuiEx.InputWithRightButtonsArea(() =>
                 {
-                    S.EmojiLoader.Search(EmojiSearch.ToLower());
-                }
-                ImGuiEx.Tooltip($"Search for this emoji on BetterTTV");
-            });
-            var fav = S.EmojiLoader.Emoji.Where(x => C.FavoriteEmoji.Contains(x.Key));
-            var all = S.EmojiLoader.Emoji.Where(x => !C.FavoriteEmoji.Contains(x.Key));
-            if (fav.Any())
-            {
-                DrawEmojiSet(fav);
-                ImGui.SameLine();
-                ImGui.NewLine();
-                ImGui.Separator();
-            }
-            DrawEmojiSet(all);
-            void DrawEmojiSet(IEnumerable<KeyValuePair<string, ImageFile>> emojiSet)
-            {
-                var internalCnt = 0;
-                foreach (var em in emojiSet)
+                    ImGui.InputTextWithHint("##emjfltr", "Search...", ref EmojiSearch, 50);
+                }, () =>
                 {
-                    if (EmojiSearch != "" && !em.Key.Contains(EmojiSearch, StringComparison.OrdinalIgnoreCase)) continue;
-                    cnt++;
-                    internalCnt++;
-                    if (em.Value.GetTextureWrap() != null)
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, enabled: EmojiSearch != "" && !S.EmojiLoader.DownloaderTaskRunning))
                     {
-                        ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(32));
-                        ImGuiEx.Tooltip($":{em.Key}:");
-                        if (ImGui.IsItemHovered())
-                        {
-                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-                            if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-                            {
-                                Insert(em.Key);
-                            }
-                            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                            {
-                                ImGui.OpenPopup($"EmojiContext{em.Key}");
-                            }
-                        }
-                        if (ImGui.BeginPopup($"EmojiContext{em.Key}"))
-                        {
-                            if (ImGui.Selectable("Insert as sticker"))
-                            {
-                                Insert("s-" + em.Key);
-                            }
-                            if (ImGui.Selectable(!C.FavoriteEmoji.Contains(em.Key) ? "Add to Favorites" : "Remove from Favorites", false, ImGuiSelectableFlags.DontClosePopups))
-                            {
-                                C.FavoriteEmoji.Toggle(em.Key);
-                            }
-                            ImGui.EndPopup();
-                        }
+                        S.EmojiLoader.Search(EmojiSearch.ToLower());
                     }
-                    else
-                    {
-                        ImGui.Dummy(new(32));
-                    }
+                    ImGuiEx.Tooltip($"Search for this emoji on BetterTTV");
+                });
+                var fav = S.EmojiLoader.Emoji.Where(x => C.FavoriteEmoji.Contains(x.Key));
+                var all = S.EmojiLoader.Emoji.Where(x => !C.FavoriteEmoji.Contains(x.Key));
+                if (fav.Any())
+                {
+                    DrawEmojiSet(fav);
                     ImGui.SameLine();
-                    if (internalCnt % 12 == 0)
+                    ImGui.NewLine();
+                    ImGui.Separator();
+                }
+                DrawEmojiSet(all);
+                void DrawEmojiSet(IEnumerable<KeyValuePair<string, ImageFile>> emojiSet)
+                {
+                    var internalCnt = 0;
+                    foreach (var em in emojiSet)
                     {
-                        ImGui.NewLine();
+                        if (EmojiSearch != "" && !em.Key.Contains(EmojiSearch, StringComparison.OrdinalIgnoreCase)) continue;
+                        cnt++;
+                        internalCnt++;
+                        if (em.Value.GetTextureWrap() != null)
+                        {
+                            ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(emojiSize));
+                            ImGuiEx.Tooltip($":{em.Key}:");
+                            HandleEmojiRightClick(em);
+                        }
+                        else
+                        {
+                            ImGui.Dummy(new(emojiSize));
+                        }
+                        ImGui.SameLine();
+                        if (ImGui.GetContentRegionAvail().X < emojiSize)
+                        {
+                            ImGui.NewLine();
+                        }
+                    }
+                }
+                if (cnt == 0)
+                {
+                    ImGuiEx.Text($"No emoji found...");
+                }
+            }
+            else
+            {
+                var index = 0;
+                var fav = S.EmojiLoader.Emoji.Where(x => C.FavoriteEmoji.Contains(x.Key));
+                var all = S.EmojiLoader.Emoji.Where(x => !C.FavoriteEmoji.Contains(x.Key));
+                if (fav.Any())
+                {
+                    DrawEmojiSet(fav, "fav");
+                    ImGui.SameLine();
+                    ImGui.NewLine();
+                    ImGui.Separator();
+                }
+                DrawEmojiSet(all, "all");
+                void DrawEmojiSet(IEnumerable<KeyValuePair<string, ImageFile>> emojiSet, string id)
+                {
+                    List<Action> PostDrawAction = [];
+                    if(ImGui.BeginTable($"EmojiTable{id}", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.BordersOuter | ImGuiTableFlags.BordersInnerH))
+                    {
+                        ImGui.TableSetupColumn("image");
+                        ImGui.TableSetupColumn("emojiText", ImGuiTableColumnFlags.WidthStretch);
+                        foreach (var em in emojiSet)
+                        {
+                            if (EmojiSearch != "" && !em.Key.Contains(EmojiSearch, StringComparison.OrdinalIgnoreCase)) continue;
+                            ImGui.TableNextRow();
+                            if(index == this.EmojiSelectorRow)
+                            {
+                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGuiEx.Vector4FromRGBA(0xffffff33).ToUint());
+                                this.EmojiSelectorRow = -1;
+                            }
+                            ImGui.TableNextColumn();
+
+                            var cur = ImGui.GetCursorPos();
+                            var index2 = index;
+                            PostDrawAction.Add(() =>
+                            {
+                                ImGui.SetCursorPos(cur);
+                                ImGui.Dummy(new(ImGuiEx.GetWindowContentRegionWidth(), emojiSize));
+                                HandleEmojiRightClick(em);
+                            });
+
+                            if (em.Value.GetTextureWrap() != null)
+                            {
+                                ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(emojiSize));
+                            }
+                            else
+                            {
+                                ImGui.Dummy(new(emojiSize));
+                            }
+                            ImGui.TableNextColumn();
+                            var pad = (emojiSize - ImGui.CalcTextSize($":{em.Key}:").Y) / 2f;
+                            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + pad);
+                            ImGuiEx.Text($":{em.Key}:");
+                            index++;
+                        }
+                        ImGui.EndTable();
+                        PostDrawAction.Each(x => x());
                     }
                 }
             }
-            if (cnt == 0)
+            ImGui.EndPopup();
+        }
+    }
+
+    void HandleEmojiRightClick(KeyValuePair<string, ImageFile> em)
+    {
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {
-                ImGuiEx.Text($"No emoji found...");
+                Insert(em.Key);
+            }
+            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+            {
+                ImGui.OpenPopup($"EmojiContext{em.Key}");
+            }
+        }
+        if (ImGui.BeginPopup($"EmojiContext{em.Key}"))
+        {
+            if (ImGui.Selectable("Insert as sticker"))
+            {
+                Insert("s-" + em.Key);
+            }
+            if (ImGui.Selectable(!C.FavoriteEmoji.Contains(em.Key) ? "Add to Favorites" : "Remove from Favorites", false, ImGuiSelectableFlags.DontClosePopups))
+            {
+                C.FavoriteEmoji.Toggle(em.Key);
+                CloseEmojiPopup = true;
+                CImGui.igClosePopupToLevel(1, false);
             }
             ImGui.EndPopup();
         }

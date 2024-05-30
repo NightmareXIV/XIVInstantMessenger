@@ -12,6 +12,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
 {
     public override FontAwesomeIcon Icon => FontAwesomeIcon.DoorOpen;
     public override Vector2 Offset => new(2, 0);
+    public bool RequestOpenPopup = false;
 
     public InviteToPartyButton(ChatWindow chatWindow) : base(chatWindow)
     {
@@ -75,15 +76,15 @@ public class InviteToPartyButton : ChatWindowTitleButton
             if (!flSuccess)
             {
                 {
-                    ImGui.OpenPopup("###Invite");
+                    RequestOpenPopup = true;
                 }
             }
         }
     }
 
-    public override void OnRightClick()
+    public override void OnCtrlLeftClick()
     {
-        ImGui.OpenPopup("Invite");
+        RequestOpenPopup = true;
     }
 
     public override bool ShouldDisplay()
@@ -93,9 +94,14 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public void DrawPopup()
     {
-        if (ImGui.BeginPopup("###Invite"))
+        if (RequestOpenPopup)
         {
-            ImGuiEx.Text("Unable to determine player's current world.");
+            RequestOpenPopup = false;
+            ImGui.OpenPopup($"###Invite{MessageHistory.Player}");
+        }
+        if (ImGui.BeginPopup($"###Invite{MessageHistory.Player}"))
+        {
+            ImGuiEx.Text($"Unable to determine {MessageHistory.Player}'s current world.");
             if (ImGui.Selectable("Same world"))
             {
                 P.InviteToParty(MessageHistory.Player, true);
@@ -117,6 +123,6 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Invite {MessageHistory.Player} to party.\nRight click for more options.");
+        ImGuiEx.SetTooltip($"Invite {MessageHistory.Player} to party.\nHold CTRL+click for more options.");
     }
 }

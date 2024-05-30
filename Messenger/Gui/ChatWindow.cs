@@ -27,6 +27,7 @@ public unsafe class ChatWindow : Window
     internal bool SetPosition = false;
     internal new bool BringToFront = false;
     private PseudoMultilineInput Input = new();
+    private bool BlockEmojiSelection = false;
 
     internal string OwningTab => C.TabWindowAssociations.TryGetValue(MessageHistory.Player.ToString(), out string owner) ? owner : null;
 
@@ -340,7 +341,22 @@ public unsafe class ChatWindow : Window
         {
             if (ImGuiEx.IconButton(FontAwesomeIcon.SmileWink, "Insert emoji"))
             {
-                Input.OpenEmojiSelector();
+                if(!BlockEmojiSelection) Input.OpenEmojiSelector();
+            }
+            if(ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Left) && Input.IsSelectingEmoji)
+            {
+                BlockEmojiSelection = true;
+            }
+            if (BlockEmojiSelection)
+            {
+                if(ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                {
+                    //
+                }
+                else
+                {
+                    BlockEmojiSelection = false;
+                }
             }
             ImGuiEx.Tooltip("Open Emoji selector");
         }

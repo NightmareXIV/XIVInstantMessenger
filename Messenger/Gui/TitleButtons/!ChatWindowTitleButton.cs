@@ -19,8 +19,14 @@ public abstract class ChatWindowTitleButton
             Icon = Icon,
             Click = (m) =>
             {
-                if (m == ImGuiMouseButton.Left) OnLeftClick();
-                if (m == ImGuiMouseButton.Right) OnRightClick();
+                if (!ImGuiEx.Ctrl)
+                {
+                    OnLeftClick();
+                }
+                else
+                {
+                    OnCtrlLeftClick();
+                }
             },
             IconOffset = Offset,
             ShowTooltip = DrawTooltip,
@@ -29,7 +35,7 @@ public abstract class ChatWindowTitleButton
 
     public Window.TitleBarButton Button { get; private set; }
     public abstract void OnLeftClick();
-    public virtual void OnRightClick() { }
+    public virtual void OnCtrlLeftClick() { }
     public abstract bool ShouldDisplay();
     public abstract void DrawTooltip();
 }
