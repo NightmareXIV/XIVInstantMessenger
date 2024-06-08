@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace Messenger.Services.MessageParsingService.Segments;
 public class SegmentSticker(string emoji) : SegmentEmoji(emoji)
 {
-    public override void Draw()
+    public override void Draw(Action? postMessageAction)
     {
-        base.Draw(4f);
+        base.Draw(4f, postMessageAction);
     }
 }

@@ -14,9 +14,9 @@ public class SegmentText : ISegment
         Text = text ?? throw new ArgumentNullException(nameof(text));
     }
 
-    public void Draw()
+    public void Draw(Action? postMessageFunctions)
     {
-        Utils.DrawWrappedText(Text);
+        Utils.DrawWrappedText(Text, postMessageFunctions);
         ImGui.SameLine(0, 0);
     }
 }

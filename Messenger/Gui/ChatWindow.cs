@@ -257,7 +257,7 @@ public unsafe class ChatWindow : Window
                     ImGuiEx.Text(messageColor, $"] ");
                     ImGui.SameLine(0, 0);
                     ImGui.PushStyleColor(ImGuiCol.Text, messageColor);
-                    x.Draw();
+                    x.Draw("", "", () => PostMessageFunctionsShared(x));
                     PostMessageFunctions(x);
                     ImGui.PopStyleColor();
                 }
@@ -282,7 +282,8 @@ public unsafe class ChatWindow : Window
                     ImGuiHelpers.ScaledDummy(new Vector2(20f, 1f));
                     ImGui.SameLine(0, 0);
                     ImGui.PushStyleColor(ImGuiCol.Text, x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage);
-                    x.Draw("[{timestamp}] ", "", () => PostMessageFunctions(x));
+                    x.Draw("[{timestamp}] ", "", () => PostMessageFunctionsShared(x));
+                    PostMessageFunctions(x);
                     ImGui.PopStyleColor();
                 }
             }
@@ -393,7 +394,7 @@ public unsafe class ChatWindow : Window
         ImGui.SetWindowFontScale(1);
     }
 
-    private void PostMessageFunctions(SavedMessage x)
+    private void PostMessageFunctionsShared(SavedMessage x)
     {
         if (C.ClickToOpenLink && ImGui.IsItemHovered())
         {
@@ -418,6 +419,10 @@ public unsafe class ChatWindow : Window
         {
             ImGui.OpenPopup($"MessageDetail{x.GUID}");
         }
+    }
+
+    private void PostMessageFunctions(SavedMessage x)
+    {
         if (ImGui.BeginPopup($"MessageDetail{x.GUID}"))
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);

@@ -17,9 +17,9 @@ public class SegmentEmoji : ISegment
         Emoji = emoji ?? throw new ArgumentNullException(nameof(emoji));
     }
 
-    public virtual void Draw() => Draw(1f);
+    public virtual void Draw(Action? postMessageAction) => Draw(1f, postMessageAction);
 
-    public void Draw(float sizeMult)
+    public void Draw(float sizeMult, Action? postMessageAction = null)
     {
         if (!C.EnableEmoji)
         {
@@ -38,6 +38,7 @@ public class SegmentEmoji : ISegment
         if (tex != null)
         {
             ImGui.Image(tex.ImGuiHandle, size * sizeMult);
+            postMessageAction?.Invoke();
             ImGuiEx.Tooltip(Emoji);
         }
         else
@@ -48,6 +49,7 @@ public class SegmentEmoji : ISegment
                 if (S.EmojiLoader.Loading.GetTextureWrap() != null)
                 {
                     ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size * sizeMult);
+                    postMessageAction?.Invoke();
                 }
                 else
                 {
@@ -60,6 +62,7 @@ public class SegmentEmoji : ISegment
                 if (S.EmojiLoader.Error.GetTextureWrap() != null)
                 {
                     ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size * sizeMult);
+                    postMessageAction?.Invoke();
                 }
                 else
                 {

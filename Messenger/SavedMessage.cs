@@ -24,8 +24,7 @@ internal class SavedMessage
     {
         if (ParsedMessage == null)
         {
-            Utils.DrawWrappedText($"{prefix}{Message}{suffix}");
-            postMessageAction?.Invoke();
+            Utils.DrawWrappedText($"{prefix}{Message}{suffix}", postMessageAction);
         }
         else
         {

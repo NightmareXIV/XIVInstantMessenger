@@ -66,8 +66,7 @@ public partial class ParsedMessage
     {
         foreach (var x in Segments)
         {
-            x.Draw();
-            postMessageFunction?.Invoke();
+            x.Draw(postMessageFunction);
         }
     }
 

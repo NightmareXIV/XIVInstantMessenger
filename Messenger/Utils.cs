@@ -17,6 +17,7 @@ using Messenger.FontControl;
 using Messenger.Gui.Settings;
 using PInvoke;
 using System.IO;
+using Action = System.Action;
 
 namespace Messenger;
 
@@ -29,7 +30,7 @@ internal static unsafe class Utils
         return new(point.x, point.y);
     }
 
-    public static void DrawWrappedText(string str)
+    public static void DrawWrappedText(string str, Action? postMessageFunctions = null)
     {
         var max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
         foreach (var s in str.Split("\n"))
@@ -51,6 +52,7 @@ internal static unsafe class Utils
                         if (WrapSymbols.Contains(s[z]))
                         {
                             ImGuiEx.Text(s[start..z]);
+                            postMessageFunctions?.Invoke();
                             canRestart = false;
                             start = z;
                             //PluginLog.Information($"start is now {start}");
@@ -67,6 +69,7 @@ internal static unsafe class Utils
                             }
                             //just wrap it
                             ImGuiEx.Text(s[start..i]);
+                            postMessageFunctions?.Invoke();
                             start = i;
                         }
                     }
@@ -75,6 +78,7 @@ internal static unsafe class Utils
             if (start < s.Length)
             {
                 ImGuiEx.Text(s[start..]);
+                postMessageFunctions?.Invoke();
             }
         }
     }
