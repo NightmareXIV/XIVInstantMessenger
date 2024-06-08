@@ -1,4 +1,5 @@
-﻿using Lumina.Excel.GeneratedSheets2;
+﻿using FFXIVClientStructs.Interop;
+using Lumina.Excel.GeneratedSheets2;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -109,6 +110,22 @@ public sealed class EmojiLoader : IDisposable
 
     public void Initialize()
     {
+        foreach (var fname in C.StaticBetterTTVEmojiCache.Keys.ToArray())
+        {
+            if (!File.Exists(Path.Combine(CachePath, fname)))
+            {
+                PluginLog.Warning($"Deleting corrupted emoji {fname} from static bttv cache");
+                C.StaticBetterTTVEmojiCache.Remove(fname);
+            }
+        }
+        foreach (var fname in C.DynamicBetterTTVEmojiCache.Keys.ToArray())
+        {
+            if (!File.Exists(Path.Combine(CachePath, fname)))
+            {
+                PluginLog.Warning($"Deleting corrupted emoji {fname} from dynamic bttv cache");
+                C.DynamicBetterTTVEmojiCache.Remove(fname);
+            }
+        }
         if (C.EnableEmoji)
         {
             LoadDefaultEmoji();
@@ -165,6 +182,7 @@ public sealed class EmojiLoader : IDisposable
         PluginLog.Debug($" Downloading {url}");
         var file = Client.GetByteArrayAsync(url).Result;
         var fname = $"{id}.{imageType}";
+        Directory.CreateDirectory(CachePath);
         File.WriteAllBytes(Path.Combine(CachePath, fname), file);
         Svc.Framework.RunOnFrameworkThread(() =>
         {

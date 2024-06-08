@@ -1,5 +1,7 @@
 ﻿using Dalamud.Memory;
+using ECommons.Interop;
 using Messenger.Services.EmojiLoaderService;
+using PInvoke;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,8 +27,13 @@ public unsafe partial class PseudoMultilineInput
     private int SetFocusAt = -1;
     private bool EmojiListMode = false;
     private int EmojiSelectorRow = -1;
+    private int EmojiKeyboardSelectorRow = 0;
+    private bool EmojiKeyboardSelecting = false;
     private int FrameCharsProcessed = 0;
     private bool CloseEmojiPopup = false;
+    private bool DoCursorLock = false;
+    private int CursorLock = -1;
+    private Vector2 MouseEmojiLock = Vector2.Zero;
 
     private int MaxLines => C.PMLMaxLines;
     public bool IsMultiline => C.PMLEnable;
@@ -88,7 +95,7 @@ public unsafe partial class PseudoMultilineInput
         var newlines = Text.Split("\n").Length;
         var cnt = Math.Max(1, Math.Min(newlines, MaxLines));
         var lheight = ImGui.CalcTextSize("A").Y;
-        ImGui.InputTextMultiline($"##{Label}", ref Text, MaxLength, new(width, lheight * cnt + ImGui.GetStyle().FramePadding.X * 2), ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.CallbackAlways | ImGuiInputTextFlags.CallbackCharFilter | ImGuiInputTextFlags.NoUndoRedo, Callback);
+        ImGui.InputTextMultiline($"##{Label}", ref Text, MaxLength, new(width, lheight * cnt + ImGui.GetStyle().FramePadding.X * 2), ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.CallbackAlways | ImGuiInputTextFlags.CallbackCharFilter | ImGuiInputTextFlags.CallbackHistory | ImGuiInputTextFlags.NoUndoRedo, Callback);
         if (SetFocusAt > -1) ImGui.SetKeyboardFocusHere(-1);
         IsInputActive = ImGui.IsItemActive();
         DrawEmojiPopup();
@@ -96,6 +103,28 @@ public unsafe partial class PseudoMultilineInput
 
     private int Callback(ImGuiInputTextCallbackData* data)
     {
+        if(data->EventFlag == ImGuiInputTextFlags.CallbackHistory)
+        {
+            //DuoLog.Information($"{data->EventKey}");
+            if(data->EventKey == ImGuiKey.DownArrow || data->EventKey == ImGuiKey.UpArrow)
+            {
+                EmojiKeyboardSelecting = true;
+                MouseEmojiLock = User32.GetCursorPos().AsVector2();
+                if (data->EventKey == ImGuiKey.UpArrow)
+                {
+                    EmojiKeyboardSelectorRow--;
+                }
+                if (data->EventKey == ImGuiKey.DownArrow)
+                {
+                    EmojiKeyboardSelectorRow++;
+                }
+            }
+            if (DoCursorLock && CursorLock > -1)
+            {
+                data->CursorPos = CursorLock;
+            }
+            return 1;
+        }
         if (data->EventFlag == ImGuiInputTextFlags.CallbackCharFilter)
         {
             FrameCharsProcessed++;
@@ -119,6 +148,24 @@ public unsafe partial class PseudoMultilineInput
                     data->CursorPos = SetFocusAt;
                 }
                 SetFocusAt = -1;
+            }
+            if (DoCursorLock)
+            {
+                if (CursorLock != -1 && GenericHelpers.IsAnyKeyPressed([LimitedKeys.Up, LimitedKeys.Down]))
+                {
+                    data->CursorPos = CursorLock;
+                }
+                else
+                {
+                    CursorLock = data->CursorPos;
+                }
+            }
+            else
+            {
+                if(CursorLock != -1)
+                {
+                    CursorLock = -1;
+                }
             }
             EmojiEndCursor = data->CursorPos;
             IsSelectingEmoji = false;
@@ -205,6 +252,7 @@ public unsafe partial class PseudoMultilineInput
 
     private void DrawEmojiPopup()
     {
+        DoCursorLock = false;
         var emojiSize = 32f;
         if (IsInputActive)
         {
@@ -236,6 +284,7 @@ public unsafe partial class PseudoMultilineInput
             if (!IsSelectingEmoji) ImGui.CloseCurrentPopup();
             if (!EmojiListMode)
             {
+                EmojiKeyboardSelecting = false;
                 var cnt = 0;
                 ImGuiEx.InputWithRightButtonsArea(() =>
                 {
@@ -290,6 +339,18 @@ public unsafe partial class PseudoMultilineInput
             }
             else
             {
+                if (ImGui.IsWindowAppearing())
+                {
+                    EmojiKeyboardSelectorRow = -1;
+                    EmojiKeyboardSelecting = false;
+                }
+                if(MouseEmojiLock != User32.GetCursorPos().AsVector2() && ImGui.IsWindowHovered())
+                {
+                    MouseEmojiLock = User32.GetCursorPos().AsVector2();
+                    EmojiKeyboardSelectorRow = -1;
+                    EmojiKeyboardSelecting = false;
+                }
+                DoCursorLock = true;
                 var index = 0;
                 var fav = S.EmojiLoader.Emoji.Where(x => C.FavoriteEmoji.Contains(x.Key));
                 var all = S.EmojiLoader.Emoji.Where(x => !C.FavoriteEmoji.Contains(x.Key));
@@ -348,6 +409,7 @@ public unsafe partial class PseudoMultilineInput
                         PostDrawAction.Each(x => x());
                     }
                 }
+                if(EmojiKeyboardSelecting) EmojiKeyboardSelectorRow.ValidateRange(0, index - 1);
             }
             ImGui.EndPopup();
         }
@@ -355,17 +417,33 @@ public unsafe partial class PseudoMultilineInput
 
     private void HandleEmojiRightClick(KeyValuePair<string, ImageFile> em, int index)
     {
-        if (ImGui.IsItemHovered())
+        if (EmojiKeyboardSelecting)
         {
-            EmojiSelectorRow = index;
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+            if(EmojiKeyboardSelectorRow == index)
             {
-                Insert(em.Key);
+                EmojiSelectorRow = index;
+                ImGui.SetScrollHereY();
+                if (IsKeyPressed(LimitedKeys.Tab))
+                {
+                    ImGui.SetWindowFocus(null);
+                    Insert(em.Key);
+                }
             }
-            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+        }
+        else
+        {
+            if (ImGui.IsItemHovered())
             {
-                ImGui.OpenPopup($"EmojiContext{em.Key}");
+                EmojiSelectorRow = index;
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                {
+                    Insert(em.Key);
+                }
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                {
+                    ImGui.OpenPopup($"EmojiContext{em.Key}");
+                }
             }
         }
         if (ImGui.BeginPopup($"EmojiContext{em.Key}"))

@@ -15,6 +15,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 using Messenger.Gui.Settings;
+using PInvoke;
 using System.IO;
 
 namespace Messenger;
@@ -22,6 +23,11 @@ namespace Messenger;
 internal static unsafe class Utils
 {
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
+
+    public static Vector2 AsVector2(this POINT point)
+    {
+        return new(point.x, point.y);
+    }
 
     public static void DrawWrappedText(string str)
     {
