@@ -1,4 +1,5 @@
-﻿using Messenger.FontControl;
+﻿using ECommons.Configuration;
+using Messenger.FontControl;
 
 namespace Messenger.Gui.Settings;
 
@@ -42,6 +43,6 @@ internal class GuiSettings : Window
     public override void OnClose()
     {
         base.OnClose();
-        Svc.PluginInterface.SavePluginConfig(C);
+        EzConfig.Save();
     }
 }

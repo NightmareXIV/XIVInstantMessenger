@@ -3,19 +3,19 @@ using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
 using Dalamud.Interface.FontIdentifier;
 using Dalamud.Interface.GameFonts;
+using ECommons.Configuration;
 using Messenger.FontControl;
 
 namespace Messenger;
 
-public class Config : IPluginConfiguration
+public class Config : IEzConfig
 {
-    public int Version { get; set; } = 1;
-    public int ContextMenuIndex = 1;
+    public int ContextMenuPriority = 0;
     public bool ContextMenuEnable = true;
 
     public HashSet<XivChatType> Channels = [];
 
-    public ChannelCustomization DefaultChannelCustomization = null;
+    public ChannelCustomization DefaultChannelCustomization = new();
     public Dictionary<XivChatType, ChannelCustomization> SpecificChannelCustomizations = [];
 
     public bool IRCStyle = true;

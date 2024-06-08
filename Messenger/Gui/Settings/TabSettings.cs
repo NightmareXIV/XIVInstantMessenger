@@ -14,6 +14,11 @@ internal class TabSettings
                     ShellStart(logFolder);
                 }
                 ImGui.Checkbox("Enable context menu integration", ref C.ContextMenuEnable);
+                ImGui.Indent();
+                ImGui.SetNextItemWidth(60f);
+                ImGui.DragInt("Context menu priority", ref C.ContextMenuPriority.ValidateRange(-100, 100), 0.1f);
+                ImGuiEx.HelpMarker($"This option sets priority of XIM's context menu related to other plugins' context menu options. Negative priority will put menu item on top of the list.");
+                ImGui.Unindent();
                 if (ImGui.Checkbox("Tabs instead of windows", ref C.Tabs))
                 {
                     P.Tabs(C.Tabs);

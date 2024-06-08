@@ -17,7 +17,7 @@ public class OpenLogButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Open Chat Log with {MessageHistory.Player}");
+        ImGuiEx.SetTooltip($"Open Chat Log with {MessageHistory.HistoryPlayer}");
     }
 
     public override void OnLeftClick()

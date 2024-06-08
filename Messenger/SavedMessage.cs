@@ -20,15 +20,16 @@ internal class SavedMessage
 
     internal string GUID = Guid.NewGuid().ToString();
 
-    public void Draw(string prefix = "", string suffix = "")
+    public void Draw(string prefix = "", string suffix = "", Action? postMessageAction = null)
     {
         if (ParsedMessage == null)
         {
             Utils.DrawWrappedText($"{prefix}{Message}{suffix}");
+            postMessageAction?.Invoke();
         }
         else
         {
-            ParsedMessage.Draw();
+            ParsedMessage.Draw(postMessageAction);
         }
     }
 }

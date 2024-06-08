@@ -103,21 +103,21 @@ internal class TabSystem : Window
                     {
                         if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                         {
-                            ImGui.OpenPopup($"Associate{w.MessageHistory.Player}");
+                            ImGui.OpenPopup($"Associate{w.MessageHistory.HistoryPlayer}");
                         }
-                        if (ImGui.BeginPopup($"Associate{w.MessageHistory.Player}"))
+                        if (ImGui.BeginPopup($"Associate{w.MessageHistory.HistoryPlayer}"))
                         {
                             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
                             if (ImGui.Selectable("Default window"))
                             {
-                                C.TabWindowAssociations.Remove(w.MessageHistory.Player.ToString());
+                                C.TabWindowAssociations.Remove(w.MessageHistory.HistoryPlayer.ToString());
                             }
                             ImGui.PopStyleColor();
                             foreach (var x in C.TabWindows)
                             {
                                 if (ImGui.Selectable(x))
                                 {
-                                    C.TabWindowAssociations[w.MessageHistory.Player.ToString()] = x;
+                                    C.TabWindowAssociations[w.MessageHistory.HistoryPlayer.ToString()] = x;
                                 }
                             }
                             ImGui.EndPopup();
@@ -138,7 +138,7 @@ internal class TabSystem : Window
                         ImGui.PushStyleColor(ImGuiCol.Tab, ImGuiCol.Tab.GetFlashColor(w.Cust));
                         ImGui.PushStyleColor(ImGuiCol.TabHovered, ImGuiCol.TabHovered.GetFlashColor(w.Cust));
                     }
-                    if (isOpen && ImGui.BeginTabItem(w.MessageHistory.Player.GetChannelName(!C.TabsNoWorld) + $"###{w.WindowName}", ref isOpen, flags))
+                    if (isOpen && ImGui.BeginTabItem(w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld) + $"###{w.WindowName}", ref isOpen, flags))
                     {
                         Associate();
                         if (titleColored)

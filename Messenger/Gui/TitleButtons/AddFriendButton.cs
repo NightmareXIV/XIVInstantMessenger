@@ -17,16 +17,16 @@ public class AddFriendButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Add {MessageHistory.Player} to Friend List");
+        ImGuiEx.SetTooltip($"Add {MessageHistory.HistoryPlayer} to Friend List");
     }
 
     public override void OnLeftClick()
     {
-        P.GameFunctions.SendFriendRequest(MessageHistory.Player.Name, (ushort)MessageHistory.Player.HomeWorld);
+        P.GameFunctions.SendFriendRequest(MessageHistory.HistoryPlayer.Name, (ushort)MessageHistory.HistoryPlayer.HomeWorld);
     }
 
     public override bool ShouldDisplay()
     {
-        return MessageHistory.Player.ToString() != Player.NameWithWorld && C.ButtonFriend && !MessageHistory.Player.IsGenericChannel() && !P.IsFriend(MessageHistory.Player);
+        return MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonFriend && !MessageHistory.HistoryPlayer.IsGenericChannel() && !P.IsFriend(MessageHistory.HistoryPlayer);
     }
 }

@@ -6,6 +6,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ManagedFontAtlas;
 using ECommons.Automation;
+using ECommons.Configuration;
 using ECommons.Events;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
@@ -22,6 +23,7 @@ using Messenger.Gui;
 using Messenger.Gui.Settings;
 using SharpDX.DXGI;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Messenger;
 
@@ -59,8 +61,8 @@ public unsafe class Messenger : IDalamudPlugin
         KoFiButton.IsOfficialPlugin = true;
         new TickScheduler(delegate
         {
-            Config = Svc.PluginInterface.GetPluginConfig() as Config ?? new();
-            Migrator.MigrateConfiguration();
+            EzConfig.Migrate<Config>();
+            Config = EzConfig.Init<Config>();
             Svc.Chat.ChatMessage += OnChatMessage;
             GameFunctions = new();
             WindowSystemMain = new();
@@ -74,7 +76,6 @@ public unsafe class Messenger : IDalamudPlugin
                 HelpMessage = "open main control window\n/xim h|hide → temporarily hide/show all message windows\n/xim c|close → close all active windows and reset cascading positions\n/xim <partial player name> - attempt to open chat history with specified player",
             });
             Svc.Commands.AddHandler("/msg", new(OnCommand) { HelpMessage = "Alias" });
-            ContextMenuManager = new();
             PartyFunctions = new();
             Svc.ClientState.Logout += Logout;
             Logger = new();
@@ -147,7 +148,6 @@ public unsafe class Messenger : IDalamudPlugin
     public void Dispose()
     {
         Safe(() => ContextMenuManager.Dispose());
-        Safe(() => Svc.PluginInterface.SavePluginConfig(Config));
         Svc.Chat.ChatMessage -= OnChatMessage;
         Svc.PluginInterface.UiBuilder.Draw -= WindowSystemMain.Draw;
         Svc.PluginInterface.UiBuilder.Draw -= WindowSystemChat.Draw;
@@ -194,7 +194,7 @@ public unsafe class Messenger : IDalamudPlugin
                 }
             }
         }
-        return previous ?? GetMostRecentChat(current.Player);
+        return previous ?? GetMostRecentChat(current.HistoryPlayer);
     }
 
     internal MessageHistory GetMostRecentChat(Sender? exclude = null)
@@ -204,7 +204,7 @@ public unsafe class Messenger : IDalamudPlugin
         foreach (var x in Chats.Values)
         {
             var latest = x.GetLatestMessageTime();
-            if (latest > time && (exclude == null || exclude.Value != x.Player))
+            if (latest > time && (exclude == null || exclude.Value != x.HistoryPlayer))
             {
                 chat = x;
                 time = latest;
@@ -403,6 +403,11 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 if (type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
                 {
+                    if (s.Name.StartsWith("Gm "))
+                    {
+                        PluginLog.Debug($"Skipping processing of GameMaster's {s} message");
+                        return;
+                    }
                     var isOpen = Chats.TryGetValue(s, out var sHist) && sHist.ChatWindow.IsOpen;
                     OpenMessenger(s,
                         (!Svc.Condition[ConditionFlag.InCombat] || Config.AutoReopenAfterCombat) &&

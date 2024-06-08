@@ -17,16 +17,16 @@ public class AddToBlacklistButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Add {MessageHistory.Player} to Blacklist");
+        ImGuiEx.SetTooltip($"Add {MessageHistory.HistoryPlayer} to Blacklist");
     }
 
     public override void OnLeftClick()
     {
-        P.GameFunctions.AddToBlacklist(MessageHistory.Player.Name, (ushort)MessageHistory.Player.HomeWorld);
+        P.GameFunctions.AddToBlacklist(MessageHistory.HistoryPlayer.Name, (ushort)MessageHistory.HistoryPlayer.HomeWorld);
     }
 
     public override bool ShouldDisplay()
     {
-        return MessageHistory.Player.ToString() != Player.NameWithWorld && C.ButtonBlack && !MessageHistory.Player.IsGenericChannel() && !P.IsFriend(MessageHistory.Player);
+        return MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonBlack && !MessageHistory.HistoryPlayer.IsGenericChannel() && !P.IsFriend(MessageHistory.HistoryPlayer);
     }
 }

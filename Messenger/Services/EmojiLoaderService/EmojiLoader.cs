@@ -112,7 +112,7 @@ public sealed class EmojiLoader : IDisposable
     {
         foreach (var fname in C.StaticBetterTTVEmojiCache.Keys.ToArray())
         {
-            if (!File.Exists(Path.Combine(CachePath, fname)))
+            if (!File.Exists(Path.Combine(CachePath, C.StaticBetterTTVEmojiCache[fname])))
             {
                 PluginLog.Warning($"Deleting corrupted emoji {fname} from static bttv cache");
                 C.StaticBetterTTVEmojiCache.Remove(fname);
@@ -120,7 +120,7 @@ public sealed class EmojiLoader : IDisposable
         }
         foreach (var fname in C.DynamicBetterTTVEmojiCache.Keys.ToArray())
         {
-            if (!File.Exists(Path.Combine(CachePath, fname)))
+            if (!File.Exists(Path.Combine(CachePath, C.DynamicBetterTTVEmojiCache[fname])))
             {
                 PluginLog.Warning($"Deleting corrupted emoji {fname} from dynamic bttv cache");
                 C.DynamicBetterTTVEmojiCache.Remove(fname);

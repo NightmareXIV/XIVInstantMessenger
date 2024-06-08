@@ -1,4 +1,5 @@
-﻿using Messenger.Gui;
+﻿using ECommons.GameHelpers;
+using Messenger.Gui;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -7,7 +8,7 @@ namespace Messenger;
 public partial class MessageHistory
 {
     private const int LoadBytes = 128 * 1024;
-    internal Sender Player;
+    internal Sender HistoryPlayer;
     internal List<SavedMessage> Messages;
     internal List<SavedMessage> LoadedMessages;
     internal ChatWindow ChatWindow;
@@ -23,7 +24,7 @@ public partial class MessageHistory
 
     internal MessageHistory(Sender player)
     {
-        Player = player;
+        HistoryPlayer = player;
         Init();
     }
 
@@ -45,9 +46,9 @@ public partial class MessageHistory
         LoadedMessages = [];
         LogLoaded = false;
 
-        LogFile = Path.Combine(Utils.GetLogStorageFolder(), Player.GetPlayerName() + ".txt");
+        LogFile = Path.Combine(Utils.GetLogStorageFolder(), HistoryPlayer.GetPlayerName() + ".txt");
 
-        var subject = Player.GetPlayerName();
+        var subject = HistoryPlayer.GetPlayerName();
         Task.Run(delegate
         {
             Safe(delegate
@@ -77,7 +78,7 @@ public partial class MessageHistory
                                 PluginLog.Debug($"name: {name}, subject: {subject}");
                                 LoadedMessages.Insert(0, new()
                                 {
-                                    IsIncoming = name == subject,
+                                    IsIncoming = name != Player.NameWithWorld,
                                     Message = matches[4].ToString(),
                                     Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
                                     OverrideName = name,

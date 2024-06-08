@@ -1,13 +1,16 @@
-﻿using Dalamud.ContextMenu;
+﻿using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using ECommons.ChatMethods;
+using ECommons.ExcelServices;
+using ECommons.GameHelpers;
 
 namespace Messenger;
 
-internal class ContextMenuManager : IDisposable
+public class ContextMenuManager : IDisposable
 {
-    private static readonly string[] ValidAddons = new string[]
-    {
+    private static readonly string[] ValidAddons =
+    [
         null,
         "PartyMemberList",
         "FriendList",
@@ -21,49 +24,40 @@ internal class ContextMenuManager : IDisposable
         "ContentMemberList",
         "SocialList",
         "ContactList",
-    };
-    private GameObjectContextMenuItem openMessenger;
-    private DalamudContextMenu contextMenu;
+    ];
 
-    internal ContextMenuManager()
+    private ContextMenuManager()
     {
-        contextMenu = new(Svc.PluginInterface);
-        openMessenger = new GameObjectContextMenuItem(
-            new SeString(new Payload[]
-            {
-                new TextPayload("Messenger"),
-            }), OpenMessenger);
-        contextMenu.OnOpenGameObjectContextMenu += OpenContextMenu;
-    }
-
-    private void OpenContextMenu(GameObjectContextMenuOpenArgs args)
-    {
-        //Svc.Chat.Print($"{args.ParentAddonName.NullSafe()}/{args.Text}/{args.ObjectWorld}");
-        if (C.ContextMenuEnable
-            && args.Text != null
-            && ValidAddons.Contains(args.ParentAddonName) && args.ObjectWorld != 0 && args.ObjectWorld != 65535)
-        {
-            args.AddCustomItem(openMessenger);
-        }
+        Svc.ContextMenu.OnMenuOpened += OpenContextMenu;
     }
 
     public void Dispose()
     {
-        contextMenu.Dispose();
+        Svc.ContextMenu.OnMenuOpened -= OpenContextMenu;
     }
 
-    private void OpenMessenger(GameObjectContextMenuItemSelectedArgs args)
+    private void OpenContextMenu(MenuOpenedArgs args)
     {
-        var player = args.Text.ToString();
-        var world = args.ObjectWorld;
-        Sender s = new(player, world);
-        P.OpenMessenger(s);
-        P.Chats[s].SetFocusAtNextFrame();
-        P.Chats[s].Scroll();
-        if (Svc.Condition[ConditionFlag.InCombat])
+        if (C.ContextMenuEnable && ValidAddons.Contains(args.AddonName) && args.Target is MenuTargetDefault def && def.TargetName != null && ExcelWorldHelper.Get(def.TargetHomeWorld.Id, true) != null)
         {
-            P.Chats[s].ChatWindow.KeepInCombat = true;
-            Notify.Info("This chat will not be hidden in combat");
+            args.AddMenuItem(new()
+            {
+                OnClicked = (_) =>
+                {
+                    Sender s = new(def.TargetName, def.TargetHomeWorld.Id);
+                    P.OpenMessenger(s);
+                    P.Chats[s].SetFocusAtNextFrame();
+                    P.Chats[s].Scroll();
+                    if (Svc.Condition[ConditionFlag.InCombat])
+                    {
+                        P.Chats[s].ChatWindow.KeepInCombat = true;
+                        Notify.Info("This chat will not be hidden in combat");
+                    }
+                },
+                PrefixChar = 'M',
+                Priority = C.ContextMenuPriority,
+                Name = "Messenger",
+            });
         }
     }
 }

@@ -16,12 +16,12 @@ public class OpenCharaCardButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Open {MessageHistory.Player}'s Adventurer Plate");
+        ImGuiEx.SetTooltip($"Open {MessageHistory.HistoryPlayer}'s Adventurer Plate");
     }
 
     public override void OnLeftClick()
     {
-        P.OpenCharaCard(MessageHistory.Player);
+        P.OpenCharaCard(MessageHistory.HistoryPlayer);
     }
 
     public override bool ShouldDisplay()

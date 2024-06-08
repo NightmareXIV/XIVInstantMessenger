@@ -62,11 +62,12 @@ public partial class ParsedMessage
         Segments = [.. segments];
     }
 
-    public void Draw()
+    public void Draw(Action? postMessageFunction = null)
     {
         foreach (var x in Segments)
         {
             x.Draw();
+            postMessageFunction?.Invoke();
         }
     }
 

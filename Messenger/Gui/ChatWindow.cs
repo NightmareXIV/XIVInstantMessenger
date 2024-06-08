@@ -29,9 +29,9 @@ public unsafe class ChatWindow : Window
     private PseudoMultilineInput Input = new();
     private bool BlockEmojiSelection = false;
 
-    internal string OwningTab => C.TabWindowAssociations.TryGetValue(MessageHistory.Player.ToString(), out var owner) ? owner : null;
+    internal string OwningTab => C.TabWindowAssociations.TryGetValue(MessageHistory.HistoryPlayer.ToString(), out var owner) ? owner : null;
 
-    internal ChannelCustomization Cust => MessageHistory.Player.GetCustomization();
+    internal ChannelCustomization Cust => MessageHistory.HistoryPlayer.GetCustomization();
 
     private InviteToPartyButton InviteToPartyButton;
     private AddFriendButton AddFriendButton;
@@ -40,7 +40,7 @@ public unsafe class ChatWindow : Window
     private OpenCharaCardButton OpenCharaCardButton;
 
     public ChatWindow(MessageHistory messageHistory) :
-        base($"Chat with {messageHistory.Player.GetChannelName()}###Messenger - {messageHistory.Player.Name}{messageHistory.Player.HomeWorld}"
+        base($"Chat with {messageHistory.HistoryPlayer.GetChannelName()}###Messenger - {messageHistory.HistoryPlayer.Name}{messageHistory.HistoryPlayer.HomeWorld}"
             , ImGuiWindowFlags.NoFocusOnAppearing)
     {
         MessageHistory = messageHistory;
@@ -202,8 +202,8 @@ public unsafe class ChatWindow : Window
             BringToFront = false;
             CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
         }
-        var subject = MessageHistory.Player.IsGenericChannel() ? Enum.GetValues<XivChatType>().First(x => x.ToString() == MessageHistory.Player.Name).GetCommand() : MessageHistory.Player.GetPlayerName();
-        var subjectNoWorld = MessageHistory.Player.GetPlayerName().Split("@")[0];
+        var subject = MessageHistory.HistoryPlayer.IsGenericChannel() ? Enum.GetValues<XivChatType>().First(x => x.ToString() == MessageHistory.HistoryPlayer.Name).GetCommand() : MessageHistory.HistoryPlayer.GetPlayerName();
+        var subjectNoWorld = MessageHistory.HistoryPlayer.GetPlayerName().Split("@")[0];
         var me = Svc.ClientState.LocalPlayer?.Name.ToString().Split("@")[0] ?? "Me";
         ImGui.BeginChild($"##ChatChild{subject}", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - fieldHeight));
         if (MessageHistory.Messages.Count == 0)
@@ -232,6 +232,7 @@ public unsafe class ChatWindow : Window
             }
             else
             {
+                if (!x.IsIncoming && Cust.NoOutgoing) continue;
                 var time = DateTimeOffset.FromUnixTimeMilliseconds(x.Time).ToLocalTime();
                 if (C.PrintDate)
                 {
@@ -281,9 +282,8 @@ public unsafe class ChatWindow : Window
                     ImGuiHelpers.ScaledDummy(new Vector2(20f, 1f));
                     ImGui.SameLine(0, 0);
                     ImGui.PushStyleColor(ImGuiCol.Text, x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage);
-                    x.Draw("[{timestamp}] ");
+                    x.Draw("[{timestamp}] ", "", () => PostMessageFunctions(x));
                     ImGui.PopStyleColor();
-                    PostMessageFunctions(x);
                 }
             }
             if (C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
@@ -313,7 +313,7 @@ public unsafe class ChatWindow : Window
         Input.Draw();
         if (Input.EnterWasPressed())
         {
-            SendMessage(subject, MessageHistory.Player.IsGenericChannel());
+            SendMessage(subject, MessageHistory.HistoryPlayer.IsGenericChannel());
             if (Input.IsMultiline)
             {
                 ImGui.SetWindowFocus(null);
@@ -368,7 +368,7 @@ public unsafe class ChatWindow : Window
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command"))
                 {
-                    SendMessage(subject, MessageHistory.Player.IsGenericChannel());
+                    SendMessage(subject, MessageHistory.HistoryPlayer.IsGenericChannel());
                 }
                 ImGuiEx.Tooltip("Execute command");
             }
@@ -376,7 +376,7 @@ public unsafe class ChatWindow : Window
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send"))
                 {
-                    SendMessage(subject, MessageHistory.Player.IsGenericChannel());
+                    SendMessage(subject, MessageHistory.HistoryPlayer.IsGenericChannel());
                 }
                 ImGuiEx.Tooltip("Send message");
             }

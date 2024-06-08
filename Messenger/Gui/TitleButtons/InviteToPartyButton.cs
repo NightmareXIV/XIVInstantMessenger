@@ -21,9 +21,9 @@ public class InviteToPartyButton : ChatWindowTitleButton
     public override void OnLeftClick()
     {
         if (Svc.Objects.Any(c => c is PlayerCharacter pc
-            && pc.HomeWorld.Id == MessageHistory.Player.HomeWorld && pc.Name.ToString() == MessageHistory.Player.Name))
+            && pc.HomeWorld.Id == MessageHistory.HistoryPlayer.HomeWorld && pc.Name.ToString() == MessageHistory.HistoryPlayer.Name))
         {
-            var result = P.InviteToParty(MessageHistory.Player, true);
+            var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
             if (result != null)
             {
                 Notify.Error(result);
@@ -39,13 +39,13 @@ public class InviteToPartyButton : ChatWindowTitleButton
             foreach (var x in FriendList.Get())
             {
                 if (flSuccess) break;
-                if (x.Name.ToString() == MessageHistory.Player.Name && x.HomeWorld == MessageHistory.Player.HomeWorld)
+                if (x.Name.ToString() == MessageHistory.HistoryPlayer.Name && x.HomeWorld == MessageHistory.HistoryPlayer.HomeWorld)
                 {
                     flSuccess = true;
                     if (x.IsOnline)
                     {
                         var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x.CurrentWorld;
-                        var result = P.InviteToParty(MessageHistory.Player, sameWorld, x.ContentId);
+                        var result = P.InviteToParty(MessageHistory.HistoryPlayer, sameWorld, x.ContentId);
                         if (result != null)
                         {
                             Notify.Error(result);
@@ -57,7 +57,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
                     }
                     else if (P.CIDlist.ContainsValue(x.ContentId))
                     {
-                        var result = P.InviteToParty(MessageHistory.Player, true);
+                        var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
                         if (result != null)
                         {
                             Notify.Error(result);
@@ -89,7 +89,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public override bool ShouldDisplay()
     {
-        return MessageHistory.Player.ToString() != Player.NameWithWorld && MessageHistory.Player.ToString() != Player.NameWithWorld && C.ButtonInvite && !MessageHistory.Player.IsGenericChannel();
+        return MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonInvite && !MessageHistory.HistoryPlayer.IsGenericChannel();
     }
 
     public void DrawPopup()
@@ -97,20 +97,20 @@ public class InviteToPartyButton : ChatWindowTitleButton
         if (RequestOpenPopup)
         {
             RequestOpenPopup = false;
-            ImGui.OpenPopup($"###Invite{MessageHistory.Player}");
+            ImGui.OpenPopup($"###Invite{MessageHistory.HistoryPlayer}");
         }
-        if (ImGui.BeginPopup($"###Invite{MessageHistory.Player}"))
+        if (ImGui.BeginPopup($"###Invite{MessageHistory.HistoryPlayer}"))
         {
-            ImGuiEx.Text($"Unable to determine {MessageHistory.Player}'s current world.");
+            ImGuiEx.Text($"Unable to determine {MessageHistory.HistoryPlayer}'s current world.");
             if (ImGui.Selectable("Same world"))
             {
-                P.InviteToParty(MessageHistory.Player, true);
+                P.InviteToParty(MessageHistory.HistoryPlayer, true);
             }
             if (ImGui.Selectable("Different world"))
             {
-                if (P.IsFriend(MessageHistory.Player))
+                if (P.IsFriend(MessageHistory.HistoryPlayer))
                 {
-                    P.InviteToParty(MessageHistory.Player, false);
+                    P.InviteToParty(MessageHistory.HistoryPlayer, false);
                 }
                 else
                 {
@@ -123,6 +123,6 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Invite {MessageHistory.Player} to party.\nHold CTRL+click for more options.");
+        ImGuiEx.SetTooltip($"Invite {MessageHistory.HistoryPlayer} to party.\nHold CTRL+click for more options.");
     }
 }

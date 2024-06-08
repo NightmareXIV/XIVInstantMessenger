@@ -19,5 +19,6 @@ namespace Messenger
         public Vector4 ColorTitleFlash = new(0.91f, 1f, 0f, 1f);
         public bool SuppressDMs = false;
         public bool NoUnread = false;
+        public bool NoOutgoing = false;
     }
 }

@@ -9,4 +9,5 @@ namespace Messenger.Services;
 public static class ServiceManager
 {
     public static EmojiLoader EmojiLoader { get; private set; }
+    public static ContextMenuManager ContextMenuManager { get; private set; }
 }
