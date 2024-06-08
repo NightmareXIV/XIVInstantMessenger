@@ -409,7 +409,11 @@ public unsafe partial class PseudoMultilineInput
                         PostDrawAction.Each(x => x());
                     }
                 }
-                if(EmojiKeyboardSelecting) EmojiKeyboardSelectorRow.ValidateRange(0, index - 1);
+                if (EmojiKeyboardSelecting)
+                {
+                    if (EmojiKeyboardSelectorRow < 0) EmojiKeyboardSelectorRow = index - 1;
+                    if (EmojiKeyboardSelectorRow >= index) EmojiKeyboardSelectorRow = 0;
+                }
             }
             ImGui.EndPopup();
         }
