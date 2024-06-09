@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Messenger.Services.MessageParsingService.Segments;
 using System;
 using System.Collections.Generic;
@@ -10,52 +11,54 @@ using System.Threading.Tasks;
 namespace Messenger.Services.MessageParsingService;
 public partial class ParsedMessage
 {
-    public string RawString;
     public ISegment[] Segments;
 
     public ParsedMessage(SeString message)
     {
-        RawString = message.ExtractText();
-        var splitMessage = EmojiRegex().Split(RawString).Where(x => x.Length > 0).ToArray();
-        PluginLog.Debug($"Message parts: \n- {splitMessage.Print("\n- ")}");
         List<ISegment> segments = [];
-        foreach (var str in splitMessage)
+        foreach (var payload in message.Payloads)
         {
-            if (str.StartsWith(':') && str.EndsWith(':'))
+            if(payload is AutoTranslatePayload atPayload)
             {
-                var e = str[1..^1];
-                if (e.StartsWith("s-"))
-                {
-                    if (splitMessage.Length == 1)
-                    {
-                        segments.Add(new SegmentSticker(e[2..]));
-                    }
-                    else
-                    {
-                        segments.Add(new SegmentEmoji(e[2..]));
-                    }
-                }
-                else
-                {
-                    if (splitMessage.Length == 1)
-                    {
-                        segments.Add(new SegmentDoubleEmoji(e));
-                    }
-                    else
-                    {
-                        segments.Add(new SegmentEmoji(e));
-                    }
-                }
+                segments.Add(new SegmentAutoTranslate(atPayload.Text));
             }
-            else
+            else if (payload is TextPayload textPayload)
             {
-                if (segments.Count > 0 && segments[^1] is SegmentText text)
+                if (textPayload.Text == null) continue;
+                var splitMessage = EmojiRegex().Split(textPayload.Text).Where(x => x.Length > 0).ToArray();
+                PluginLog.Debug($"Message parts: \n- {splitMessage.Print("\n- ")}");
+                foreach (var str in splitMessage)
                 {
-                    text.Text += str;
-                }
-                else
-                {
-                    segments.Add(new SegmentText(str));
+                    if (str.StartsWith(':') && str.EndsWith(':'))
+                    {
+                        var e = str[1..^1];
+                        if (e.StartsWith("s-"))
+                        {
+                            if (splitMessage.Length == 1)
+                            {
+                                segments.Add(new SegmentSticker(e[2..]));
+                            }
+                            else
+                            {
+                                segments.Add(new SegmentEmoji(e[2..]));
+                            }
+                        }
+                        else
+                        {
+                            if (splitMessage.Length == 1)
+                            {
+                                segments.Add(new SegmentDoubleEmoji(e));
+                            }
+                            else
+                            {
+                                segments.Add(new SegmentEmoji(e));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        segments.Add(new SegmentText(str));
+                    }
                 }
             }
         }
