@@ -40,19 +40,11 @@ public unsafe struct FriendListEntry
     /// <summary>
     /// The friend's raw SeString name. See <see cref="Name"/>.
     /// </summary>
-    public byte* RawName => Data->Name;
-    /// <summary>
-    /// The friend's raw SeString free company tag. See <see cref="FreeCompany"/>.
-    /// </summary>
-    public byte* RawFreeCompany => Data->FCTag;
-    /// <summary>
-    /// The friend's name.
-    /// </summary>
     public SeString Name
     {
         get
         {
-            return MemoryHelper.ReadSeStringNullTerminated((nint)RawName);
+            return Data->NameString;
         }
     }
     /// <summary>
@@ -62,7 +54,7 @@ public unsafe struct FriendListEntry
     {
         get
         {
-            return MemoryHelper.ReadSeStringNullTerminated((nint)RawFreeCompany);
+            return Data->FCTagString;
         }
     }
 

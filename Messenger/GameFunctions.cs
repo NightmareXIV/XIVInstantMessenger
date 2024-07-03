@@ -166,7 +166,7 @@ internal unsafe class GameFunctions : IDisposable
             return null;
         }
 
-        return _getContentIdForChatEntry(Framework.Instance()->GetUiModule()->GetRaptureLogModule(), index);
+        return _getContentIdForChatEntry(Framework.Instance()->GetUIModule()->GetRaptureLogModule(), index);
     }
 
 
@@ -177,7 +177,7 @@ internal unsafe class GameFunctions : IDisposable
             return null;
         }
 
-        var log = (IntPtr)Framework.Instance()->GetUiModule()->GetRaptureLogModule();
+        var log = (IntPtr)Framework.Instance()->GetUIModule()->GetRaptureLogModule();
         return *(uint*)(log + _currentChatEntryOffset.Value);
     }
 
@@ -188,7 +188,7 @@ internal unsafe class GameFunctions : IDisposable
             return IntPtr.Zero;
         }
 
-        var uiModule = Framework.Instance()->GetUiModule();
+        var uiModule = Framework.Instance()->GetUIModule();
         var getInfoModule = (delegate* unmanaged<UIModule*, IntPtr>)uiModule->vfunc[vfunc / 8];
         return getInfoModule(uiModule);
     }

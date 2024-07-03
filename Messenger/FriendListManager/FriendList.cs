@@ -17,7 +17,7 @@ public static unsafe class FriendList
         List<FriendListEntry> l = [];
         try
         {
-            var p = AgentFriendList.Instance()->InfoProxy;
+            var p = AgentFriendlist.Instance()->InfoProxy;
             for (uint i = 0; i < p->InfoProxyCommonList.DataSize; i++)
             {
                 var entry = p->InfoProxyCommonList.GetEntry(i);

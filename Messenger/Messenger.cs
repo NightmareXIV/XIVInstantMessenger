@@ -9,6 +9,7 @@ using ECommons.Automation;
 using ECommons.Configuration;
 using ECommons.Events;
 using ECommons.ExcelServices;
+using ECommons.Funding;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Singletons;
@@ -54,11 +55,11 @@ public unsafe class Messenger : IDalamudPlugin
     internal List<TabSystem> TabSystems = [];
     public string CurrentPlayer = null;
 
-    public Messenger(DalamudPluginInterface pi)
+    public Messenger(IDalamudPluginInterface pi)
     {
         P = this;
         ECommonsMain.Init(pi, this);
-        KoFiButton.IsOfficialPlugin = true;
+        PatreonBanner.IsOfficialPlugin = () => true;
         new TickScheduler(delegate
         {
             EzConfig.Migrate<Config>();
@@ -365,7 +366,7 @@ public unsafe class Messenger : IDalamudPlugin
         CIDlist.Clear();
     }
 
-    internal void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
+    internal void OnChatMessage(XivChatType type, int a2, ref SeString sender, ref SeString message, ref bool isHandled)
     {
         try
         {
@@ -657,7 +658,7 @@ public unsafe class Messenger : IDalamudPlugin
         }
         foreach (var x in Svc.Objects)
         {
-            if (x is PlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable)
+            if (x is IPlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable)
             {
                 AgentCharaCard.Instance()->OpenCharaCard(x.Struct());
                 PluginLog.Debug($"Opening characard via gameobject {x}");
@@ -698,7 +699,7 @@ public unsafe class Messenger : IDalamudPlugin
             var party = Svc.Party;
             var leader = (ulong?)party[(int)party.PartyLeaderIndex]?.ContentId;
             var isLeader = party.Length == 0 || Svc.ClientState.LocalContentId == leader;
-            Dalamud.Game.ClientState.Party.PartyMember member = party.FirstOrDefault(member => member.Name.TextValue == player.Name && member.World.Id == player.HomeWorld);
+            Dalamud.Game.ClientState.Party.IPartyMember member = party.FirstOrDefault(member => member.Name.TextValue == player.Name && member.World.Id == player.HomeWorld);
             var isInParty = member != default;
             var inInstance = GameFunctions.IsInInstance();
             //var inPartyInstance = Svc.Data.GetExcelSheet<TerritoryType>()!.GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse is (41 or 47 or 48 or 52 or 53);

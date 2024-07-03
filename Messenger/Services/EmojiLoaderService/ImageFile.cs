@@ -1,4 +1,5 @@
 ﻿using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiScene;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
@@ -45,14 +46,14 @@ public sealed class ImageFile : IDisposable
                     frame.Save(frameData, pngEncoder);
                     //PluginLog.Information($"  Loading frame {i}");
                     var delay = meta.FrameDelay == 0 ? 5 : meta.FrameDelay;
-                    Data.Add(new(Svc.PluginInterface.UiBuilder.LoadImage(frameData.ToArray()), delay * 10));
+                    Data.Add(new(Svc.Texture.CreateFromImageAsync(frameData.ToArray()).Result, delay * 10));
                 }
                 TotalLength = (int)Data.Sum(x => x.DelayMS);
             }
             else
             {
                 //PluginLog.Information($" Static image detected");
-                Data.Add(new(Svc.PluginInterface.UiBuilder.LoadImage(bytes), 0));
+                Data.Add(new(Svc.Texture.CreateFromImageAsync(bytes).Result, 0));
             }
         }
         catch (Exception e)

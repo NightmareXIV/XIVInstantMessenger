@@ -36,7 +36,7 @@ public class ContextMenuManager : IDisposable
         Svc.ContextMenu.OnMenuOpened -= OpenContextMenu;
     }
 
-    private void OpenContextMenu(MenuOpenedArgs args)
+    private void OpenContextMenu(IMenuOpenedArgs args)
     {
         if (C.ContextMenuEnable && ValidAddons.Contains(args.AddonName) && args.Target is MenuTargetDefault def && def.TargetName != null && ExcelWorldHelper.Get(def.TargetHomeWorld.Id, true) != null)
         {

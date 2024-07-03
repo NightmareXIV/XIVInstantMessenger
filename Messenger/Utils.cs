@@ -12,6 +12,7 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.FontControl;
 using Messenger.Gui.Settings;
@@ -134,8 +135,8 @@ internal static unsafe class Utils
         if (type.EqualsAny(XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8))
         {
             var num = int.Parse(type.ToString()[^1..]);
-            var proxy = (InfoProxyCrossWorldLinkShell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkShell);
-            var name = proxy->CWLSArraySpan[num - 1].Name;
+            var proxy = (InfoProxyCrossWorldLinkshell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkshell);
+            var name = proxy->CrossWorldLinkshells[num - 1].Name;
             var str = MemoryHelper.ReadSeString(&name).ExtractText();
             if (str != "")
             {
@@ -278,7 +279,7 @@ internal static unsafe class Utils
         return $"{value.Name}@{ExcelWorldHelper.GetName(value.HomeWorld)}";
     }
 
-    public static string GetPlayerName(this PlayerCharacter c) => c.GetNameWithWorld();
+    public static string GetPlayerName(this IPlayerCharacter c) => c.GetNameWithWorld();
 
     public static byte[] ToTerminatedBytes(this string s)
     {
