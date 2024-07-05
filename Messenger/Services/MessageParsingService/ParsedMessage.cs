@@ -26,7 +26,7 @@ public partial class ParsedMessage
             {
                 if (textPayload.Text == null) continue;
                 var splitMessage = EmojiRegex().Split(textPayload.Text).Where(x => x.Length > 0).ToArray();
-                PluginLog.Debug($"Message parts: \n- {splitMessage.Print("\n- ")}");
+                PluginLog.Verbose($"Message parts: \n- {splitMessage.Print("\n- ")}");
                 foreach (var str in splitMessage)
                 {
                     if (str.StartsWith(':') && str.EndsWith(':'))

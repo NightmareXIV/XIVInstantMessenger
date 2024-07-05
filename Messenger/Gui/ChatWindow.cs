@@ -107,7 +107,7 @@ public unsafe class ChatWindow : Window
     public override void OnClose()
     {
         KeepInCombat = false;
-        if (P.Chats.All(x => !x.Value.ChatWindow.IsOpen))
+        if (S.MessageProcessor.Chats.All(x => !x.Value.ChatWindow.IsOpen))
         {
             //Notify.Info("Cascading has been reset");
             ChatWindow.CascadingPosition = 0;
@@ -504,7 +504,7 @@ public unsafe class ChatWindow : Window
         {
             if (!generic && C.AutoTarget &&
             (P.TargetCommands.Any(x => Input.SinglelineText.Equals(x, StringComparison.OrdinalIgnoreCase) || Input.SinglelineText.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
-            && Svc.Objects.TryGetFirst(x => x is PlayerCharacter pc && pc.GetPlayerName() == subject && x.IsTargetable, out var obj))
+            && Svc.Objects.TryGetFirst(x => x is IPlayerCharacter pc && pc.GetPlayerName() == subject && x.IsTargetable, out var obj))
             {
                 Svc.Targets.SetTarget(obj);
                 //Notify.Info($"Targeting {subject}");

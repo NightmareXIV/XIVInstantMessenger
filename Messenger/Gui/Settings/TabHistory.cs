@@ -54,13 +54,13 @@ internal class TabHistory
         {
             ImGuiEx.SetNextItemFullWidth();
             ImGui.InputTextWithHint("##fltr", "Filter...", ref search, 50);
-            foreach (var x in P.Chats)
+            foreach (var x in S.MessageProcessor.Chats)
             {
                 if (search.Length > 0 && !x.Key.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
                 if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count(x => !x.IsSystem)} messages)"))
                 {
                     P.OpenMessenger(x.Key, true);
-                    P.Chats[x.Key].SetFocusAtNextFrame();
+                    S.MessageProcessor.Chats[x.Key].SetFocusAtNextFrame();
                 }
             }
             ImGuiEx.WithTextColor(ImGuiColors.DalamudGrey2, delegate
@@ -68,10 +68,10 @@ internal class TabHistory
                 foreach (var x in fileChatList)
                 {
                     if (search.Length > 0 && !x.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
-                    if (!P.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetChannelName()} (unloaded)"))
+                    if (!S.MessageProcessor.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetChannelName()} (unloaded)"))
                     {
                         P.OpenMessenger(x, true);
-                        P.Chats[x].SetFocusAtNextFrame();
+                        S.MessageProcessor.Chats[x].SetFocusAtNextFrame();
                     }
                 }
             });

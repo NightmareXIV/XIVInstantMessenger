@@ -5,7 +5,7 @@ using ECommons.ChatMethods;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 
-namespace Messenger;
+namespace Messenger.Services;
 
 public class ContextMenuManager : IDisposable
 {
@@ -46,11 +46,11 @@ public class ContextMenuManager : IDisposable
                 {
                     Sender s = new(def.TargetName, def.TargetHomeWorld.Id);
                     P.OpenMessenger(s);
-                    P.Chats[s].SetFocusAtNextFrame();
-                    P.Chats[s].Scroll();
+                    S.MessageProcessor.Chats[s].SetFocusAtNextFrame();
+                    S.MessageProcessor.Chats[s].Scroll();
                     if (Svc.Condition[ConditionFlag.InCombat])
                     {
-                        P.Chats[s].ChatWindow.KeepInCombat = true;
+                        S.MessageProcessor.Chats[s].ChatWindow.KeepInCombat = true;
                         Notify.Info("This chat will not be hidden in combat");
                     }
                 },

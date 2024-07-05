@@ -330,11 +330,11 @@ internal static unsafe class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (var x in P.Chats)
+            foreach (var x in S.MessageProcessor.Chats)
             {
                 P.WindowSystemChat.RemoveWindow(x.Value.ChatWindow);
             }
-            P.Chats.Clear();
+            S.MessageProcessor.Chats.Clear();
             P.GuiSettings.TabHistory.Reload();
         });
     }
@@ -343,7 +343,7 @@ internal static unsafe class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (var x in P.Chats)
+            foreach (var x in S.MessageProcessor.Chats)
             {
                 x.Value.LoadHistory();
             }

@@ -51,7 +51,11 @@ internal class TabFonts
 
     private void DisplayFontSelector()
     {
-        var chooser = SingleFontChooserDialog.CreateAuto(Svc.PluginInterface.UiBuilder);
+        var chooser = SingleFontChooserDialog.CreateAuto((UiBuilder)Svc.PluginInterface.UiBuilder);
+        if(P.FontManager.FontConfiguration.Font is SingleFontSpec sfs)
+        {
+            chooser.SelectedFont = sfs;
+        }
         chooser.SelectedFontSpecChanged += Chooser_SelectedFontSpecChanged;
     }
 

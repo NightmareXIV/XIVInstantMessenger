@@ -61,7 +61,7 @@ public partial class MessageHistory
                 using StreamReader reader2 = new(reader);
                 foreach (var x in reader2.ReadToEnd().Split("\n"))
                 {
-                    PluginLog.Debug("Have read line: " + x);
+                    PluginLog.Verbose("Have read line: " + x);
                     //[Mon, 20 Jun 2022 12:44:41 GMT] To Falalala lala@Omega: fgdfgdfg
                     var parsed = MessageRegex().Match(x);
                     if (parsed.Success)
@@ -69,7 +69,7 @@ public partial class MessageHistory
                         Safe(delegate
                         {
                             var i = 0;
-                            PluginLog.Debug($"Parsed line: {parsed.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
+                            PluginLog.Verbose($"Parsed line: {parsed.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
                             var matches = parsed.Groups.Values.ToArray();
                             if (matches.Length == 5)
@@ -94,12 +94,12 @@ public partial class MessageHistory
                         if (systemMessage.Success) Safe(delegate
                         {
                             var i = 0;
-                            PluginLog.Debug($"Parsed system message line: {systemMessage.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
+                            PluginLog.Verbose($"Parsed system message line: {systemMessage.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
                             var matches = systemMessage.Groups.Values.ToArray();
                             if (matches.Length == 3)
                             {
-                                PluginLog.Debug($"subject: {subject}");
+                                PluginLog.Verbose($"subject: {subject}");
                                 LoadedMessages.Insert(0, new()
                                 {
                                     IsIncoming = false,

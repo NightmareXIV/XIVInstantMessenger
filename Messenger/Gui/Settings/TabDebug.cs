@@ -22,6 +22,19 @@ internal unsafe class TabDebug
 
         try
         {
+            if (ImGui.CollapsingHeader("CIDMAP"))
+            {
+                ImGuiEx.Text(S.MessageProcessor.CIDlist.Select(x => $"{x.Key}: {x.Value:X16}").Print("\n"));
+            }
+            if (ImGui.CollapsingHeader("LogMessages"))
+            {
+                var map = S.MessageProcessor.RetrieveCIDsFromLog();
+                foreach (var m in map)
+                {
+                    ImGuiEx.Text($"{m}");
+                    ImGui.Separator();
+                }
+            }
             if (ImGui.CollapsingHeader("Emoji"))
             {
                 if (ImGui.Button("Rebuild cache"))
@@ -48,7 +61,7 @@ internal unsafe class TabDebug
             }
             if (ImGui.CollapsingHeader("Senders"))
             {
-                foreach (var x in P.Chats)
+                foreach (var x in S.MessageProcessor.Chats)
                 {
                     ImGuiEx.Text($"{x.Key.Name}@{x.Key.HomeWorld}, {x.Key.IsGenericChannel()}");
                 }
@@ -68,22 +81,17 @@ internal unsafe class TabDebug
                 }
                 var n = false;
                 var m = new SeStringBuilder().AddText(MMessage).Build();
-                P.OnChatMessage(MType, 0, ref s, ref m, ref n);
+                S.MessageProcessor.OnChatMessage(MType, 0, ref s, ref m, ref n);
             }
             ImGui.Separator();
             ImGuiEx.Text($"Is in instance: {P.GameFunctions.IsInInstance()}");
-            ImGuiEx.Text($"Last received message: {P.LastReceivedMessage.GetPlayerName()}");
+            ImGuiEx.Text($"Last received message: {S.MessageProcessor.LastReceivedMessage.GetPlayerName()}");
             if (ImGui.Button("Mark all as unread"))
             {
-                foreach (var x in P.Chats.Values)
+                foreach (var x in S.MessageProcessor.Chats.Values)
                 {
                     x.ChatWindow.Unread = true;
                 }
-            }
-            ImGuiEx.Text("CID map:");
-            foreach (var x in P.CIDlist)
-            {
-                ImGuiEx.Text($"{x.Key.Name}@{x.Key.HomeWorld}={x.Value:X16}");
             }
 
             if (ImGui.CollapsingHeader("Friends"))
@@ -103,14 +111,6 @@ internal unsafe class TabDebug
                     ];
                     ImGuiEx.TextCopy(sb.Join(" "));
                 }
-            }
-            if (ImGui.Button("Install invite to party hook"))
-            {
-                P.PartyFunctions.InstallHooks();
-            }
-            if (ImGui.Button("Install tell hook"))
-            {
-                P.GameFunctions.InstallHooks();
             }
             ImGui.Separator();
             ImGuiEx.Text("Target commands");

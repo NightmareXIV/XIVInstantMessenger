@@ -20,7 +20,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public override void OnLeftClick()
     {
-        if (Svc.Objects.Any(c => c is PlayerCharacter pc
+        if (Svc.Objects.Any(c => c is IPlayerCharacter pc
             && pc.HomeWorld.Id == MessageHistory.HistoryPlayer.HomeWorld && pc.Name.ToString() == MessageHistory.HistoryPlayer.Name))
         {
             var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
@@ -55,7 +55,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
                             Notify.Info($"Inviting through FrieldList ({(sameWorld ? "same world" : "different world")})");
                         }
                     }
-                    else if (P.CIDlist.ContainsValue(x.ContentId))
+                    else if (S.MessageProcessor.TryFindCID(MessageHistory.HistoryPlayer, out _))
                     {
                         var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
                         if (result != null)

@@ -61,7 +61,7 @@ public sealed class EmojiLoader : IDisposable
         DownloaderTaskRunning = true;
         new Thread(() =>
         {
-            PluginLog.Debug($"Begin emoji downloader thread");
+            PluginLog.Verbose($"Begin emoji downloader thread");
             try
             {
                 var idle = 0;
@@ -71,15 +71,15 @@ public sealed class EmojiLoader : IDisposable
                     {
                         try
                         {
-                            PluginLog.Debug($"  Request dequeued: {request}");
+                            PluginLog.Verbose($"  Request dequeued: {request}");
                             idle = 0;
                             Client ??= new();
                             var result = Client.GetStringAsync("https://api.betterttv.net/3/emotes/shared/search?query=" + request).Result;
-                            PluginLog.Debug($"  Result: {result}");
+                            PluginLog.Verbose($"  Result: {result}");
                             var emoji = JsonConvert.DeserializeObject<List<BetterTTWEmoji.EmoteData>>(result);
                             foreach (var e in emoji)
                             {
-                                PluginLog.Debug($"    Emoji: {e.code}");
+                                PluginLog.Verbose($"    Emoji: {e.code}");
                                 DownloadEmojiToCache(e.id, e.imageType, e.code, true, C.DynamicBetterTTVEmojiCache, request);
                             }
                         }
@@ -157,7 +157,7 @@ public sealed class EmojiLoader : IDisposable
                 var result = Client.GetAsync("https://api.betterttv.net/3/emotes/shared/top?limit=100").Result;
                 result.EnsureSuccessStatusCode();
                 var data = JsonConvert.DeserializeObject<List<BetterTTWEmoji>>(result.Content.ReadAsStringAsync().Result);
-                PluginLog.Debug($"Emote info received: \n{data.Print("\n")}");
+                PluginLog.Verbose($"Emote info received: \n{data.Print("\n")}");
                 foreach (var e in data)
                 {
                     DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false, C.StaticBetterTTVEmojiCache, null);
@@ -179,7 +179,7 @@ public sealed class EmojiLoader : IDisposable
     private void DownloadEmojiToCache(string id, string imageType, string code, bool skipExisting, Dictionary<string, string> cache, string overwrite)
     {
         var url = $"https://cdn.betterttv.net/emote/{id}/3x.{imageType}";
-        PluginLog.Debug($" Downloading {url}");
+        PluginLog.Verbose($" Downloading {url}");
         var file = Client.GetByteArrayAsync(url).Result;
         var fname = $"{id}.{imageType}";
         Directory.CreateDirectory(CachePath);

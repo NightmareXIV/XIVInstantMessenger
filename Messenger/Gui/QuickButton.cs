@@ -62,7 +62,7 @@ internal unsafe class QuickButton : Window
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(7, 7));
         if (ImGui.BeginPopup("Select target"))
         {
-            if (P.Chats.Count == 0)
+            if (S.MessageProcessor.Chats.Count == 0)
             {
                 ImGuiEx.Text("There is nothing here yet...");
             }
@@ -77,7 +77,7 @@ internal unsafe class QuickButton : Window
                 });
                 var tsize = ImGui.CalcTextSize("");
                 Sender? toRem = null;
-                foreach (var x in P.Chats)
+                foreach (var x in S.MessageProcessor.Chats)
                 {
                     var cur = ImGui.GetCursorPos();
                     if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count})", false, ImGuiSelectableFlags.None, new Vector2(200f.Scale(), tsize.Y)))
@@ -101,8 +101,8 @@ internal unsafe class QuickButton : Window
                 }
                 if (toRem != null)
                 {
-                    P.WindowSystemChat.RemoveWindow(P.Chats[toRem.Value].ChatWindow);
-                    P.Chats.Remove(toRem.Value);
+                    P.WindowSystemChat.RemoveWindow(S.MessageProcessor.Chats[toRem.Value].ChatWindow);
+                    S.MessageProcessor.Chats.Remove(toRem.Value);
                     toRem = null;
                 }
             }
