@@ -149,7 +149,7 @@ public sealed class EmojiLoader : IDisposable
         if (BuildingCache) return;
         BuildingCache = true;
         C.StaticBetterTTVEmojiCache.Clear();
-        Task.Run(() =>
+        S.ThreadPool.Run(() =>
         {
             try
             {
@@ -220,9 +220,11 @@ public sealed class EmojiLoader : IDisposable
 
     private void LoadDefaultEmoji()
     {
+        PluginLog.Information($"Loading default emoji");
         var defaultEmojiFolder = Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "images", "emoji");
         foreach (var f in Directory.GetFiles(defaultEmojiFolder))
         {
+            PluginLog.Verbose($"Loading default emoji {f} exists={File.Exists(f)}");
             Emoji[Path.GetFileNameWithoutExtension(f)] = new(f);
         }
     }
@@ -231,6 +233,7 @@ public sealed class EmojiLoader : IDisposable
     {
         Emoji.Clear();
         LoadDefaultEmoji();
+        PluginLog.Information($"Loading BetterTTV emoji");
         foreach (var x in C.StaticBetterTTVEmojiCache)
         {
             Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));

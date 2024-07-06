@@ -35,7 +35,7 @@ public unsafe class ChatWindow : Window
 
     private InviteToPartyButton InviteToPartyButton;
     private AddFriendButton AddFriendButton;
-    private AddToBlacklistButton AddToBlacklistButton;
+    private AddToMutelistButton AddToMutelistButton;
     private OpenLogButton OpenLogButton;
     private OpenCharaCardButton OpenCharaCardButton;
 
@@ -51,7 +51,7 @@ public unsafe class ChatWindow : Window
         };
         InviteToPartyButton = new(this);
         AddFriendButton = new(this);
-        AddToBlacklistButton = new(this);
+        AddToMutelistButton = new(this);
         OpenLogButton = new(this);
         OpenCharaCardButton = new(this);
     }
@@ -61,7 +61,7 @@ public unsafe class ChatWindow : Window
         window.TitleBarButtons.Clear();
         if (InviteToPartyButton.ShouldDisplay()) window.TitleBarButtons.Add(InviteToPartyButton.Button);
         if (AddFriendButton.ShouldDisplay()) window.TitleBarButtons.Add(AddFriendButton.Button);
-        if (AddToBlacklistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToBlacklistButton.Button);
+        if (AddToMutelistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToMutelistButton.Button);
         if (OpenLogButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenLogButton.Button);
         if (OpenCharaCardButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenCharaCardButton.Button);
     }

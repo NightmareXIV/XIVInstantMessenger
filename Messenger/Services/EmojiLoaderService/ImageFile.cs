@@ -1,16 +1,7 @@
-﻿using Dalamud.Interface.Internal;
-using Dalamud.Interface.Textures.TextureWraps;
-using ImGuiScene;
+﻿using Dalamud.Interface.Textures.TextureWraps;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Messenger.Services.EmojiLoaderService;
 public sealed class ImageFile : IDisposable
@@ -31,29 +22,33 @@ public sealed class ImageFile : IDisposable
     {
         try
         {
-            //PluginLog.Information($"Loading image {Path}");
+            //PluginLog.Verbose($"Loading image {Path}");
             var bytes = File.ReadAllBytes(Path);
             var image = Image.Load(bytes);
             if (image.Frames.Count > 1)
             {
                 PngEncoder pngEncoder = new();
-                //PluginLog.Information($" Animation detected");
+                //PluginLog.Verbose($" Animation detected");
                 for (var i = 0; i < image.Frames.Count; i++)
                 {
                     var frame = image.Frames.CloneFrame(i);
                     var meta = image.Frames[i].Metadata.GetGifMetadata();
                     using MemoryStream frameData = new();
                     frame.Save(frameData, pngEncoder);
-                    //PluginLog.Information($"  Loading frame {i}");
+                    //PluginLog.Verbose($"  Loading frame {i}");
                     var delay = meta.FrameDelay == 0 ? 5 : meta.FrameDelay;
-                    Data.Add(new(Svc.Texture.CreateFromImageAsync(frameData.ToArray()).Result, delay * 10));
+                    var img = new FrameData(Svc.Texture.CreateFromImageAsync(frameData.ToArray()).Result, delay * 10);
+                    Data.Add(img);
+                    //PluginLog.Verbose($" Texture: {img.Texture} duration: {img.DelayMS}");
                 }
                 TotalLength = (int)Data.Sum(x => x.DelayMS);
             }
             else
             {
-                //PluginLog.Information($" Static image detected");
-                Data.Add(new(Svc.Texture.CreateFromImageAsync(bytes).Result, 0));
+                //PluginLog.Verbose($" Static image detected");
+                var img = new FrameData(Svc.Texture.CreateFromImageAsync(bytes).Result, 0);
+                //PluginLog.Verbose($" Texture: {img.Texture}");
+                Data.Add(img);
             }
         }
         catch (Exception e)
@@ -68,7 +63,7 @@ public sealed class ImageFile : IDisposable
         if (Status == LoadStatus.NotLoaded)
         {
             Status = LoadStatus.Loading;
-            Task.Run(Load);
+            S.ThreadPool.Run(Load);
         }
         if (Status == LoadStatus.Loaded)
         {

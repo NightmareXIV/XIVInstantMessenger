@@ -10,6 +10,7 @@ using Dalamud.Utility.Signatures;
 using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.GeneratedSheets;
@@ -63,28 +64,12 @@ internal unsafe class GameFunctions : IDisposable
 
     internal void SendFriendRequest(string name, ushort world)
     {
-        if (Svc.ClientState.LocalPlayer?.CurrentWorld.GameData.DataCenter.Value.RowId !=
-            Svc.Data.GetExcelSheet<World>().GetRow(world).DataCenter.Value.RowId)
-        {
-            Notify.Error("Target is located in different data center");
-        }
-        else
-        {
-            ListCommand(name, world, "friendlist");
-        }
+        ListCommand(name, world, "friendlist");
     }
 
-    internal void AddToBlacklist(string name, ushort world)
+    internal void AddToMutelist(string name, ushort world)
     {
-        if (Svc.ClientState.LocalPlayer?.CurrentWorld.GameData.DataCenter.Value.RowId !=
-            Svc.Data.GetExcelSheet<World>().GetRow(world).DataCenter.Value.RowId)
-        {
-            Notify.Error("Target is located in different data center");
-        }
-        else
-        {
-            ListCommand(name, world, "blist");
-        }
+        ListCommand(name, world, "mutelist");
     }
 
     private IntPtr _placeholderNamePtr = Marshal.AllocHGlobal(128);

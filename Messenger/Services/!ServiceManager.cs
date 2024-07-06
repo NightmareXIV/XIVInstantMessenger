@@ -13,4 +13,5 @@ public static class ServiceManager
     public static EmojiLoader EmojiLoader { get; private set; }
     public static ContextMenuManager ContextMenuManager { get; private set; }
     public static MessageProcessor MessageProcessor { get; private set; }
+    public static ThreadPool ThreadPool { get; private set; }
 }

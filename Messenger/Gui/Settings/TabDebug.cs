@@ -50,7 +50,7 @@ internal unsafe class TabDebug
                         ImGui.Image(w.ImGuiHandle, new Vector2(24f));
                         ImGui.SameLine();
                     }
-                    ImGuiEx.Text($"{x.Key}");
+                    ImGuiEx.Text($"{x.Key}\n{x.Value.IsReady}");
                     ImGui.NextColumn();
                 }
                 ImGui.Columns(1);

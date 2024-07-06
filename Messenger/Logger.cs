@@ -41,7 +41,7 @@ internal class Logger : IDisposable
     {
         if (!Tasks.TryAdd(task))
         {
-            Task.Run(() => Tasks.Add(task));
+            S.ThreadPool.Run(() => Tasks.Add(task));
         }
     }
 

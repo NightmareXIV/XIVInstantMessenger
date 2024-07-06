@@ -49,7 +49,7 @@ public partial class MessageHistory
         LogFile = Path.Combine(Utils.GetLogStorageFolder(), HistoryPlayer.GetPlayerName() + ".txt");
 
         var subject = HistoryPlayer.GetPlayerName();
-        Task.Run(delegate
+        S.ThreadPool.Run(delegate
         {
             Safe(delegate
             {

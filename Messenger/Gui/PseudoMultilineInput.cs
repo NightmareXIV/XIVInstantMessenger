@@ -357,14 +357,18 @@ public unsafe partial class PseudoMultilineInput
                 if (fav.Any())
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedGold);
-                    DrawEmojiSet(fav, "fav");
+                    var num = DrawEmojiSet(fav, "fav");
                     ImGui.PopStyleColor();
-                    ImGui.SameLine();
-                    ImGui.NewLine();
+                    if (num > 0)
+                    {
+                        ImGui.SameLine();
+                        ImGui.NewLine();
+                    }
                 }
                 DrawEmojiSet(all, "all");
-                void DrawEmojiSet(IEnumerable<KeyValuePair<string, ImageFile>> emojiSet, string id)
+                int DrawEmojiSet(IEnumerable<KeyValuePair<string, ImageFile>> emojiSet, string id)
                 {
+                    int num = 0;
                     List<Action> PostDrawAction = [];
                     if (ImGui.BeginTable($"EmojiTable{id}", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.BordersInnerH))
                     {
@@ -373,6 +377,7 @@ public unsafe partial class PseudoMultilineInput
                         foreach (var em in emojiSet)
                         {
                             if (EmojiSearch != "" && !em.Key.Contains(EmojiSearch, StringComparison.OrdinalIgnoreCase)) continue;
+                            num++;
                             ImGui.TableNextRow();
                             if (index == EmojiSelectorRow)
                             {
@@ -408,6 +413,7 @@ public unsafe partial class PseudoMultilineInput
                         ImGui.EndTable();
                         PostDrawAction.Each(x => x());
                     }
+                    return num;
                 }
                 if (EmojiKeyboardSelecting)
                 {

@@ -27,7 +27,6 @@ using Messenger.Services;
 using SharpDX.DXGI;
 using System.IO;
 using System.Text.RegularExpressions;
-using Task = System.Threading.Tasks.Task;
 
 namespace Messenger;
 
@@ -265,7 +264,7 @@ public unsafe class Messenger : IDalamudPlugin
                 }
             }
             Notify.Info("Searching in logs...");
-            Task.Run(delegate
+            S.ThreadPool.Run(delegate
             {
                 Safe(delegate
                 {

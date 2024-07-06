@@ -1,4 +1,5 @@
 ﻿using ECommons.Configuration;
+using ECommons.Funding;
 using Messenger.FontControl;
 
 namespace Messenger.Gui.Settings;
@@ -23,8 +24,8 @@ internal class GuiSettings : Window
 
     public override void Draw()
     {
-        KoFiButton.DrawRight();
-        ImGuiEx.EzTabBar("MessengerBar", KoFiButton.Text,
+        PatreonBanner.DrawRight();
+        ImGuiEx.EzTabBar("MessengerBar", PatreonBanner.Text,
             ("Chat history", TabHistory.Draw, null, true),
             ("Settings", TabSettings.Draw, null, true),
             ("Style", TabStyle.Draw, null, true),

@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Messenger.Gui.TitleButtons;
-public class AddToBlacklistButton : ChatWindowTitleButton
+public class AddToMutelistButton : ChatWindowTitleButton
 {
-    public AddToBlacklistButton(ChatWindow chatWindow) : base(chatWindow)
+    public AddToMutelistButton(ChatWindow chatWindow) : base(chatWindow)
     {
     }
 
@@ -17,12 +17,12 @@ public class AddToBlacklistButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Add {MessageHistory.HistoryPlayer} to Blacklist");
+        ImGuiEx.SetTooltip($"Add {MessageHistory.HistoryPlayer} to Mute List");
     }
 
     public override void OnLeftClick()
     {
-        P.GameFunctions.AddToBlacklist(MessageHistory.HistoryPlayer.Name, (ushort)MessageHistory.HistoryPlayer.HomeWorld);
+        P.GameFunctions.AddToMutelist(MessageHistory.HistoryPlayer.Name, (ushort)MessageHistory.HistoryPlayer.HomeWorld);
     }
 
     public override bool ShouldDisplay()
