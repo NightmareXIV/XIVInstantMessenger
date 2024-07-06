@@ -6,6 +6,7 @@ using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
+using System.Threading;
 
 namespace Messenger.Gui.Settings;
 
@@ -22,6 +23,24 @@ internal unsafe class TabDebug
 
         try
         {
+            if(ImGui.CollapsingHeader("Thread pool"))
+            {
+                ImGuiEx.Text($"{S.ThreadPool.State}");
+                if (ImGui.Button("Create 10s task"))
+                {
+                    S.ThreadPool.Run(() => {
+                        Thread.Sleep(10000);
+                        DuoLog.Information("10000 end!");
+                        });
+                }
+                if (ImGui.Button("Create 1s task"))
+                {
+                    S.ThreadPool.Run(() => {
+                        Thread.Sleep(1000);
+                        DuoLog.Information("1000 end!");
+                    });
+                }
+            }
             if (ImGui.CollapsingHeader("CIDMAP"))
             {
                 ImGuiEx.Text(S.MessageProcessor.CIDlist.Select(x => $"{x.Key}: {x.Value:X16}").Print("\n"));

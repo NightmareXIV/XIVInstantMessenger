@@ -22,11 +22,12 @@ public class AddToMutelistButton : ChatWindowTitleButton
 
     public override void OnLeftClick()
     {
-        P.GameFunctions.AddToMutelist(MessageHistory.HistoryPlayer.Name, (ushort)MessageHistory.HistoryPlayer.HomeWorld);
+        P.GameFunctions.AddToBlacklist(MessageHistory.HistoryPlayer.Name, (ushort)MessageHistory.HistoryPlayer.HomeWorld);
     }
 
     public override bool ShouldDisplay()
     {
-        return MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonBlack && !MessageHistory.HistoryPlayer.IsGenericChannel() && !P.IsFriend(MessageHistory.HistoryPlayer);
+        return false;
+        //return MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonBlack && !MessageHistory.HistoryPlayer.IsGenericChannel() && !P.IsFriend(MessageHistory.HistoryPlayer);
     }
 }

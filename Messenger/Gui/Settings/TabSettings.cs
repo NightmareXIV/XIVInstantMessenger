@@ -215,7 +215,7 @@ internal class TabSettings
                 ImGui.Checkbox("Attempt to search for unknown emoji on BetterTTV", ref C.DownloadUnknownEmoji);
                 ImGuiEx.TextWrapped("""
                     Adding your custom emoji:
-                    1) Login to betterttv.com with your twitter account;
+                    1) Login to betterttv.com with your twitch account;
                     2) Go to your dashboard and it will let you upload emojis;
                     3) When uploading your emojis make sure you mark them as "Allow emote to be shared with other channels.".
                     
