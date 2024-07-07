@@ -376,35 +376,28 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 return "Not logged in";
             }
-            if (TryGetAddonByName<AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
+            if (generic)
             {
-                if (generic)
+                var c = $"/{destination} {message}";
+                PluginLog.Verbose($"Sending command generic: {c}");
+                Chat.Instance.SendMessage(c);
+            }
+            else
+            {
+                if (destination == S.MessageProcessor.LastReceivedMessage.GetPlayerName())
                 {
-                    var c = $"/{destination} {message}";
-                    PluginLog.Verbose($"Sending command generic: {c}");
+                    var c = $"/r {message}";
+                    PluginLog.Verbose($"Sending via reply: {c}");
                     Chat.Instance.SendMessage(c);
                 }
                 else
                 {
-                    if (destination == S.MessageProcessor.LastReceivedMessage.GetPlayerName())
-                    {
-                        var c = $"/r {message}";
-                        PluginLog.Verbose($"Sending via reply: {c}");
-                        Chat.Instance.SendMessage(c);
-                    }
-                    else
-                    {
-                        var c = $"/tell {destination} {message}";
-                        PluginLog.Verbose($"Sending command: {c}");
-                        Chat.Instance.SendMessage(c);
-                    }
+                    var c = $"/tell {destination} {message}";
+                    PluginLog.Verbose($"Sending command: {c}");
+                    Chat.Instance.SendMessage(c);
                 }
-                return null;
             }
-            else
-            {
-                return "It appears that you can not chat right now.\nIf you believe this is an error, please contact developer.";
-            }
+            return null;
         }
         catch (Exception e)
         {
