@@ -47,6 +47,7 @@ internal class TabStyle
         ImGui.SetNextItemWidth(50f);
         ImGui.DragFloat("Transparency change delta, per frame", ref C.TransDelta, 0.001f, 0f, 1f);
         C.TransDelta.ValidateRange(0f, 1f);
+        ImGui.Checkbox("Disable transparency changes on hover", ref C.DisallowTransparencyHovered);
 
         ImGui.SetNextItemWidth(120f);
         ImGui.DragFloat2("Default window size", ref C.DefaultSize, 1f, 200f, 2000f);
@@ -90,7 +91,7 @@ internal class TabStyle
         ImGui.Checkbox("Send message", ref C.ButtonSend);
         ImGui.Checkbox("Invite to party", ref C.ButtonInvite);
         ImGui.Checkbox("Add to friendlist", ref C.ButtonFriend);
-        ImGui.Checkbox("Add to blacklist", ref C.ButtonBlack);
+        //ImGui.Checkbox("Add to blacklist", ref C.ButtonBlack);
         ImGui.Checkbox("Open chat log", ref C.ButtonLog);
         ImGui.Checkbox("Open adventurer plate", ref C.ButtonCharaCard);
         ImGui.Separator();

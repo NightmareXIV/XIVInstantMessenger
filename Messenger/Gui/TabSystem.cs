@@ -85,7 +85,7 @@ internal class TabSystem : Window
         }
         else
         {
-            if (ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
+            if (!C.DisallowTransparencyHovered && ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
             {
                 Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
             }

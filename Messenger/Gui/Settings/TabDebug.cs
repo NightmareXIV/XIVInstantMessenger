@@ -23,6 +23,25 @@ internal unsafe class TabDebug
 
         try
         {
+            if (ImGui.CollapsingHeader("Context"))
+            {
+                var c = AgentContext.Instance();
+                ImGuiEx.Text($"""
+                    TargetAccountId {c->TargetAccountId:X16}
+                    TargetContentId {c->TargetContentId:X16}
+                    TargetHomeWorldId {c->TargetHomeWorldId}
+                    TargetMountSeats {c->TargetMountSeats}
+                    TargetName {c->TargetName}
+                    TargetObjectId {(ulong)c->TargetObjectId:X16}
+                    TargetSex {c->TargetSex}
+                    YesNoEventId {c->YesNoEventId}
+                    YesNoTargetAccountId {c->YesNoTargetAccountId:X16}
+                    YesNoTargetContentId {c->YesNoTargetContentId:X16}
+                    YesNoTargetHomeWorldId {c->YesNoTargetHomeWorldId}
+                    YesNoTargetName {c->YesNoTargetName}
+                    YesNoTargetObjectId {(ulong)c->YesNoTargetObjectId:X16}
+                    """);
+            }
             if(ImGui.CollapsingHeader("Thread pool"))
             {
                 ImGuiEx.Text($"{S.ThreadPool.State}");

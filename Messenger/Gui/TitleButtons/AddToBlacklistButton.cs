@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Messenger.Gui.TitleButtons;
-public class AddToMutelistButton : ChatWindowTitleButton
+public class AddToBlacklistButton : ChatWindowTitleButton
 {
-    public AddToMutelistButton(ChatWindow chatWindow) : base(chatWindow)
+    public AddToBlacklistButton(ChatWindow chatWindow) : base(chatWindow)
     {
     }
 
@@ -17,7 +17,7 @@ public class AddToMutelistButton : ChatWindowTitleButton
 
     public override void DrawTooltip()
     {
-        ImGuiEx.SetTooltip($"Add {MessageHistory.HistoryPlayer} to Mute List");
+        ImGuiEx.SetTooltip($"Add {MessageHistory.HistoryPlayer} to blacklist");
     }
 
     public override void OnLeftClick()

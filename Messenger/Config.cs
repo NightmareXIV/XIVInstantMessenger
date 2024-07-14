@@ -23,7 +23,9 @@ public class Config : IEzConfig
     public string MessageTimestampFormat = "HH:mm:ss";
     public string DateFormat = "D";
     public bool AutoHideCombat = true;
+    public bool AutoHideDuty = false;
     public bool AutoReopenAfterCombat = true;
+    public bool DisallowTransparencyHovered = false;
 
     public bool QuickOpenButton = false;
     public int QuickOpenPositionX2 = 0;

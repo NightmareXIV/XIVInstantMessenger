@@ -68,7 +68,7 @@ public unsafe class MessageProcessor : IDisposable
                 }
                 RecentReceiver = null;
             }
-            if (Utils.DecodeSender(sender, out var s))
+            if (Utils.DecodeSender(sender, type, out var s))
             {
                 if (type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
                 {
@@ -248,7 +248,7 @@ public unsafe class MessageProcessor : IDisposable
                         var p = new Sender(payload.PlayerName, payload.World.RowId);
                         if (!CIDlist.ContainsKey(p))
                         {
-                            PluginLog.Verbose($"New Content ID for {p}: {src.ContentId}");
+                            PluginLog.Verbose($"New Content ID for {p}: {src.ContentId:X16}");
                         }
                         CIDlist[p] = src.ContentId;
                     }
@@ -263,17 +263,17 @@ public unsafe class MessageProcessor : IDisposable
     {
         if(CIDlist.TryGetValue(new(name, (uint)world), out cid))
         {
-            PluginLog.Debug($"{name}@{world} CID found via CIDList: {cid}");
+            PluginLog.Debug($"{name}@{world} CID found via CIDList: {cid:X16}");
             return true;
         }
         foreach(var x in Svc.Objects)
         {
-            if(x is IPlayerCharacter pc)
+            if(x is IPlayerCharacter pc && pc.Name.ToString() == name && pc.HomeWorld.Id == world)
             {
                 cid = pc.Struct()->ContentId;
                 if (cid != 0)
                 {
-                    PluginLog.Debug($"{name}@{world} CID found via ObjectTable: {cid}");
+                    PluginLog.Debug($"{name}@{world} CID found via ObjectTable: {cid:X16}");
                     return true;
                 }
             }
@@ -285,7 +285,7 @@ public unsafe class MessageProcessor : IDisposable
             cid = result->ContentId;
             if(cid != 0)
             {
-                PluginLog.Debug($"{name}@{world} CID found via FriendList: {cid}");
+                PluginLog.Debug($"{name}@{world} CID found via FriendList: {cid:X16}");
                 return true;
             }
         }
@@ -294,7 +294,7 @@ public unsafe class MessageProcessor : IDisposable
             if(x.Name == name && x.HomeWorld.Id == world && x.ContentID != 0)
             {
                 cid = x.ContentID;
-                PluginLog.Debug($"{name}@{world} CID found via Party: {cid}");
+                PluginLog.Debug($"{name}@{world} CID found via Party: {cid:X16}");
                 return true;
             }
         }
@@ -309,7 +309,7 @@ public unsafe class MessageProcessor : IDisposable
                 if (playerPayload.PlayerName == name && playerPayload.World.RowId == world)
                 {
                     cid = src.ContentId;
-                    PluginLog.Debug($"{name}@{world} CID found via Log: {cid}");
+                    PluginLog.Debug($"{name}@{world} CID found via Log: {cid:X16}");
                     return true;
                 }
             }

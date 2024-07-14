@@ -27,6 +27,7 @@ using Messenger.Services;
 using SharpDX.DXGI;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace Messenger;
 
@@ -436,7 +437,7 @@ public unsafe class Messenger : IDalamudPlugin
         if (S.MessageProcessor.TryFindCID(player, out var cid))
         {
             AgentCharaCard.Instance()->OpenCharaCard(cid);
-            PluginLog.Debug($"Opening characard via cid {cid}");
+            PluginLog.Debug($"Opening characard via cid {cid:X16}");
             return;
         }
         else

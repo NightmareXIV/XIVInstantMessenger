@@ -79,6 +79,7 @@ internal class TabSettings
                 }
                 ImGui.Checkbox("Hide DMs from in-game chat", ref C.DefaultChannelCustomization.SuppressDMs);
                 ImGui.Checkbox("Auto-hide chat windows in combat", ref C.AutoHideCombat);
+                ImGui.Checkbox("Auto-hide chat windows in duty", ref C.AutoHideDuty);
                 ImGui.Checkbox("Open chat window after combat if received message during it", ref C.AutoReopenAfterCombat);
                 ImGui.Checkbox("Command passthrough", ref C.CommandPassthrough);
                 if (C.CommandPassthrough)

@@ -33,6 +33,7 @@ internal static unsafe class Utils
 
     public static void DrawWrappedText(string str, Action? postMessageFunctions = null)
     {
+        var chunk = 0;
         var max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
         foreach (var s in str.Split("\n"))
         {
@@ -50,25 +51,27 @@ internal static unsafe class Utils
                     //try to match wrapping symbol first
                     for (var z = i; z >= start; z--)
                     {
-                        if (WrapSymbols.Contains(s[z]))
+                        if (WrapSymbols.Contains(s[z]) && start != z)
                         {
                             ImGuiEx.Text(s[start..z]);
                             postMessageFunctions?.Invoke();
                             canRestart = false;
                             start = z;
-                            //PluginLog.Information($"start is now {start}");
+                            //PluginLog.Information($"start is now {start} chunk {++chunk}");
                             break;
                         }
                         else if (z == start)
                         {
                             if (max > avail && canRestart)
                             {
+                                //PluginLog.Information($"Restart, max:{max}, avail: {avail}");
                                 //we can use more space at next line, restart everything
                                 ImGui.NewLine();
                                 canRestart = false;
                                 goto Start;
                             }
                             //just wrap it
+                            //PluginLog.Information($"Just wrap, max:{max}, avail: {avail}, start:{start}, i:{i}, str:{s[start..i]}");
                             ImGuiEx.Text(s[start..i]);
                             postMessageFunctions?.Invoke();
                             start = i;
@@ -204,6 +207,11 @@ internal static unsafe class Utils
         return TabIndividual.Types.Select(x => x.ToString()).Contains(s.Name);
     }
 
+    public static bool IsGenericChannel(this XivChatType s)
+    {
+        return TabIndividual.Types.Contains(s);
+    }
+
     public static bool IsGenericChannel(this Sender s, out XivChatType type)
     {
         if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out var z))
@@ -295,7 +303,7 @@ internal static unsafe class Utils
         return C.NoFlashing ? c.ColorTitleFlash : GradientColor.Get(ImGui.GetStyle().Colors[(int)col], c.ColorTitleFlash, 500);
     }
 
-    public static bool DecodeSender(SeString sender, out Sender senderStruct)
+    public static bool DecodeSender(SeString sender, XivChatType type, out Sender senderStruct)
     {
         if (sender == null)
         {
@@ -310,7 +318,7 @@ internal static unsafe class Utils
                 return true;
             }
         }
-        if (ProperOnLogin.PlayerPresent && sender.ToString().EndsWith(Svc.ClientState.LocalPlayer?.Name.ToString()))
+        if (Player.Available && IsGenericChannel(type))
         {
             senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Svc.ClientState.LocalPlayer.HomeWorld.Id);
             return true;

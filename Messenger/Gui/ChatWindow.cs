@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using ECommons;
 using ECommons.Automation;
 using ECommons.GameFunctions;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
 using Messenger.Gui.TitleButtons;
@@ -35,7 +36,7 @@ public unsafe class ChatWindow : Window
 
     private InviteToPartyButton InviteToPartyButton;
     private AddFriendButton AddFriendButton;
-    private AddToMutelistButton AddToMutelistButton;
+    private AddToBlacklistButton AddToBlacklistButton;
     private OpenLogButton OpenLogButton;
     private OpenCharaCardButton OpenCharaCardButton;
 
@@ -51,7 +52,7 @@ public unsafe class ChatWindow : Window
         };
         InviteToPartyButton = new(this);
         AddFriendButton = new(this);
-        AddToMutelistButton = new(this);
+        AddToBlacklistButton = new(this);
         OpenLogButton = new(this);
         OpenCharaCardButton = new(this);
     }
@@ -61,7 +62,7 @@ public unsafe class ChatWindow : Window
         window.TitleBarButtons.Clear();
         if (InviteToPartyButton.ShouldDisplay()) window.TitleBarButtons.Add(InviteToPartyButton.Button);
         if (AddFriendButton.ShouldDisplay()) window.TitleBarButtons.Add(AddFriendButton.Button);
-        if (AddToMutelistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToMutelistButton.Button);
+        if (AddToBlacklistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToBlacklistButton.Button);
         if (OpenLogButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenLogButton.Button);
         if (OpenCharaCardButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenCharaCardButton.Button);
     }
@@ -71,7 +72,7 @@ public unsafe class ChatWindow : Window
         Transparency = !isTransparent ? C.TransMax : C.TransMin;
     }
 
-    internal bool HideByCombat => Svc.Condition[ConditionFlag.InCombat] && C.AutoHideCombat && !KeepInCombat;
+    internal bool HideByCombat => !KeepInCombat && ((Svc.Condition[ConditionFlag.InCombat] && C.AutoHideCombat) || (Svc.Condition[ConditionFlag.BoundByDuty56] && C.AutoHideDuty));
 
     public override bool DrawConditions()
     {
@@ -188,7 +189,7 @@ public unsafe class ChatWindow : Window
         }
         else
         {
-            if (ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
+            if (!C.DisallowTransparencyHovered && ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
             {
                 Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
             }
