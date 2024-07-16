@@ -26,6 +26,14 @@ internal static unsafe class Utils
 {
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
 
+    public static void ResetDisplayedMessageCaps()
+    {
+        foreach(var x in S.MessageProcessor.Chats.Values)
+        {
+            x.ChatWindow.DisplayCap = C.DisplayedMessages;
+        }
+    }
+
     public static Vector2 AsVector2(this POINT point)
     {
         return new(point.x, point.y);

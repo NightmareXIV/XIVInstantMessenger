@@ -147,6 +147,7 @@ internal class TabSystem : Window
                         }
                         w.BringToFront = false;
                         w.SetPosition = false;
+                        w.UpdateLastFrame();
                         if (C.FontNoTabs) P.FontManager.PushFont();
                         w.Draw();
                         TitleBarButtons = w.TitleBarButtons;

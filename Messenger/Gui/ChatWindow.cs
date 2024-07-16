@@ -1,16 +1,8 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using ECommons;
 using ECommons.Automation;
-using ECommons.GameFunctions;
-using ECommons.UIHelpers.AddonMasterImplementations;
-using Messenger.FontControl;
-using Messenger.FriendListManager;
 using Messenger.Gui.TitleButtons;
-using SixLabors.ImageSharp.Metadata;
-using System.IO;
-using static FFXIVClientStructs.FFXIV.Client.Graphics.Kernel.VertexShader;
 
 namespace Messenger.Gui;
 
@@ -29,6 +21,9 @@ public unsafe class ChatWindow : Window
     internal new bool BringToFront = false;
     private PseudoMultilineInput Input = new();
     private bool BlockEmojiSelection = false;
+    internal int DisplayCap = C.DisplayedMessages;
+    private int FrameCount = 0;
+    private int ScrollToMessage = -1;
 
     internal string OwningTab => C.TabWindowAssociations.TryGetValue(MessageHistory.HistoryPlayer.ToString(), out var owner) ? owner : null;
 
@@ -117,7 +112,19 @@ public unsafe class ChatWindow : Window
 
     public override void Update()
     {
+        UpdateLastFrame();
         TitleBarButtons.Clear();
+    }
+
+    public void UpdateLastFrame()
+    {
+        var f = ImGui.GetFrameCount();
+        if (f - FrameCount > 1)
+        {
+            PluginLog.Debug($"Window {MessageHistory.HistoryPlayer} just opened");
+            this.DisplayCap = C.DisplayedMessages;
+        }
+        FrameCount = f;
     }
 
     public override void PreDraw()
@@ -223,18 +230,29 @@ public unsafe class ChatWindow : Window
         }
         (int year, int day) currentDay = (0, 0);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, C.MessageLineSpacing));
-        foreach (var x in MessageHistory.Messages)
+        var startIndex = Math.Max(0, MessageHistory.Messages.Count - DisplayCap);
+        if(startIndex != 0)
         {
-            if (x.IsSystem)
+            ImGuiEx.TextWrapped(EColor.OrangeBright, $"For performance reasons, {startIndex} messages have been hidden.");
+            if(ImGui.Button($"Display {Math.Min(startIndex, C.DisplayedMessages)} more messages"))
+            {
+                Svc.Framework.RunOnTick(() => ScrollToMessage = startIndex, delayTicks:1);
+                DisplayCap += C.DisplayedMessages;
+            }
+        }
+        for (var n = startIndex; n<MessageHistory.Messages.Count;n++)
+        {
+            var message = MessageHistory.Messages[n];
+            if (message.IsSystem)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
-                x.Draw();
+                message.Draw();
                 ImGui.PopStyleColor();
             }
             else
             {
-                if (!x.IsIncoming && Cust.NoOutgoing) continue;
-                var time = DateTimeOffset.FromUnixTimeMilliseconds(x.Time).ToLocalTime();
+                if (!message.IsIncoming && Cust.NoOutgoing) continue;
+                var time = DateTimeOffset.FromUnixTimeMilliseconds(message.Time).ToLocalTime();
                 if (C.PrintDate)
                 {
                     if (!(time.DayOfYear == currentDay.day && time.Year == currentDay.year))
@@ -247,46 +265,53 @@ public unsafe class ChatWindow : Window
                 var timestamp = time.ToString(C.MessageTimestampFormat);
                 if (C.IRCStyle)
                 {
-                    var messageColor = x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage;
-                    var subjectColor = x.IsIncoming ? Cust.ColorFromTitle : Cust.ColorToTitle;
+                    var messageColor = message.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage;
+                    var subjectColor = message.IsIncoming ? Cust.ColorFromTitle : Cust.ColorToTitle;
                     ImGuiEx.Text(Cust.ColorGeneric, $"{timestamp} ");
                     ImGui.SameLine(0, 0);
                     ImGuiEx.Text(messageColor, $"[");
                     ImGui.SameLine(0, 0);
-                    ImGuiEx.Text(subjectColor, $"{x.OverrideName?.Split("@")[0] ?? (x.IsIncoming ? subjectNoWorld : me)}");
+                    ImGuiEx.Text(subjectColor, $"{message.OverrideName?.Split("@")[0] ?? (message.IsIncoming ? subjectNoWorld : me)}");
                     ImGui.SameLine(0, 0);
                     ImGuiEx.Text(messageColor, $"] ");
                     ImGui.SameLine(0, 0);
                     ImGui.PushStyleColor(ImGuiCol.Text, messageColor);
-                    x.Draw("", "", () => PostMessageFunctionsShared(x));
-                    PostMessageFunctions(x);
+                    message.Draw("", "", () => PostMessageFunctionsShared(message));
+                    PostMessageFunctions(message);
                     ImGui.PopStyleColor();
                 }
                 else
                 {
-                    if (x.IsIncoming != isIncoming)
+                    if (message.IsIncoming != isIncoming)
                     {
-                        isIncoming = x.IsIncoming;
-                        if (x.IsIncoming)
+                        isIncoming = message.IsIncoming;
+                        if (message.IsIncoming)
                         {
                             ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorFromTitle);
-                            Utils.DrawWrappedText($"From {x.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
+                            Utils.DrawWrappedText($"From {message.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
                             ImGui.PopStyleColor();
                         }
                         else
                         {
                             ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorToTitle);
-                            Utils.DrawWrappedText($"From {x.OverrideName?.Split("@")[0] ?? me}");
+                            Utils.DrawWrappedText($"From {message.OverrideName?.Split("@")[0] ?? me}");
                             ImGui.PopStyleColor();
                         }
                     }
                     ImGuiHelpers.ScaledDummy(new Vector2(20f, 1f));
                     ImGui.SameLine(0, 0);
-                    ImGui.PushStyleColor(ImGuiCol.Text, x.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage);
-                    x.Draw("[{timestamp}] ", "", () => PostMessageFunctionsShared(x));
-                    PostMessageFunctions(x);
+                    ImGui.PushStyleColor(ImGuiCol.Text, message.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage);
+                    message.Draw("[{timestamp}] ", "", () => PostMessageFunctionsShared(message));
+                    PostMessageFunctions(message);
                     ImGui.PopStyleColor();
                 }
+            }
+
+            if (ScrollToMessage == n)
+            {
+                PluginLog.Debug($"Set scroll to {n}");
+                ImGui.SetScrollHereY();
+                ScrollToMessage = -1;
             }
             if (C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
         }

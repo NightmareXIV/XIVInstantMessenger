@@ -30,7 +30,8 @@ public class Config : IEzConfig
     public bool QuickOpenButton = false;
     public int QuickOpenPositionX2 = 0;
     public int QuickOpenPositionY2 = 0;
-    public int HistoryAmount = 50;
+    public int HistoryAmount = 25;
+    public int DisplayedMessages = 50;
 
     public bool EnableKey = true;
     public ModifierKey ModifierKey = ModifierKey.Alt;

@@ -164,13 +164,14 @@ internal class TabSettings
             }, null, true),
             ("Logging", delegate
             {
-                ImGui.SetNextItemWidth(50f);
-                ImGui.DragInt("Load up to this much messages from history upon opening messenger", ref C.HistoryAmount, 1f, 0, 1000);
-                if (C.HistoryAmount > 1000)
-                {
-                    ImGuiEx.Text(ImGuiColors.DalamudRed, "This setting may cause issues");
-                }
-                C.HistoryAmount.ValidateRange(0, 10000);
+                ImGui.SetNextItemWidth(100f);
+                ImGui.DragInt("Amount of messages to load from history", ref C.HistoryAmount.ValidateRange(0, 5000), 1f, 0, 5000);
+                ImGuiEx.HelpMarker("This amount of last messages will be loaded into memory from chat log upon opening chat with a player. Once loaded, you can't load more previous messages than this. This setting does not affects performance.");
+
+                ImGui.SetNextItemWidth(100f);
+                ImGuiEx.SliderInt("Maximum number of messages to display", ref C.DisplayedMessages.ValidateRange(0, 200), 0, 200);
+                ImGuiEx.HelpMarker("This amount of last messages will be displayed in chat window. You will be able to display previous messages using a button in the beginning of chat history. This setting affects performance: higher number of displayed messages will result in less FPS.");
+
                 ImGui.Separator();
                 if (ImGui.Checkbox($"Write separate logs for each character", ref C.SplitLogging))
                 {
