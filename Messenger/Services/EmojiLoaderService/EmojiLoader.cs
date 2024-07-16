@@ -1,15 +1,8 @@
-﻿using FFXIVClientStructs.Interop;
-using Lumina.Excel.GeneratedSheets2;
-using Newtonsoft.Json;
-using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Messenger.Services.EmojiLoaderService;
 public sealed class EmojiLoader : IDisposable
@@ -110,21 +103,37 @@ public sealed class EmojiLoader : IDisposable
 
     public void Initialize()
     {
-        foreach (var fname in C.StaticBetterTTVEmojiCache.Keys.ToArray())
+        try
         {
-            if (!File.Exists(Path.Combine(CachePath, C.StaticBetterTTVEmojiCache[fname])))
+            foreach (var fname in C.StaticBetterTTVEmojiCache.Keys.ToArray())
             {
-                PluginLog.Warning($"Deleting corrupted emoji {fname} from static bttv cache");
-                C.StaticBetterTTVEmojiCache.Remove(fname);
+                if (!File.Exists(Path.Combine(CachePath, C.StaticBetterTTVEmojiCache[fname])))
+                {
+                    PluginLog.Warning($"Deleting corrupted emoji {fname} from static bttv cache");
+                    C.StaticBetterTTVEmojiCache.Remove(fname);
+                }
             }
         }
-        foreach (var fname in C.DynamicBetterTTVEmojiCache.Keys.ToArray())
+        catch(Exception e)
         {
-            if (!File.Exists(Path.Combine(CachePath, C.DynamicBetterTTVEmojiCache[fname])))
+            PluginLog.Error($"Error initializing static betterttv emoji:");
+            e.Log();
+        }
+        try
+        {
+            foreach (var fname in C.DynamicBetterTTVEmojiCache.Keys.ToArray())
             {
-                PluginLog.Warning($"Deleting corrupted emoji {fname} from dynamic bttv cache");
-                C.DynamicBetterTTVEmojiCache.Remove(fname);
+                if (!File.Exists(Path.Combine(CachePath, C.DynamicBetterTTVEmojiCache[fname])))
+                {
+                    PluginLog.Warning($"Deleting corrupted emoji {fname} from dynamic bttv cache");
+                    C.DynamicBetterTTVEmojiCache.Remove(fname);
+                }
             }
+        }
+        catch(Exception e)
+        {
+            PluginLog.Error($"Error initializing dynamic betterttv emoji:");
+            e.Log();
         }
         if (C.EnableEmoji)
         {
@@ -221,11 +230,19 @@ public sealed class EmojiLoader : IDisposable
     private void LoadDefaultEmoji()
     {
         PluginLog.Information($"Loading default emoji");
-        var defaultEmojiFolder = Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "images", "emoji");
-        foreach (var f in Directory.GetFiles(defaultEmojiFolder))
+        try
         {
-            PluginLog.Verbose($"Loading default emoji {f} exists={File.Exists(f)}");
-            Emoji[Path.GetFileNameWithoutExtension(f)] = new(f);
+            var defaultEmojiFolder = Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "images", "emoji");
+            foreach (var f in Directory.GetFiles(defaultEmojiFolder))
+            {
+                PluginLog.Verbose($"Loading default emoji {f} exists={File.Exists(f)}");
+                Emoji[Path.GetFileNameWithoutExtension(f)] = new(f);
+            }
+        }
+        catch(Exception e)
+        {
+            PluginLog.Error($"Error loading default emoji:");
+            e.Log();
         }
     }
 
@@ -234,13 +251,21 @@ public sealed class EmojiLoader : IDisposable
         Emoji.Clear();
         LoadDefaultEmoji();
         PluginLog.Information($"Loading BetterTTV emoji");
-        foreach (var x in C.StaticBetterTTVEmojiCache)
+        try
         {
-            Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
+            foreach (var x in C.StaticBetterTTVEmojiCache)
+            {
+                Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
+            }
+            foreach (var x in C.DynamicBetterTTVEmojiCache)
+            {
+                Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
+            }
         }
-        foreach (var x in C.DynamicBetterTTVEmojiCache)
+        catch (Exception e)
         {
-            Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
+            PluginLog.Error($"Error loading emoji cache:");
+            e.Log();
         }
     }
 }

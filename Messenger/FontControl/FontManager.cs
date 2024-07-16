@@ -2,6 +2,7 @@
 using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ManagedFontAtlas;
 using ECommons.Configuration;
+using ECommons.Throttlers;
 using ImGuiNET;
 
 namespace Messenger.FontControl;
@@ -54,7 +55,7 @@ public unsafe class FontManager
     {
         if (FontPushed)
         {
-            DuoLog.Error($"A critical error occurred. Please send logs to developer.");
+            if(EzThrottler.Throttle("Error", 10000)) DuoLog.Error($"A critical error occurred. Please send logs to developer.");
             throw new InvalidOperationException("Font is already pushed.");
         }
         if (C.UseCustomFont)

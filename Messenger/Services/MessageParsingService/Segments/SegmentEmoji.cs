@@ -43,7 +43,6 @@ public class SegmentEmoji : ISegment
         }
         else
         {
-
             if (S.EmojiLoader.DownloaderTaskRunning)
             {
                 if (S.EmojiLoader.Loading.GetTextureWrap() != null)
