@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace Messenger.Services;
 public static class ServiceManager
 {
+    public static ThreadPool ThreadPool { get; private set; }
     public static Memory Memory { get; private set; }
     public static EmojiLoader EmojiLoader { get; private set; }
     public static ContextMenuManager ContextMenuManager { get; private set; }
     public static MessageProcessor MessageProcessor { get; private set; }
-    public static ThreadPool ThreadPool { get; private set; }
 }

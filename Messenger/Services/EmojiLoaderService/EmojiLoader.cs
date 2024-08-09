@@ -135,54 +135,70 @@ public sealed class EmojiLoader : IDisposable
             PluginLog.Error($"Error initializing dynamic betterttv emoji:");
             e.Log();
         }
-        if (C.EnableEmoji)
+        try
         {
-            LoadDefaultEmoji();
-            if (C.EnableBetterTTV)
+            if(C.EnableEmoji)
             {
-                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > C.LastStaticBetterTTVUpdate + TimeSpan.FromDays(7).TotalMilliseconds)
+                LoadDefaultEmoji();
+                if(C.EnableBetterTTV)
                 {
-                    BuildCache();
-                }
-                else
-                {
-                    LoadEmojiCache();
+                    if(DateTimeOffset.Now.ToUnixTimeMilliseconds() > C.LastStaticBetterTTVUpdate + TimeSpan.FromDays(7).TotalMilliseconds)
+                    {
+                        BuildCache();
+                    }
+                    else
+                    {
+                        LoadEmojiCache();
+                    }
                 }
             }
+        }
+        catch(Exception e)
+        {
+            PluginLog.Error($"Failed to initialize EmojiLoader");
+            e.Log();
         }
     }
 
     private volatile bool BuildingCache = false;
     public void BuildCache()
     {
-        if (BuildingCache) return;
-        BuildingCache = true;
-        C.StaticBetterTTVEmojiCache.Clear();
-        S.ThreadPool.Run(() =>
+        try
         {
-            try
+            if(BuildingCache) return;
+            BuildingCache = true;
+            C.StaticBetterTTVEmojiCache.Clear();
+            S.ThreadPool.Run(() =>
             {
-                Client ??= new();
-                var result = Client.GetAsync("https://api.betterttv.net/3/emotes/shared/top?limit=100").Result;
-                result.EnsureSuccessStatusCode();
-                var data = JsonConvert.DeserializeObject<List<BetterTTWEmoji>>(result.Content.ReadAsStringAsync().Result);
-                PluginLog.Verbose($"Emote info received: \n{data.Print("\n")}");
-                foreach (var e in data)
+                try
                 {
-                    DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false, C.StaticBetterTTVEmojiCache, null);
+                    Client ??= new();
+                    var result = Client.GetAsync("https://api.betterttv.net/3/emotes/shared/top?limit=100").Result;
+                    result.EnsureSuccessStatusCode();
+                    var data = JsonConvert.DeserializeObject<List<BetterTTWEmoji>>(result.Content.ReadAsStringAsync().Result);
+                    PluginLog.Verbose($"Emote info received: \n{data.Print("\n")}");
+                    foreach(var e in data)
+                    {
+                        DownloadEmojiToCache(e.emote.id, e.emote.imageType, e.emote.code, false, C.StaticBetterTTVEmojiCache, null);
+                    }
+                    Svc.Framework.RunOnFrameworkThread(() =>
+                    {
+                        LoadEmojiCache();
+                        C.LastStaticBetterTTVUpdate = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    });
                 }
-                Svc.Framework.RunOnFrameworkThread(() =>
+                catch(Exception e)
                 {
-                    LoadEmojiCache();
-                    C.LastStaticBetterTTVUpdate = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                });
-            }
-            catch (Exception e)
-            {
-                e.Log();
-            }
-            BuildingCache = false;
-        });
+                    e.Log();
+                }
+                BuildingCache = false;
+            });
+        }
+        catch(Exception e)
+        {
+            PluginLog.Error("Failed to build emoji cache");
+            e.Log();
+        }
     }
 
     private void DownloadEmojiToCache(string id, string imageType, string code, bool skipExisting, Dictionary<string, string> cache, string overwrite)
