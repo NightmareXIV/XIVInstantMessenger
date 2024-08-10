@@ -263,7 +263,7 @@ public unsafe class MessageProcessor : IDisposable
     {
         if(CIDlist.TryGetValue(new(name, (uint)world), out cid))
         {
-            PluginLog.Debug($"{name}@{world} CID found via CIDList: {cid:X16}");
+            //PluginLog.Debug($"{name}@{world} CID found via CIDList: {cid:X16}");
             return true;
         }
         foreach(var x in Svc.Objects)
@@ -273,7 +273,7 @@ public unsafe class MessageProcessor : IDisposable
                 cid = pc.Struct()->ContentId;
                 if (cid != 0)
                 {
-                    PluginLog.Debug($"{name}@{world} CID found via ObjectTable: {cid:X16}");
+                    //PluginLog.Debug($"{name}@{world} CID found via ObjectTable: {cid:X16}");
                     return true;
                 }
             }
@@ -285,7 +285,7 @@ public unsafe class MessageProcessor : IDisposable
             cid = result->ContentId;
             if(cid != 0)
             {
-                PluginLog.Debug($"{name}@{world} CID found via FriendList: {cid:X16}");
+                //PluginLog.Debug($"{name}@{world} CID found via FriendList: {cid:X16}");
                 return true;
             }
         }
@@ -294,7 +294,7 @@ public unsafe class MessageProcessor : IDisposable
             if(x.Name == name && x.HomeWorld.Id == world && x.ContentID != 0)
             {
                 cid = x.ContentID;
-                PluginLog.Debug($"{name}@{world} CID found via Party: {cid:X16}");
+                //PluginLog.Debug($"{name}@{world} CID found via Party: {cid:X16}");
                 return true;
             }
         }
@@ -309,13 +309,13 @@ public unsafe class MessageProcessor : IDisposable
                 if (playerPayload.PlayerName == name && playerPayload.World.RowId == world)
                 {
                     cid = src.ContentId;
-                    PluginLog.Debug($"{name}@{world} CID found via Log: {cid:X16}");
+                    //PluginLog.Debug($"{name}@{world} CID found via Log: {cid:X16}");
                     return true;
                 }
             }
         }
         cid = 0;
-        PluginLog.Debug($"{name}@{world} CID not found");
+        //PluginLog.Debug($"{name}@{world} CID not found");
         return false;
     }
 }

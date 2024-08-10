@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Messenger", "Messenger\Mess
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{DD411D86-4A40-4C7B-8283-7314FDB53A99}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NightmareUI", "NightmareUI\NightmareUI\NightmareUI.csproj", "{018F6CE6-EEED-432A-B060-7DB132BD70A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{DD411D86-4A40-4C7B-8283-7314FDB53A99}.Release|Any CPU.Build.0 = Release|x64
 		{DD411D86-4A40-4C7B-8283-7314FDB53A99}.Release|x64.ActiveCfg = Release|x64
 		{DD411D86-4A40-4C7B-8283-7314FDB53A99}.Release|x64.Build.0 = Release|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Debug|Any CPU.Build.0 = Debug|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Debug|x64.ActiveCfg = Debug|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Debug|x64.Build.0 = Debug|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Release|Any CPU.ActiveCfg = Release|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Release|Any CPU.Build.0 = Release|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Release|x64.ActiveCfg = Release|x64
+		{018F6CE6-EEED-432A-B060-7DB132BD70A3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

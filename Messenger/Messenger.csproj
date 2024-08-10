@@ -92,5 +92,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+        <ProjectReference Include="..\NightmareUI\NightmareUI\NightmareUI.csproj" />
     </ItemGroup>
 </Project>

@@ -14,4 +14,6 @@ public static class ServiceManager
     public static EmojiLoader EmojiLoader { get; private set; }
     public static ContextMenuManager ContextMenuManager { get; private set; }
     public static MessageProcessor MessageProcessor { get; private set; }
+    public static IPCProvider IPCProvider { get; private set; }
+    public static XIMIpcManager XIMIpcManager { get; private set; }
 }

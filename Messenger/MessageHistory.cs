@@ -15,7 +15,7 @@ public partial class MessageHistory
     internal volatile int DoScroll = 0;
     internal volatile bool LogLoaded = false;
     internal string LogFile;
-    private int? SetFocus = 0;
+    private int? SetFocus = null;
 
     internal void SetFocusAtNextFrame() => SetFocus = ImGui.GetFrameCount() + 1;
     internal void UnsetFocus() => SetFocus = null;

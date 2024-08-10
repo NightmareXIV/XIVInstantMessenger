@@ -6,6 +6,8 @@ using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
+using NightmareUI;
+using NightmareUI.ImGuiElements;
 using System.Threading;
 
 namespace Messenger.Gui.Settings;
@@ -23,6 +25,30 @@ internal unsafe class TabDebug
 
         try
         {
+            if(ImGui.CollapsingHeader("IPC"))
+            {
+                try
+                {
+                    ref var name = ref Ref<string>.Get("PlayerName");
+                    ref var world = ref Ref<int>.Get("PlayerWorld");
+                    ImGui.InputText("Players's name", ref name, 50);
+                    WorldSelector.Instance.Draw(ref world);
+                    ImGuiEx.Text($"GetConversationCount {S.XIMIpcManager.GetConversationCount()}");
+                    ImGuiEx.Text($"GetUnreadConversationCount {S.XIMIpcManager.GetUnreadConversationCount()}");
+                    ImGuiEx.TreeNodeCollapsingHeader("Conversations", () => ImGuiEx.Text(S.XIMIpcManager.GetConversations().Print("\n")));
+                    ref var focus = ref Ref<bool>.Get("Focus");
+                    ImGui.Checkbox("Set focus", ref focus);
+                    if(ImGui.Button("Open messenger")) S.XIMIpcManager.OpenMessenger(new Sender(name, (uint)world).ToString(), focus);
+                    ref var sameWorld = ref Ref<bool>.Get("SameWorld");
+                    ImGui.Checkbox("Same world", ref sameWorld);
+                    if(ImGui.Button("Invite")) DuoLog.Information(S.XIMIpcManager.InviteToParty(new Sender(name, (uint)world).ToString(), sameWorld) ?? "Success");
+                    ImGuiEx.Text($"GetCID {S.XIMIpcManager.GetCID(new Sender(name, (uint)world).ToString()):X16}");
+                }
+                catch(Exception e)
+                {
+                    ImGuiEx.TextWrapped(e.ToString());
+                }
+            }
             if (ImGui.CollapsingHeader("Context"))
             {
                 var c = AgentContext.Instance();

@@ -26,6 +26,38 @@ internal static unsafe class Utils
 {
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
 
+    public static void OpenOffline(string target)
+    {
+        S.ThreadPool.Run(delegate
+        {
+            Safe(delegate
+            {
+                var logFolder = Utils.GetLogStorageFolder();
+                var files = Directory.GetFiles(logFolder);
+                foreach(var file in files)
+                {
+                    FileInfo fileInfo = new(file);
+                    if(file.EndsWith(".txt") && file.Contains("@") && fileInfo.Length > 0
+                    && fileInfo.Name.Contains(target, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var t = fileInfo.Name.Replace(".txt", "").Split("@");
+                        if(ExcelWorldHelper.TryGet(t[1], out var world))
+                        {
+                            new TickScheduler(delegate
+                            {
+                                Sender s = new() { Name = t[0], HomeWorld = world.RowId };
+                                P.OpenMessenger(s, true);
+                                S.MessageProcessor.Chats[s].SetFocusAtNextFrame();
+                            });
+                            return;
+                        }
+                    }
+                }
+                Notify.Error("Could not find chat history with " + target);
+            });
+        });
+    }
+
     public static void ResetDisplayedMessageCaps()
     {
         foreach(var x in S.MessageProcessor.Chats.Values)

@@ -2,6 +2,9 @@
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using ECommons.Automation;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using Messenger.Gui.TitleButtons;
 
 namespace Messenger.Gui;

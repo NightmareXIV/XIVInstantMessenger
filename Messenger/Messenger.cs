@@ -265,34 +265,7 @@ public unsafe class Messenger : IDalamudPlugin
                 }
             }
             Notify.Info("Searching in logs...");
-            S.ThreadPool.Run(delegate
-            {
-                Safe(delegate
-                {
-                    var logFolder = Utils.GetLogStorageFolder();
-                    var files = Directory.GetFiles(logFolder);
-                    foreach (var file in files)
-                    {
-                        FileInfo fileInfo = new(file);
-                        if (file.EndsWith(".txt") && file.Contains("@") && fileInfo.Length > 0
-                        && fileInfo.Name.Contains(args, StringComparison.OrdinalIgnoreCase))
-                        {
-                            var t = fileInfo.Name.Replace(".txt", "").Split("@");
-                            if (ExcelWorldHelper.TryGet(t[1], out var world))
-                            {
-                                new TickScheduler(delegate
-                                {
-                                    Sender s = new() { Name = t[0], HomeWorld = world.RowId };
-                                    P.OpenMessenger(s, true);
-                                    S.MessageProcessor.Chats[s].SetFocusAtNextFrame();
-                                });
-                                return;
-                            }
-                        }
-                    }
-                    Notify.Error("Could not find chat history with " + args);
-                });
-            });
+            Utils.OpenOffline(args);
         }
     }
 

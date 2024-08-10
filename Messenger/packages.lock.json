@@ -942,6 +942,12 @@
       },
       "ecommons": {
         "type": "Project"
+      },
+      "nightmareui": {
+        "type": "Project",
+        "dependencies": {
+          "ECommons": "[2.2.0.2, )"
+        }
       }
     }
   }
