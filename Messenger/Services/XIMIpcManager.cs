@@ -13,7 +13,7 @@ public class XIMIpcManager
     /// </summary>
     public XIMIpcManager()
     {
-        EzIPC.Init(this, "Messenger");
+        EzIPC.Init(this, "Messenger", SafeWrapper.AnyException);
     }
 
     /// <summary>
