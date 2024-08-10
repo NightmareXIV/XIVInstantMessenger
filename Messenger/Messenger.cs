@@ -358,13 +358,13 @@ public unsafe class Messenger : IDalamudPlugin
             }
             else
             {
-                if (destination == S.MessageProcessor.LastReceivedMessage.GetPlayerName())
+                /*if (destination == S.MessageProcessor.LastReceivedMessage.GetPlayerName())
                 {
                     var c = $"/r {message}";
                     PluginLog.Verbose($"Sending via reply: {c}");
                     Chat.Instance.SendMessage(c);
                 }
-                else
+                else*/
                 {
                     var c = $"/tell {destination} {message}";
                     PluginLog.Verbose($"Sending command: {c}");
