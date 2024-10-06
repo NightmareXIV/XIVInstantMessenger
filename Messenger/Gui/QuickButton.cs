@@ -1,4 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Component.GUI;
+using Messenger.Configuration;
 
 namespace Messenger.Gui;
 

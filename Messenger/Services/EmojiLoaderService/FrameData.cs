@@ -1,10 +1,4 @@
-﻿using Dalamud.Interface.Internal;
-using Dalamud.Interface.Textures.TextureWraps;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Messenger.Services.EmojiLoaderService;
 public sealed class FrameData : IDisposable

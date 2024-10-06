@@ -1,5 +1,4 @@
-﻿using Dalamud.Plugin.Ipc.Exceptions;
-using ECommons.EzIpcManager;
+﻿using ECommons.EzIpcManager;
 
 namespace Messenger.Services;
 public class IPCProvider

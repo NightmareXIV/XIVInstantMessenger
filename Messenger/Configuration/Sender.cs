@@ -1,4 +1,4 @@
-﻿namespace Messenger;
+﻿namespace Messenger.Configuration;
 
 public struct Sender : IEquatable<Sender>
 {

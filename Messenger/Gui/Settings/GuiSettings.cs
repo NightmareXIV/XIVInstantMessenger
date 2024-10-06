@@ -1,6 +1,5 @@
 ﻿using ECommons.Configuration;
 using ECommons.Funding;
-using Messenger.FontControl;
 
 namespace Messenger.Gui.Settings;
 
@@ -26,7 +25,8 @@ internal class GuiSettings : Window
     {
         PatreonBanner.DrawRight();
         ImGuiEx.EzTabBar("MessengerBar", PatreonBanner.Text,
-            ("Chat history", TabHistory.Draw, null, true),
+            ("History", TabHistory.Draw, null, true),
+            ("Engagements", TabEngagement.Draw, null, true),
             ("Settings", TabSettings.Draw, null, true),
             ("Style", TabStyle.Draw, null, true),
             ("Fonts", TabFonts.Draw, null, true),

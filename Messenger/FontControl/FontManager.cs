@@ -1,9 +1,6 @@
-﻿using Dalamud.Interface.FontIdentifier;
-using Dalamud.Interface.GameFonts;
-using Dalamud.Interface.ManagedFontAtlas;
+﻿using Dalamud.Interface.ManagedFontAtlas;
 using ECommons.Configuration;
 using ECommons.Throttlers;
-using ImGuiNET;
 
 namespace Messenger.FontControl;
 

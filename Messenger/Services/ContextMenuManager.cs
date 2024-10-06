@@ -1,9 +1,9 @@
 ﻿using Dalamud.Game.Gui.ContextMenu;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Game.Text;
 using ECommons.ChatMethods;
 using ECommons.ExcelServices;
-using ECommons.GameHelpers;
+using Messenger.Configuration;
+using Sender = Messenger.Configuration.Sender;
 
 namespace Messenger.Services;
 
@@ -58,6 +58,66 @@ public class ContextMenuManager : IDisposable
                 Priority = C.ContextMenuPriority,
                 Name = "Messenger",
             });
+            if(C.EnableEngagements && C.EnableEngagementsContext)
+            {
+                args.AddMenuItem(new()
+                {
+                    OnClicked = (o) =>
+                    {
+                        List<MenuItem> items = [];
+                        Sender sender = new(def.TargetName, def.TargetHomeWorld.Id);
+                        foreach(var x in C.Engagements.Where(s => s.Enabled).OrderByDescending(s => s.LastUpdated))
+                        {
+                            if(x.Participants.Contains(sender))
+                            {
+                                items.Add(new()
+                                {
+                                    Prefix = (SeIconChar)'',
+                                    Name = x.Name,
+                                    OnClicked = (_) =>
+                                    {
+                                        var s = x.GetSender();
+                                        P.OpenMessenger(s);
+                                        S.MessageProcessor.Chats[s].SetFocusAtNextFrame();
+                                        S.MessageProcessor.Chats[s].Scroll();
+                                        if(Svc.Condition[ConditionFlag.InCombat])
+                                        {
+                                            S.MessageProcessor.Chats[s].ChatWindow.KeepInCombat = true;
+                                            Notify.Info("This chat will not be hidden in combat");
+                                        }
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                items.Add(new()
+                                {
+                                    Prefix = (SeIconChar)'',
+                                    Name = x.Name,
+                                    OnClicked = (_) =>
+                                    {
+                                        var s = x.GetSender();
+                                        x.Participants.Add(sender);
+                                        P.OpenMessenger(s);
+                                        S.MessageProcessor.Chats[s].SetFocusAtNextFrame();
+                                        S.MessageProcessor.Chats[s].Scroll();
+                                        if(Svc.Condition[ConditionFlag.InCombat])
+                                        {
+                                            S.MessageProcessor.Chats[s].ChatWindow.KeepInCombat = true;
+                                            Notify.Info("This chat will not be hidden in combat");
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        o.OpenSubmenu("Engagements", items);
+                    },
+                    PrefixChar = 'M',
+                    Priority = C.ContextMenuPriority,
+                    IsSubmenu = true,
+                    Name = "Engagements",
+                });
+            }
         }
     }
 }

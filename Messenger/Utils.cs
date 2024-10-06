@@ -1,20 +1,14 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.Gui.PartyFinder.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
-using ECommons.Automation;
-using ECommons.Configuration;
-using ECommons.Events;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.GeneratedSheets;
-using Messenger.FontControl;
+using Messenger.Configuration;
 using Messenger.Gui.Settings;
 using PInvoke;
 using System.IO;
@@ -25,6 +19,39 @@ namespace Messenger;
 internal static unsafe class Utils
 {
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
+    public const uint EngagementID = 1000000;
+    public const uint SuperchannelID = 1000001;
+
+    public static Sender GetSender(this EngagementInfo e)
+    {
+        return new(e.Name, EngagementID);
+    }
+
+    public static bool HasEngagementWithName(string name)
+    {
+        return C.Engagements.Any(x => x.Name.EqualsIgnoreCase(name));
+    }
+
+    public static bool TryParseWorldWithSubstitutions(string str, out uint worldId)
+    {
+        if(str == "Eng")
+        {
+            worldId = EngagementID;
+            return true;
+        }
+        if(str == "Super")
+        {
+            worldId = SuperchannelID;
+            return true;
+        } 
+        if(ExcelWorldHelper.TryGet(str, out var world))
+        {
+            worldId = world.RowId;
+            return true;
+        }
+        worldId = default;
+        return false;
+    }
 
     public static void OpenOffline(string target)
     {
@@ -324,6 +351,8 @@ internal static unsafe class Utils
 
     public static string GetPlayerName(this Sender value)
     {
+        if(value.HomeWorld == Utils.EngagementID) return $"{value.Name}@Eng";
+        if(value.HomeWorld == Utils.SuperchannelID) return $"{value.Name}@Super";
         return $"{value.Name}@{ExcelWorldHelper.GetName(value.HomeWorld)}";
     }
 

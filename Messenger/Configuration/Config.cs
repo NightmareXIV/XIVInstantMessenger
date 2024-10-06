@@ -1,12 +1,8 @@
-﻿using Dalamud.Configuration;
-using Dalamud.Game.ClientState.Keys;
+﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
-using Dalamud.Interface.FontIdentifier;
-using Dalamud.Interface.GameFonts;
 using ECommons.Configuration;
-using Messenger.FontControl;
 
-namespace Messenger;
+namespace Messenger.Configuration;
 
 public class Config : IEzConfig
 {
@@ -109,4 +105,9 @@ public class Config : IEzConfig
     public Dictionary<string, string> StaticBetterTTVEmojiCache = [];
     public Dictionary<string, string> DynamicBetterTTVEmojiCache = [];
     public List<string> FavoriteEmoji = [];
+
+    public bool EnableEngagements = true;
+    public bool EnableEngagementsContext = true;
+    public bool EngagementPreventsIndi = true;
+    public List<EngagementInfo> Engagements = [];
 }

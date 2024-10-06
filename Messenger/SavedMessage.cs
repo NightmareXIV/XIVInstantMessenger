@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.Text.SeStringHandling.Payloads;
+﻿using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Messenger.Services.MessageParsingService;
 
 namespace Messenger;
@@ -17,6 +18,8 @@ internal class SavedMessage
     public string TranslatedMessage = null;
     public bool IgnoreTranslation = false;
     public bool AwaitingTranslation = false;
+
+    public XivChatType? XivChatType;
 
     internal string GUID = Guid.NewGuid().ToString();
 

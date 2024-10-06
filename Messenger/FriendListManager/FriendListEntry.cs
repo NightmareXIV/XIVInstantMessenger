@@ -3,7 +3,6 @@
  * 
  * */
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 
 namespace Messenger.FriendListManager;

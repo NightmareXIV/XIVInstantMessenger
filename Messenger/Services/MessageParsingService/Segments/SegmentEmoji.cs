@@ -1,13 +1,4 @@
-﻿using ImGuiScene;
-using Messenger.Services.EmojiLoaderService;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Messenger.Services.MessageParsingService.Segments;
+﻿namespace Messenger.Services.MessageParsingService.Segments;
 public class SegmentEmoji : ISegment
 {
     public string Emoji;

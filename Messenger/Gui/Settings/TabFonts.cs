@@ -1,11 +1,6 @@
 ﻿using Dalamud.Interface.Components;
 using Dalamud.Interface.FontIdentifier;
-using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ImGuiFontChooserDialog;
-using Dalamud.Plugin.Ipc.Exceptions;
-using ECommons.Configuration;
-using Lumina.Excel.GeneratedSheets;
-using Messenger.FontControl;
 
 namespace Messenger.Gui.Settings;
 

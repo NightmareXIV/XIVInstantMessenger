@@ -1,10 +1,6 @@
-﻿using Messenger.Services.EmojiLoaderService;
+﻿using Messenger.Gui;
+using Messenger.Services.EmojiLoaderService;
 using Messenger.Services.MessageProcessorService;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Messenger.Services;
 public static class ServiceManager
@@ -16,4 +12,5 @@ public static class ServiceManager
     public static MessageProcessor MessageProcessor { get; private set; }
     public static IPCProvider IPCProvider { get; private set; }
     public static XIMIpcManager XIMIpcManager { get; private set; }
+    public static XIMModalWindow XIMModalWindow { get; private set; }
 }

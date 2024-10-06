@@ -1,20 +1,13 @@
 ﻿using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Game.Text;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dalamud.Game.Text.SeStringHandling;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using Dalamud.Memory;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using ECommons.PartyFunctions;
 using ECommons.EzEventManager;
-using System.Collections.ObjectModel;
+using Messenger.Configuration;
 
 namespace Messenger.Services.MessageProcessorService;
 public unsafe class MessageProcessor : IDisposable
@@ -78,76 +71,48 @@ public unsafe class MessageProcessor : IDisposable
                         LastReceivedMessage = default;
                         return;
                     }
-                    var isOpen = Chats.TryGetValue(s, out var sHist) && sHist.ChatWindow.IsOpen;
-                    P.OpenMessenger(s,
-                        (!Svc.Condition[ConditionFlag.InCombat] || C.AutoReopenAfterCombat) &&
-                        (
-                        s.GetCustomization().AutoOpenTellIncoming && type == XivChatType.TellIncoming
-                        || s.GetCustomization().AutoOpenTellOutgoing && type == XivChatType.TellOutgoing
-                        )
-                        );
+
+                    //process tell
                     SavedMessage addedMessage = new()
                     {
                         IsIncoming = type == XivChatType.TellIncoming,
                         Message = message.ToString(),
                         OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
                         ParsedMessage = new(message),
+                        XivChatType = type,
                     };
-                    foreach (var payload in message.Payloads)
+                    foreach(var payload in message.Payloads)
                     {
-                        if (payload.Type == PayloadType.MapLink)
+                        if(payload.Type == PayloadType.MapLink)
                         {
                             addedMessage.MapPayload = (MapLinkPayload)payload;
                         }
-                        if (payload.Type == PayloadType.Item)
+                        if(payload.Type == PayloadType.Item)
                         {
                             addedMessage.Item = (ItemPayload)payload;
                         }
                     }
-                    Chats[s].Messages.Add(addedMessage);
-                    P.lastHistory = Chats[s];
-                    Chats[s].Scroll();
-                    if (type == XivChatType.TellOutgoing)
+                    var isEngagementOpen = false;
+                    if(C.EnableEngagements)
                     {
-                        if (s.GetCustomization().AutoFocusTellOutgoing && !isOpen)
+                        foreach(var x in C.Engagements.Where(x => x.Enabled && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
                         {
-                            Chats[s].SetFocusAtNextFrame();
-                        }
-                        RecentReceiver = s;
-                    }
-                    else
-                    {
-                        LastReceivedMessage = s;
-                        Chats[s].ChatWindow.Unread = true;
-                        Chats[s].ChatWindow.SetTransparency(true);
-                        if (C.IncomingTellSound != Sounds.None)
-                        {
-                            P.GameFunctions.PlaySound(C.IncomingTellSound);
+                            PluginLog.Debug($"Processing tell for engagement {x.Name}");
+                            x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            isEngagementOpen = ProcessOpenOnTell(x.GetSender(), s, type, ref message, ref isHandled, addedMessage, false);
                         }
                     }
-                    P.Logger.Log(new()
+                    ProcessOpenOnTell(s, s, type, ref message, ref isHandled, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);
+                    if(C.IncomingTellSound != Sounds.None)
                     {
-                        History = Chats[s],
-                        Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {(type == XivChatType.TellIncoming ? s.GetPlayerName() : Svc.ClientState.LocalPlayer?.GetPlayerName())}: {message.ToString()}"
-                    });
-                    if (s.GetCustomization().SuppressDMs)
-                    {
-                        isHandled = true;
+                        P.GameFunctions.PlaySound(C.IncomingTellSound);
                     }
                 }
-                else if (type.GetCommand() != null && C.Channels.Contains(type))
+                else if (type.GetCommand() != null)
                 {
                     //generic
                     var incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
                     Sender genericSender = new(type.ToString(), 0);
-                    var isOpen = Chats.TryGetValue(genericSender, out var sHist) && sHist.ChatWindow.IsOpen;
-                    P.OpenMessenger(genericSender,
-                        (!Svc.Condition[ConditionFlag.InCombat] || C.AutoReopenAfterCombat) &&
-                        (
-                        genericSender.GetCustomization().AutoOpenTellIncoming && incoming
-                        || genericSender.GetCustomization().AutoOpenTellOutgoing && !incoming
-                        )
-                        );
                     SavedMessage addedMessage = new()
                     {
                         IsIncoming = incoming,
@@ -166,40 +131,24 @@ public unsafe class MessageProcessor : IDisposable
                             addedMessage.Item = (ItemPayload)payload;
                         }
                     }
-                    Chats[genericSender].Messages.Add(addedMessage);
-                    Chats[genericSender].Scroll();
-                    if (!incoming)
+                    var isEngagementOpen = false;
+                    if(C.EnableEngagements)
                     {
-                        if (genericSender.GetCustomization().AutoFocusTellOutgoing && !isOpen)
+                        foreach(var x in C.Engagements.Where(x => x.Enabled && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
                         {
-                            Chats[genericSender].SetFocusAtNextFrame();
+                            PluginLog.Debug($"Processing generic message for engagement {x.Name}");
+                            x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            isEngagementOpen = ProcessOpenOnGeneric(x.GetSender(), genericSender, s, incoming, type, ref message, ref isHandled, addedMessage, false);
                         }
                     }
-                    else
+                    if(C.Channels.Contains(type))
                     {
-                        if (!genericSender.GetCustomization().NoUnread)
-                        {
-                            Chats[genericSender].ChatWindow.Unread = incoming;
-                        }
-                        else
-                        {
-                            Chats[genericSender].ChatWindow.Unread = false;
-                        }
-                        Chats[genericSender].ChatWindow.SetTransparency(true);
-                        /*if (C.IncomingTellSound != Sounds.None)
-                        {
-                            gameFunctions.PlaySound(C.IncomingTellSound);
-                        }*/
+                        ProcessOpenOnGeneric(genericSender, genericSender, s, incoming, type, ref message, ref isHandled, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);
                     }
-                    P.Logger.Log(new()
+                    /*if (C.IncomingTellSound != Sounds.None)
                     {
-                        History = Chats[genericSender],
-                        Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {s.GetPlayerName()}: {message.ToString()}"
-                    });
-                    if (genericSender.GetCustomization().SuppressDMs)
-                    {
-                        isHandled = true;
-                    }
+                        gameFunctions.PlaySound(C.IncomingTellSound);
+                    }*/
                 }
                 new TickScheduler(UpdateCIDList);
             }
@@ -208,6 +157,90 @@ public unsafe class MessageProcessor : IDisposable
         {
             PluginLog.Error($"{e.Message}\n{e.StackTrace ?? ""}");
         }
+    }
+
+    internal bool ProcessOpenOnGeneric(Sender messageHistoryOwner, Sender genericSender, Sender messageSender, bool incoming, XivChatType type, ref SeString message, ref bool isHandled, SavedMessage addedMessage, bool forceHide)
+    {
+        var isOpen = Chats.TryGetValue(messageHistoryOwner, out var sHist) && sHist.ChatWindow.IsOpen;
+        P.OpenMessenger(messageHistoryOwner,
+            !forceHide &&
+            (!Svc.Condition[ConditionFlag.InCombat] || C.AutoReopenAfterCombat) &&
+            (
+            messageHistoryOwner.GetCustomization().AutoOpenTellIncoming && incoming
+            || messageHistoryOwner.GetCustomization().AutoOpenTellOutgoing && !incoming
+            )
+            );
+        Chats[messageHistoryOwner].Messages.Add(addedMessage);
+        Chats[messageHistoryOwner].Scroll();
+        if(!incoming)
+        {
+            if(messageHistoryOwner.GetCustomization().AutoFocusTellOutgoing && !isOpen)
+            {
+                Chats[messageHistoryOwner].SetFocusAtNextFrame();
+            }
+        }
+        else
+        {
+            if(!messageHistoryOwner.GetCustomization().NoUnread)
+            {
+                Chats[messageHistoryOwner].ChatWindow.Unread = incoming;
+            }
+            else
+            {
+                Chats[messageHistoryOwner].ChatWindow.Unread = false;
+            }
+            Chats[messageHistoryOwner].ChatWindow.SetTransparency(true);
+        }
+        P.Logger.Log(new()
+        {
+            History = Chats[messageHistoryOwner],
+            Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {messageSender.GetPlayerName()}: {message.ToString()}"
+        });
+        if(messageHistoryOwner.GetCustomization().SuppressDMs)
+        {
+            isHandled = true;
+        }
+        return true;
+    }
+
+    internal bool ProcessOpenOnTell(Sender messageHistoryOwner, Sender messageSender, XivChatType type, ref SeString message, ref bool isHandled, SavedMessage addedMessage, bool forceHide)
+    {
+        var isOpen = Chats.TryGetValue(messageHistoryOwner, out var sHist) && sHist.ChatWindow.IsOpen;
+        P.OpenMessenger(messageHistoryOwner,
+            !forceHide &&
+            (!Svc.Condition[ConditionFlag.InCombat] || C.AutoReopenAfterCombat) &&
+            (
+            messageHistoryOwner.GetCustomization().AutoOpenTellIncoming && type == XivChatType.TellIncoming
+            || messageHistoryOwner.GetCustomization().AutoOpenTellOutgoing && type == XivChatType.TellOutgoing
+            )
+            );
+        Chats[messageHistoryOwner].Messages.Add(addedMessage);
+        P.lastHistory = Chats[messageHistoryOwner];
+        Chats[messageHistoryOwner].Scroll();
+        if(type == XivChatType.TellOutgoing)
+        {
+            if(messageHistoryOwner.GetCustomization().AutoFocusTellOutgoing && !isOpen)
+            {
+                Chats[messageHistoryOwner].SetFocusAtNextFrame();
+            }
+            RecentReceiver = messageHistoryOwner;
+        }
+        else
+        {
+            LastReceivedMessage = messageSender;
+            Chats[messageHistoryOwner].ChatWindow.Unread = true;
+            Chats[messageHistoryOwner].ChatWindow.SetTransparency(true);
+        }
+        P.Logger.Log(new()
+        {
+            History = Chats[messageHistoryOwner],
+            Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {(type == XivChatType.TellIncoming ? messageSender.GetPlayerName() : Svc.ClientState.LocalPlayer?.GetPlayerName())}: {message.ToString()}"
+        });
+        if(messageHistoryOwner.GetCustomization().SuppressDMs)
+        {
+            isHandled = true;
+        }
+        return true;
     }
 
     public List<LogMessage> RetrieveCIDsFromLog()

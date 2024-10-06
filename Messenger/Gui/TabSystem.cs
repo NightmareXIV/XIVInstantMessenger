@@ -1,7 +1,4 @@
-﻿using Messenger.FontControl;
-using System.Xml.Linq;
-
-namespace Messenger.Gui;
+﻿namespace Messenger.Gui;
 
 internal class TabSystem : Window
 {

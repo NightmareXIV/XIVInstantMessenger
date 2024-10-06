@@ -1,4 +1,5 @@
 ﻿using ECommons.GameHelpers;
+using Messenger.Configuration;
 using Messenger.Gui;
 using System.IO;
 using System.Text.RegularExpressions;

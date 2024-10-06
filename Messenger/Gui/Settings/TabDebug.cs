@@ -2,11 +2,9 @@
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
-using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using Messenger.FontControl;
+using Messenger.Configuration;
 using Messenger.FriendListManager;
-using NightmareUI;
 using NightmareUI.ImGuiElements;
 using System.Threading;
 

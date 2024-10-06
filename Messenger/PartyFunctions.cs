@@ -1,8 +1,4 @@
-﻿using Dalamud.Hooking;
-using Dalamud.Memory;
-using Dalamud.Utility.Signatures;
-using ECommons.ExcelServices;
-using ECommons.GameHelpers;
+﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 
 namespace Messenger;

@@ -2,13 +2,7 @@
 using ECommons.Interop;
 using Messenger.Services.EmojiLoaderService;
 using PInvoke;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Messenger.Gui;
 public unsafe partial class PseudoMultilineInput

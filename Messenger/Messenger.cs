@@ -1,33 +1,20 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Interface.GameFonts;
-using Dalamud.Interface.ManagedFontAtlas;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.Automation;
 using ECommons.Configuration;
 using ECommons.Events;
-using ECommons.ExcelServices;
 using ECommons.Funding;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Singletons;
 using ECommons.Throttlers;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
+using Messenger.Configuration;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
 using Messenger.Services;
-using SharpDX.DXGI;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace Messenger;
 
@@ -63,10 +50,10 @@ public unsafe class Messenger : IDalamudPlugin
         {
             EzConfig.Migrate<Config>();
             Config = EzConfig.Init<Config>();
-            SingletonServiceManager.Initialize(typeof(S));
-            GameFunctions = new();
             WindowSystemMain = new();
             WindowSystemChat = new();
+            SingletonServiceManager.Initialize(typeof(S));
+            GameFunctions = new();
             GuiSettings = new();
             WindowSystemMain.AddWindow(GuiSettings);
             Svc.PluginInterface.UiBuilder.Draw += WindowSystemMain.Draw;

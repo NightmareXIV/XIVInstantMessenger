@@ -1,17 +1,5 @@
-﻿using Dalamud.Hooking;
-using Dalamud.Memory;
-using Dalamud.Utility.Signatures;
-using ECommons.ExcelServices;
+﻿using Dalamud.Memory;
 using ECommons.EzHookManager;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.System.String;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Messenger.Services;
 public unsafe class Memory : IDisposable
