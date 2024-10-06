@@ -69,7 +69,7 @@ public unsafe class Messenger : IDalamudPlugin
             WindowSystemMain.AddWindow(QuickButton);
             Svc.Framework.Update += Tick;
             TargetCommands = Svc.Data.GetExcelSheet<TextCommand>()
-                .Where(x => (x.Unknown0 == 2 && x.Unknown1 == 1 && x.Unknown2 == 2) || x.Command.ToString() == "/trade")
+                .Where(x => (x.Unknown0 == 2 && x.Unknown1 == 1 && x.Unknown2 == 2 && x.RowId != 401) || x.Command.ToString() == "/trade")
                 .SelectMulti(x => x.Command.ToString(), x => x.Alias.ToString(),
                     x => x.ShortCommand.ToString(), x => x.ShortAlias.ToString())
                 .Where(x => !string.IsNullOrEmpty(x)).ToArray();

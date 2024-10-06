@@ -20,6 +20,6 @@ public class OpenCharaCardButton : ChatWindowTitleButton
 
     public override bool ShouldDisplay()
     {
-        return C.ButtonCharaCard;
+        return !MessageHistory.IsEngagement && C.ButtonCharaCard;
     }
 }

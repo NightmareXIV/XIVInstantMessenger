@@ -3,6 +3,7 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using ECommons.Automation;
 using Messenger.Configuration;
+using Messenger.Gui.Settings;
 using Messenger.Gui.TitleButtons;
 
 namespace Messenger.Gui;
@@ -211,7 +212,20 @@ public unsafe class ChatWindow : Window
             BringToFront = false;
             CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
         }
-        var subject = MessageHistory.HistoryPlayer.IsGenericChannel() ? Enum.GetValues<XivChatType>().First(x => x.ToString() == MessageHistory.HistoryPlayer.Name).GetCommand() : MessageHistory.HistoryPlayer.GetPlayerName();
+        var subject = MessageHistory.HistoryPlayer.IsGenericChannel() ? Utils.GetGenericCommand(MessageHistory.HistoryPlayer) : MessageHistory.HistoryPlayer.GetPlayerName();
+        string tellTarget = null;
+        if(MessageHistory.IsEngagement)
+        {
+            var eng = MessageHistory.HistoryPlayer.GetEngagementInfo();
+            if(eng != null && eng.DefaultTarget != null)
+            {
+                tellTarget = eng.DefaultTarget.Value.GetPlayerName();
+            }
+        }
+        else
+        {
+            tellTarget = subject;
+        }
         var subjectNoWorld = MessageHistory.HistoryPlayer.GetPlayerName().Split("@")[0];
         var me = Svc.ClientState.LocalPlayer?.Name.ToString().Split("@")[0] ?? "Me";
         ImGui.BeginChild($"##ChatChild{subject}", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - fieldHeight));
@@ -270,12 +284,18 @@ public unsafe class ChatWindow : Window
                     var subjectColor = message.IsIncoming ? Cust.ColorFromTitle : Cust.ColorToTitle;
                     ImGuiEx.Text(Cust.ColorGeneric, $"{timestamp} ");
                     ImGui.SameLine(0, 0);
-                    ImGuiEx.Text(messageColor, $"[");
-                    ImGui.SameLine(0, 0);
+                    if(message.XivChatType != XivChatType.CustomEmote)
+                    {
+                        ImGuiEx.Text(messageColor, $"[");
+                        ImGui.SameLine(0, 0);
+                    }
                     ImGuiEx.Text(subjectColor, $"{message.OverrideName?.Split("@")[0] ?? (message.IsIncoming ? subjectNoWorld : me)}");
-                    ImGui.SameLine(0, 0);
-                    ImGuiEx.Text(messageColor, $"] ");
-                    ImGui.SameLine(0, 0);
+                    ImGui.SameLine(0, 0); 
+                    if(message.XivChatType != XivChatType.CustomEmote)
+                    {
+                        ImGuiEx.Text(messageColor, $"] ");
+                        ImGui.SameLine(0, 0);
+                    }
                     ImGui.PushStyleColor(ImGuiCol.Text, messageColor);
                     message.Draw("", "", () => PostMessageFunctionsShared(message));
                     PostMessageFunctions(message);
@@ -341,8 +361,8 @@ public unsafe class ChatWindow : Window
         Input.Draw();
         if (Input.EnterWasPressed())
         {
-            SendMessage(subject, MessageHistory.HistoryPlayer.IsGenericChannel());
-            if (Input.IsMultiline)
+            SendMessage(tellTarget);
+            if (tellTarget != null && Input.IsMultiline)
             {
                 ImGui.SetWindowFocus(null);
                 ImGui.SetWindowFocus(WindowName);
@@ -396,7 +416,7 @@ public unsafe class ChatWindow : Window
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command"))
                 {
-                    SendMessage(subject, MessageHistory.HistoryPlayer.IsGenericChannel());
+                    SendMessage(tellTarget);
                 }
                 ImGuiEx.Tooltip("Execute command");
             }
@@ -404,7 +424,7 @@ public unsafe class ChatWindow : Window
             {
                 if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send"))
                 {
-                    SendMessage(subject, MessageHistory.HistoryPlayer.IsGenericChannel());
+                    SendMessage(tellTarget);
                 }
                 ImGuiEx.Tooltip("Send message");
             }
@@ -419,6 +439,135 @@ public unsafe class ChatWindow : Window
         ImGui.PopStyleColor();
         fieldHeight = ImGui.GetCursorPosY() - cursor;
         ImGui.SetWindowFontScale(1);
+
+        if(MessageHistory.IsEngagement)
+        {
+            ImGui.PushFont(UiBuilder.DefaultFont);
+            try
+            {
+                var engagementInfo = C.Engagements.FirstOrDefault(x => x.Name == MessageHistory.HistoryPlayer.Name);
+                if(engagementInfo != null)
+                {
+                    ImGuiEx.LineCentered($"Engagement{this.MessageHistory.HistoryPlayer.GetPlayerName()}", () =>
+                    {
+                        ImGui.Checkbox("##enableEng", ref engagementInfo.Enabled);
+                        ImGui.SameLine();
+                        ImGui.SetNextItemWidth(100f);
+                        if(ImGui.BeginCombo("##ctrl", $"{engagementInfo.Participants.Count} participants", ImGuiComboFlags.HeightLarge))
+                        {
+                            foreach(var x in engagementInfo.Participants)
+                            {
+                                ImGuiEx.TextV($"{x.GetPlayerName()}");
+                                ImGui.SameLine();
+                                if(ImGuiEx.IconButton(FontAwesomeIcon.Trash, enabled: ImGuiEx.Ctrl))
+                                {
+                                    new TickScheduler(() => engagementInfo.Participants.Remove(x));
+                                }
+                                ImGuiEx.Tooltip($"Hold CTRL and click to remove member from engagement");
+                            }
+                            ImGui.EndCombo();
+                        }
+                        ImGui.SameLine();
+                        if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Plus, "Target", Svc.Targets.Target is IPlayerCharacter pc && pc.ObjectIndex != 0 && !engagementInfo.Participants.Contains(new(pc.Name.ToString(), pc.HomeWorld.Id))))
+                        {
+                            engagementInfo.Participants.Add(new(Svc.Targets.Target.Name.ToString(), ((IPlayerCharacter)Svc.Targets.Target).HomeWorld.Id));
+                        }
+                        ImGui.SameLine();
+                        ImGui.SetNextItemWidth(100f);
+                        string targetName;
+                        if(engagementInfo.DefaultTarget == null)
+                        {
+                            targetName = "No default receiver";
+                        }
+                        else
+                        {
+                            targetName = engagementInfo.DefaultTarget.Value.GetChannelName();
+                            if(!engagementInfo.DefaultTarget.Value.IsGenericChannel() && !engagementInfo.Participants.Contains(engagementInfo.DefaultTarget.Value))
+                            {
+                                engagementInfo.DefaultTarget = null;
+                            }
+                        }
+                        if(ImGui.BeginCombo("##engTarget", $"{targetName}", ImGuiComboFlags.HeightRegular))
+                        {
+                            ImGuiEx.Text($"Select default target for sending messages via enter button.");
+                            if(ImGui.Selectable("None", engagementInfo.DefaultTarget == null))
+                            {
+                                engagementInfo.DefaultTarget = null;
+                            }
+                            ImGuiEx.EzTabBar("##seldeftar",
+                                ("Players", () =>
+                                {
+                                    foreach(var x in engagementInfo.Participants)
+                                    {
+                                        if(ImGui.Selectable(x.GetPlayerName(), x == engagementInfo.DefaultTarget)) engagementInfo.DefaultTarget = x;
+                                    }
+                                }, null, false),
+                                ("Generic channels", () =>
+                                {
+                                    for(int i = 1; i < TabIndividual.Types.Length; i++)
+                                    {
+                                        var x = new Sender(TabIndividual.Types[i].ToString(), 0);
+                                        if(ImGui.Selectable(x.GetChannelName(), x == engagementInfo.DefaultTarget))
+                                        {
+                                            engagementInfo.DefaultTarget = x;
+                                        }
+                                    }
+                                }, null, false)
+                                );
+                            ImGui.EndCombo();
+                        }
+                    });
+                }
+                if(ImGui.BeginPopup("SelectSendSubject"))
+                {
+                    if(ImGui.BeginMenu("- Players -"))
+                    {
+                        foreach(var x in engagementInfo.Participants)
+                        {
+                            if(ImGui.Selectable(x.GetPlayerName()))
+                            {
+                                SendMessage(x.GetChannelName(), false);
+                            }
+                        }
+                        ImGui.EndMenu();
+                    }
+                    if(ImGui.BeginMenu("- Channels -"))
+                    {
+                        for(int i = 1; i < TabIndividual.Types.Length; i++)
+                        {
+                            if(TabIndividual.Types[i].EqualsAny(XivChatType.Say, XivChatType.CustomEmote)) continue;
+                            var x = new Sender(TabIndividual.Types[i].ToString(), 0);
+                            if(ImGui.Selectable(x.GetChannelName()))
+                            {
+                                SendMessage(Utils.GetGenericCommand(x), true);
+                            }
+                        }
+                        ImGui.EndMenu();
+                    }
+                    ImGui.Separator();
+
+                    for(int i = 1; i < TabIndividual.Types.Length; i++)
+                    {
+                        if(!TabIndividual.Types[i].EqualsAny(XivChatType.Say, XivChatType.CustomEmote)) continue;
+                        var x = new Sender(TabIndividual.Types[i].ToString(), 0);
+                        if(ImGui.Selectable(x.GetChannelName()))
+                        {
+                            SendMessage(Utils.GetGenericCommand(x), true);
+                        }
+                    }
+                    ImGui.EndPopup();
+                }
+            }
+            catch(Exception e)
+            {
+                e.Log();
+            }
+
+            
+
+            ImGui.PopFont();
+            fieldHeight = ImGui.GetCursorPosY() - cursor;
+        }
     }
 
     private void PostMessageFunctionsShared(SavedMessage x)
@@ -515,10 +664,23 @@ public unsafe class ChatWindow : Window
         }
     }
 
-    private void SendMessage(string subject, bool generic)
+    private void SendMessage(string subject, bool? generic = null)
     {
-        var bytes = Utils.GetLength(subject, Input.SinglelineText);
         var trimmed = Input.SinglelineText.Trim();
+        if(subject == null && !(trimmed.StartsWith('/') && C.CommandPassthrough))
+        {
+            ImGui.OpenPopup("SelectSendSubject");
+            return;
+        }
+        if(MessageHistory.IsEngagement)
+        {
+            generic ??= MessageHistory.HistoryPlayer.GetEngagementInfo().DefaultTarget.Value.IsGenericChannel();
+        }
+        else
+        {
+            generic ??= MessageHistory.HistoryPlayer.IsGenericChannel();
+        }
+        var bytes = Utils.GetLength(subject, Input.SinglelineText);
         if (trimmed.Length == 0)
         {
             //Notify.Error("Message is empty!");
@@ -527,9 +689,9 @@ public unsafe class ChatWindow : Window
         {
             Notify.Error("Message is too long!");
         }
-        else if (trimmed.StartsWith("/") && C.CommandPassthrough)
+        else if (trimmed.StartsWith('/') && C.CommandPassthrough)
         {
-            if (!generic && C.AutoTarget &&
+            if (!generic.Value && C.AutoTarget &&
             (P.TargetCommands.Any(x => Input.SinglelineText.Equals(x, StringComparison.OrdinalIgnoreCase) || Input.SinglelineText.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
             && Svc.Objects.TryGetFirst(x => x is IPlayerCharacter pc && pc.GetPlayerName() == subject && x.IsTargetable, out var obj))
             {
@@ -546,7 +708,7 @@ public unsafe class ChatWindow : Window
         else
         {
             PluginLog.Verbose($"Begin send message to {subject} {generic}: {trimmed}");
-            var error = P.SendDirectMessage(subject, trimmed, generic);
+            var error = P.SendDirectMessage(subject, trimmed, generic.Value);
             if (error == null)
             {
                 Input.SinglelineText = "";

@@ -95,7 +95,7 @@ public unsafe class MessageProcessor : IDisposable
                     var isEngagementOpen = false;
                     if(C.EnableEngagements)
                     {
-                        foreach(var x in C.Engagements.Where(x => x.Enabled && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
+                        foreach(var x in C.Engagements.Where(x => x.Enabled && x.Participants.Contains(s)))
                         {
                             PluginLog.Debug($"Processing tell for engagement {x.Name}");
                             x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -119,6 +119,7 @@ public unsafe class MessageProcessor : IDisposable
                         Message = message.ToString(),
                         OverrideName = s.GetPlayerName(),
                         ParsedMessage = new(message),
+                        XivChatType = type,
                     };
                     foreach (var payload in message.Payloads)
                     {

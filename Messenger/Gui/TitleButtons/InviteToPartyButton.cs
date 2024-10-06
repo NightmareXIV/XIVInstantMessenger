@@ -84,7 +84,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public override bool ShouldDisplay()
     {
-        return MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonInvite && !MessageHistory.HistoryPlayer.IsGenericChannel();
+        return !MessageHistory.IsEngagement && MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonInvite && !MessageHistory.HistoryPlayer.IsGenericChannel();
     }
 
     public void DrawPopup()

@@ -11,7 +11,7 @@ public unsafe class XIMModalWindow : EzOverlayWindow
     {
         this.IsOpen = false;
         this.Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse;
-        this.Flags |= ~ImGuiWindowFlags.NoFocusOnAppearing;
+        this.Flags &= ~ImGuiWindowFlags.NoFocusOnAppearing;
         this.RespectCloseHotkey = false;
         Modal = new(this);
         P.WindowSystemMain.AddWindow(Modal);
@@ -30,6 +30,7 @@ public unsafe class XIMModalWindow : EzOverlayWindow
     public override void DrawAction()
     {
         WindowDrawAction?.Invoke();
+        //PluginLog.Information($"Is drawing / {this.WindowSize} / {this.Offset}");
     }
 
     public override void OnClose()

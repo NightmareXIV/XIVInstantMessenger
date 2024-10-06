@@ -8,4 +8,5 @@ public class EngagementInfo
     public ChannelCustomizationNullable ChannelCustomization = new();
     public bool OpenOnGenericOutgoing = false;
     public long LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+    public Sender? DefaultTarget = null;
 }

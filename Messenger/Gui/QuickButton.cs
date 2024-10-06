@@ -1,5 +1,6 @@
 ﻿using FFXIVClientStructs.FFXIV.Component.GUI;
 using Messenger.Configuration;
+using static FFXIVClientStructs.FFXIV.Common.Component.BGCollision.Collider.Delegates;
 
 namespace Messenger.Gui;
 
@@ -102,8 +103,7 @@ internal unsafe class QuickButton : Window
                 }
                 if (toRem != null)
                 {
-                    P.WindowSystemChat.RemoveWindow(S.MessageProcessor.Chats[toRem.Value].ChatWindow);
-                    S.MessageProcessor.Chats.Remove(toRem.Value);
+                    Utils.Unload(toRem.Value);
                     toRem = null;
                 }
             }

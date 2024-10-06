@@ -22,6 +22,6 @@ public class AddFriendButton : ChatWindowTitleButton
 
     public override bool ShouldDisplay()
     {
-        return MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonFriend && !MessageHistory.HistoryPlayer.IsGenericChannel() && !P.IsFriend(MessageHistory.HistoryPlayer);
+        return !MessageHistory.IsEngagement && MessageHistory.HistoryPlayer.ToString() != Player.NameWithWorld && C.ButtonFriend && !MessageHistory.HistoryPlayer.IsGenericChannel() && !P.IsFriend(MessageHistory.HistoryPlayer);
     }
 }

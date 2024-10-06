@@ -22,6 +22,30 @@ internal static unsafe class Utils
     public const uint EngagementID = 1000000;
     public const uint SuperchannelID = 1000001;
 
+    public static string GetGenericCommand(Sender sender)
+    {
+        return Enum.GetValues<XivChatType>().First(x => x.ToString() == sender.Name).GetCommand();
+    }
+
+    public static EngagementInfo GetEngagementInfo(this Sender s)
+    {
+        if(s.HomeWorld != EngagementID) return null;
+        return C.Engagements.FirstOrDefault(x => x.Name == s.Name);
+    }
+
+    public static void Unload(Sender toRem)
+    {
+        try
+        {
+            P.WindowSystemChat.RemoveWindow(S.MessageProcessor.Chats[toRem].ChatWindow);
+            S.MessageProcessor.Chats.Remove(toRem);
+        }
+        catch(Exception e)
+        {
+            e.Log();
+        }
+    }
+
     public static Sender GetSender(this EngagementInfo e)
     {
         return new(e.Name, EngagementID);

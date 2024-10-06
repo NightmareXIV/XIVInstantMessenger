@@ -87,8 +87,9 @@ public static class TabEngagement
                 if(ImGuiEx.IconButton(FontAwesomeIcon.Trash, enabled: ImGuiEx.Ctrl))
                 {
                     new TickScheduler(() => C.Engagements.Remove(e) );
+                    Utils.Unload(e.GetSender());
                 }
-                ImGuiEx.Tooltip($"Removing an engagement will not cause it's log to be also deleted. If you will create an engagement with same name, log entries from it's log will be loaded.");
+                ImGuiEx.Tooltip($"Removing an engagement will not cause it's log to be also deleted. If you will create an engagement with same name, log entries from it's log will be loaded. Hold CTRL and click to delete.");
                 ImGui.PopID();
             }
             

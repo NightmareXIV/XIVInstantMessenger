@@ -17,6 +17,7 @@ public partial class MessageHistory
     internal volatile bool LogLoaded = false;
     internal string LogFile;
     private int? SetFocus = null;
+    internal bool IsEngagement => HistoryPlayer.HomeWorld == Utils.EngagementID;
 
     internal void SetFocusAtNextFrame() => SetFocus = ImGui.GetFrameCount() + 1;
     internal void UnsetFocus() => SetFocus = null;
