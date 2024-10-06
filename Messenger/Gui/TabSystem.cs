@@ -93,7 +93,7 @@ internal class TabSystem : Window
         }
         if (ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
         {
-            foreach (var w in Windows)
+            foreach (var w in Windows.ToArray())
             {
                 {
                     void Associate()

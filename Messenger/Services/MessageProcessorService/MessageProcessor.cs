@@ -95,7 +95,7 @@ public unsafe class MessageProcessor : IDisposable
                     var isEngagementOpen = false;
                     if(C.EnableEngagements)
                     {
-                        foreach(var x in C.Engagements.Where(x => x.Enabled && x.Participants.Contains(s)))
+                        foreach(var x in C.Engagements.Where(x => x.IsActive && x.Participants.Contains(s)))
                         {
                             PluginLog.Debug($"Processing tell for engagement {x.Name}");
                             x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -135,7 +135,7 @@ public unsafe class MessageProcessor : IDisposable
                     var isEngagementOpen = false;
                     if(C.EnableEngagements)
                     {
-                        foreach(var x in C.Engagements.Where(x => x.Enabled && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
+                        foreach(var x in C.Engagements.Where(x => x.IsActive && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
                         {
                             PluginLog.Debug($"Processing generic message for engagement {x.Name}");
                             x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();

@@ -24,7 +24,11 @@ internal static unsafe class Utils
 
     public static string GetGenericCommand(Sender sender)
     {
-        return Enum.GetValues<XivChatType>().First(x => x.ToString() == sender.Name).GetCommand();
+        if(Enum.GetValues<XivChatType>().TryGetFirst(x => x.ToString() == sender.Name, out var s))
+        {
+            return s.GetCommand();
+        }
+        return null; 
     }
 
     public static EngagementInfo GetEngagementInfo(this Sender s)

@@ -219,7 +219,14 @@ public unsafe class ChatWindow : Window
             var eng = MessageHistory.HistoryPlayer.GetEngagementInfo();
             if(eng != null && eng.DefaultTarget != null)
             {
-                tellTarget = eng.DefaultTarget.Value.GetPlayerName();
+                if(eng.DefaultTarget.Value.IsGenericChannel())
+                {
+                    tellTarget = Utils.GetGenericCommand(eng.DefaultTarget.Value);
+                }
+                else
+                {
+                    tellTarget = eng.DefaultTarget.Value.GetPlayerName();
+                }
             }
         }
         else
@@ -361,8 +368,8 @@ public unsafe class ChatWindow : Window
         Input.Draw();
         if (Input.EnterWasPressed())
         {
-            SendMessage(tellTarget);
-            if (tellTarget != null && Input.IsMultiline)
+            var wasSent = SendMessage(tellTarget);
+            if (wasSent && Input.IsMultiline)
             {
                 ImGui.SetWindowFocus(null);
                 ImGui.SetWindowFocus(WindowName);
@@ -664,17 +671,18 @@ public unsafe class ChatWindow : Window
         }
     }
 
-    private void SendMessage(string subject, bool? generic = null)
+    private bool SendMessage(string subject, bool? generic = null)
     {
+        var ret = false;
         var trimmed = Input.SinglelineText.Trim();
         if(subject == null && !(trimmed.StartsWith('/') && C.CommandPassthrough))
         {
             ImGui.OpenPopup("SelectSendSubject");
-            return;
+            return ret;
         }
         if(MessageHistory.IsEngagement)
         {
-            generic ??= MessageHistory.HistoryPlayer.GetEngagementInfo().DefaultTarget.Value.IsGenericChannel();
+            generic ??= MessageHistory.HistoryPlayer.GetEngagementInfo().DefaultTarget?.IsGenericChannel() ?? false;
         }
         else
         {
@@ -698,10 +706,12 @@ public unsafe class ChatWindow : Window
                 Svc.Targets.SetTarget(obj);
                 //Notify.Info($"Targeting {subject}");
                 new TickScheduler(delegate { Chat.Instance.SendMessage(trimmed); }, 100);
+                ret = true;
             }
             else
             {
                 Chat.Instance.SendMessage(trimmed);
+                ret = true;
             }
             Input.SinglelineText = "";
         }
@@ -711,6 +721,7 @@ public unsafe class ChatWindow : Window
             var error = P.SendDirectMessage(subject, trimmed, generic.Value);
             if (error == null)
             {
+                ret = true;
                 Input.SinglelineText = "";
             }
             else
@@ -722,5 +733,6 @@ public unsafe class ChatWindow : Window
         {
             MessageHistory.SetFocusAtNextFrame();
         }
+        return ret;
     }
 }

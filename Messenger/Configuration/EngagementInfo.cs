@@ -9,4 +9,5 @@ public class EngagementInfo
     public bool OpenOnGenericOutgoing = false;
     public long LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     public Sender? DefaultTarget = null;
+    internal bool IsActive => Enabled && Participants.Count > 0;
 }
