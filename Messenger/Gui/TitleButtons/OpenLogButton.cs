@@ -17,7 +17,7 @@ public class OpenLogButton : ChatWindowTitleButton
 
     public override void OnLeftClick()
     {
-        if (File.Exists(MessageHistory.LogFile))
+        if(File.Exists(MessageHistory.LogFile))
         {
             ShellStart(MessageHistory.LogFile);
         }

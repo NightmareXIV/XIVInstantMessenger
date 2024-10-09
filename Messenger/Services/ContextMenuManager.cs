@@ -39,7 +39,7 @@ public class ContextMenuManager : IDisposable
 
     private void OpenContextMenu(IMenuOpenedArgs args)
     {
-        if (C.ContextMenuEnable && ValidAddons.Contains(args.AddonName) && args.Target is MenuTargetDefault def && def.TargetName != null && ExcelWorldHelper.Get(def.TargetHomeWorld.Id, true) != null)
+        if(C.ContextMenuEnable && ValidAddons.Contains(args.AddonName) && args.Target is MenuTargetDefault def && def.TargetName != null && ExcelWorldHelper.Get(def.TargetHomeWorld.Id, true) != null)
         {
             Sender sender = new(def.TargetName, def.TargetHomeWorld.Id);
             args.AddMenuItem(new()
@@ -49,7 +49,7 @@ public class ContextMenuManager : IDisposable
                     P.OpenMessenger(sender);
                     S.MessageProcessor.Chats[sender].SetFocusAtNextFrame();
                     S.MessageProcessor.Chats[sender].Scroll();
-                    if (Svc.Condition[ConditionFlag.InCombat])
+                    if(Svc.Condition[ConditionFlag.InCombat])
                     {
                         S.MessageProcessor.Chats[sender].ChatWindow.KeepInCombat = true;
                         Notify.Info("This chat will not be hidden in combat");

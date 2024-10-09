@@ -14,9 +14,9 @@ internal class TabFonts
         Changed |= ImGui.Checkbox($"Use Custom Font", ref C.UseCustomFont);
         ImGui.Checkbox("Increase spacing between sender information and message", ref C.IncreaseSpacing);
         ImGui.Checkbox($"Do not use custom font for tabs", ref C.FontNoTabs);
-        if (C.UseCustomFont)
+        if(C.UseCustomFont)
         {
-            if (P.FontManager.FontConfiguration.Font != null)
+            if(P.FontManager.FontConfiguration.Font != null)
             {
                 ImGuiEx.Text($"Currently selected: \n{P.FontManager.FontConfiguration.Font}");
             }
@@ -24,15 +24,15 @@ internal class TabFonts
             {
                 ImGuiEx.Text(EColor.RedBright, "No font currently selected.\nDefault font will be used.");
             }
-            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Font, "Select font..."))
+            if(ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Font, "Select font..."))
             {
                 DisplayFontSelector();
             }
         }
         ImGui.Separator();
         var col = Changed;
-        if (col) ImGui.PushStyleColor(ImGuiCol.Text, GradientColor.Get(ImGuiColors.DalamudYellow, ImGuiColors.DalamudRed));
-        if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Check, "Apply Settings"))
+        if(col) ImGui.PushStyleColor(ImGuiCol.Text, GradientColor.Get(ImGuiColors.DalamudYellow, ImGuiColors.DalamudRed));
+        if(ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Check, "Apply Settings"))
         {
             _ = new TickScheduler(() =>
             {
@@ -41,7 +41,7 @@ internal class TabFonts
             });
             Changed = false;
         }
-        if (col) ImGui.PopStyleColor();
+        if(col) ImGui.PopStyleColor();
     }
 
     private void DisplayFontSelector()

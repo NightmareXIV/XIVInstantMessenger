@@ -15,11 +15,11 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public override void OnLeftClick()
     {
-        if (Svc.Objects.Any(c => c is IPlayerCharacter pc
+        if(Svc.Objects.Any(c => c is IPlayerCharacter pc
             && pc.HomeWorld.Id == MessageHistory.HistoryPlayer.HomeWorld && pc.Name.ToString() == MessageHistory.HistoryPlayer.Name))
         {
             var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
-            if (result != null)
+            if(result != null)
             {
                 Notify.Error(result);
             }
@@ -31,17 +31,17 @@ public class InviteToPartyButton : ChatWindowTitleButton
         else
         {
             var flSuccess = false;
-            foreach (var x in FriendList.Get())
+            foreach(var x in FriendList.Get())
             {
-                if (flSuccess) break;
-                if (x.Name.ToString() == MessageHistory.HistoryPlayer.Name && x.HomeWorld == MessageHistory.HistoryPlayer.HomeWorld)
+                if(flSuccess) break;
+                if(x.Name.ToString() == MessageHistory.HistoryPlayer.Name && x.HomeWorld == MessageHistory.HistoryPlayer.HomeWorld)
                 {
                     flSuccess = true;
-                    if (x.IsOnline)
+                    if(x.IsOnline)
                     {
                         var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x.CurrentWorld;
                         var result = P.InviteToParty(MessageHistory.HistoryPlayer, sameWorld, x.ContentId);
-                        if (result != null)
+                        if(result != null)
                         {
                             Notify.Error(result);
                         }
@@ -50,10 +50,10 @@ public class InviteToPartyButton : ChatWindowTitleButton
                             Notify.Info($"Inviting through FrieldList ({(sameWorld ? "same world" : "different world")})");
                         }
                     }
-                    else if (S.MessageProcessor.TryFindCID(MessageHistory.HistoryPlayer, out _))
+                    else if(S.MessageProcessor.TryFindCID(MessageHistory.HistoryPlayer, out _))
                     {
                         var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
-                        if (result != null)
+                        if(result != null)
                         {
                             Notify.Error(result);
                         }
@@ -68,7 +68,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
                     }
                 }
             }
-            if (!flSuccess)
+            if(!flSuccess)
             {
                 {
                     RequestOpenPopup = true;
@@ -89,21 +89,21 @@ public class InviteToPartyButton : ChatWindowTitleButton
 
     public void DrawPopup()
     {
-        if (RequestOpenPopup)
+        if(RequestOpenPopup)
         {
             RequestOpenPopup = false;
             ImGui.OpenPopup($"###Invite{MessageHistory.HistoryPlayer}");
         }
-        if (ImGui.BeginPopup($"###Invite{MessageHistory.HistoryPlayer}"))
+        if(ImGui.BeginPopup($"###Invite{MessageHistory.HistoryPlayer}"))
         {
             ImGuiEx.Text($"Unable to determine {MessageHistory.HistoryPlayer}'s current world.");
-            if (ImGui.Selectable("Same world"))
+            if(ImGui.Selectable("Same world"))
             {
                 P.InviteToParty(MessageHistory.HistoryPlayer, true);
             }
-            if (ImGui.Selectable("Different world"))
+            if(ImGui.Selectable("Different world"))
             {
-                if (P.IsFriend(MessageHistory.HistoryPlayer))
+                if(P.IsFriend(MessageHistory.HistoryPlayer))
                 {
                     P.InviteToParty(MessageHistory.HistoryPlayer, false);
                 }

@@ -32,7 +32,7 @@ internal class TabSystem : Window
 
     public override void OnClose()
     {
-        foreach (var w in Windows)
+        foreach(var w in Windows)
         {
             w.IsOpen = false;
         }
@@ -41,7 +41,7 @@ internal class TabSystem : Window
 
     public override void PreDraw()
     {
-        if (C.NoResize && !ImGui.GetIO().KeyCtrl)
+        if(C.NoResize && !ImGui.GetIO().KeyCtrl)
         {
             Flags |= ImGuiWindowFlags.NoResize;
         }
@@ -49,7 +49,7 @@ internal class TabSystem : Window
         {
             Flags &= ~ImGuiWindowFlags.NoResize;
         }
-        if (C.NoMove && !ImGui.GetIO().KeyCtrl)
+        if(C.NoMove && !ImGui.GetIO().KeyCtrl)
         {
             Flags |= ImGuiWindowFlags.NoMove;
         }
@@ -58,9 +58,9 @@ internal class TabSystem : Window
             Flags &= ~ImGuiWindowFlags.NoMove;
         }
         IsTransparent = Transparency < 1f;
-        if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
-        if (!C.FontNoTabs) P.FontManager.PushFont();
-        if (C.ColorTitleFlashTab && Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
+        if(IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
+        if(!C.FontNoTabs) P.FontManager.PushFont();
+        if(C.ColorTitleFlashTab && Windows.Any(x => x.IsOpen && x is ChatWindow w && w.Unread))
         {
             IsTitleColored = true;
             ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor(C.DefaultChannelCustomization));
@@ -71,18 +71,18 @@ internal class TabSystem : Window
 
     public override void Draw()
     {
-        if (P.FontManager.FontPushed && !P.FontManager.FontReady)
+        if(P.FontManager.FontPushed && !P.FontManager.FontReady)
         {
             ImGuiEx.Text($"Loading font, please wait...");
             return;
         }
-        if (ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
+        if(ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
         {
             Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
         }
         else
         {
-            if (!C.DisallowTransparencyHovered && ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
+            if(!C.DisallowTransparencyHovered && ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
             {
                 Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
             }
@@ -91,28 +91,28 @@ internal class TabSystem : Window
                 Transparency = Math.Max(C.TransMin, Transparency - C.TransDelta);
             }
         }
-        if (ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
+        if(ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
         {
-            foreach (var w in Windows.ToArray())
+            foreach(var w in Windows.ToArray())
             {
                 {
                     void Associate()
                     {
-                        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                        if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
                         {
                             ImGui.OpenPopup($"Associate{w.MessageHistory.HistoryPlayer}");
                         }
-                        if (ImGui.BeginPopup($"Associate{w.MessageHistory.HistoryPlayer}"))
+                        if(ImGui.BeginPopup($"Associate{w.MessageHistory.HistoryPlayer}"))
                         {
                             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-                            if (ImGui.Selectable("Default window"))
+                            if(ImGui.Selectable("Default window"))
                             {
                                 C.TabWindowAssociations.Remove(w.MessageHistory.HistoryPlayer.ToString());
                             }
                             ImGui.PopStyleColor();
-                            foreach (var x in C.TabWindows)
+                            foreach(var x in C.TabWindows)
                             {
-                                if (ImGui.Selectable(x))
+                                if(ImGui.Selectable(x))
                                 {
                                     C.TabWindowAssociations[w.MessageHistory.HistoryPlayer.ToString()] = x;
                                 }
@@ -123,42 +123,42 @@ internal class TabSystem : Window
 
                     var isOpen = w.IsOpen;
                     var flags = ImGuiTabItemFlags.None;
-                    if (w.MessageHistory.ShouldSetFocus())
+                    if(w.MessageHistory.ShouldSetFocus())
                     {
                         flags = ImGuiTabItemFlags.SetSelected;
                     }
                     var titleColored = false;
-                    if (w.Unread)
+                    if(w.Unread)
                     {
                         titleColored = true;
                         ImGui.PushStyleColor(ImGuiCol.TabActive, ImGuiCol.TabActive.GetFlashColor(w.Cust));
                         ImGui.PushStyleColor(ImGuiCol.Tab, ImGuiCol.Tab.GetFlashColor(w.Cust));
                         ImGui.PushStyleColor(ImGuiCol.TabHovered, ImGuiCol.TabHovered.GetFlashColor(w.Cust));
                     }
-                    if (isOpen && ImGui.BeginTabItem(w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld) + $"###{w.WindowName}", ref isOpen, flags))
+                    if(isOpen && ImGui.BeginTabItem(w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld) + $"###{w.WindowName}", ref isOpen, flags))
                     {
                         Associate();
-                        if (titleColored)
+                        if(titleColored)
                         {
                             ImGui.PopStyleColor(3);
                         }
                         w.BringToFront = false;
                         w.SetPosition = false;
                         w.UpdateLastFrame();
-                        if (C.FontNoTabs) P.FontManager.PushFont();
+                        if(C.FontNoTabs) P.FontManager.PushFont();
                         w.Draw();
                         TitleBarButtons = w.TitleBarButtons;
-                        if (C.FontNoTabs) P.FontManager.PopFont();
+                        if(C.FontNoTabs) P.FontManager.PopFont();
                         ImGui.EndTabItem();
                     }
                     else
                     {
                         Associate();
-                        if (ImGui.IsItemClicked())
+                        if(ImGui.IsItemClicked())
                         {
                             w.MessageHistory.SetFocusAtNextFrame();
                         }
-                        if (titleColored)
+                        if(titleColored)
                         {
                             ImGui.PopStyleColor(3);
                         }
@@ -179,9 +179,9 @@ internal class TabSystem : Window
 
     public override void PostDraw()
     {
-        if (!C.FontNoTabs) P.FontManager.PopFont();
-        if (IsTransparent) ImGui.PopStyleVar();
-        if (IsTitleColored)
+        if(!C.FontNoTabs) P.FontManager.PopFont();
+        if(IsTransparent) ImGui.PopStyleVar();
+        if(IsTitleColored)
         {
             ImGui.PopStyleColor(3);
             IsTitleColored = false;

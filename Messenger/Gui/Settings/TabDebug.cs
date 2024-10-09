@@ -47,7 +47,7 @@ internal unsafe class TabDebug
                     ImGuiEx.TextWrapped(e.ToString());
                 }
             }
-            if (ImGui.CollapsingHeader("Context"))
+            if(ImGui.CollapsingHeader("Context"))
             {
                 var c = AgentContext.Instance();
                 ImGuiEx.Text($"""
@@ -69,45 +69,47 @@ internal unsafe class TabDebug
             if(ImGui.CollapsingHeader("Thread pool"))
             {
                 ImGuiEx.Text($"{S.ThreadPool.State}");
-                if (ImGui.Button("Create 10s task"))
+                if(ImGui.Button("Create 10s task"))
                 {
-                    S.ThreadPool.Run(() => {
+                    S.ThreadPool.Run(() =>
+                    {
                         Thread.Sleep(10000);
                         DuoLog.Information("10000 end!");
-                        });
+                    });
                 }
-                if (ImGui.Button("Create 1s task"))
+                if(ImGui.Button("Create 1s task"))
                 {
-                    S.ThreadPool.Run(() => {
+                    S.ThreadPool.Run(() =>
+                    {
                         Thread.Sleep(1000);
                         DuoLog.Information("1000 end!");
                     });
                 }
             }
-            if (ImGui.CollapsingHeader("CIDMAP"))
+            if(ImGui.CollapsingHeader("CIDMAP"))
             {
                 ImGuiEx.Text(S.MessageProcessor.CIDlist.Select(x => $"{x.Key}: {x.Value:X16}").Print("\n"));
             }
-            if (ImGui.CollapsingHeader("LogMessages"))
+            if(ImGui.CollapsingHeader("LogMessages"))
             {
                 var map = S.MessageProcessor.RetrieveCIDsFromLog();
-                foreach (var m in map)
+                foreach(var m in map)
                 {
                     ImGuiEx.Text($"{m}");
                     ImGui.Separator();
                 }
             }
-            if (ImGui.CollapsingHeader("Emoji"))
+            if(ImGui.CollapsingHeader("Emoji"))
             {
-                if (ImGui.Button("Rebuild cache"))
+                if(ImGui.Button("Rebuild cache"))
                 {
                     S.EmojiLoader.BuildCache();
                 }
                 ImGui.Columns(4);
-                foreach (var x in S.EmojiLoader.Emoji)
+                foreach(var x in S.EmojiLoader.Emoji)
                 {
                     var w = x.Value.GetTextureWrap();
-                    if (w != null)
+                    if(w != null)
                     {
                         ImGui.Image(w.ImGuiHandle, new Vector2(24f));
                         ImGui.SameLine();
@@ -117,13 +119,13 @@ internal unsafe class TabDebug
                 }
                 ImGui.Columns(1);
             }
-            if (ImGui.CollapsingHeader("PML"))
+            if(ImGui.CollapsingHeader("PML"))
             {
                 PseudoMultilineInput.DrawMultiline();
             }
-            if (ImGui.CollapsingHeader("Senders"))
+            if(ImGui.CollapsingHeader("Senders"))
             {
-                foreach (var x in S.MessageProcessor.Chats)
+                foreach(var x in S.MessageProcessor.Chats)
                 {
                     ImGuiEx.Text($"{x.Key.Name}@{x.Key.HomeWorld}, {x.Key.IsGenericChannel()}");
                 }
@@ -132,12 +134,12 @@ internal unsafe class TabDebug
             ImGuiEx.EnumCombo("XivChatType", ref MType);
             ImGui.InputText("Sender's name", ref MName, 50);
             ImGui.InputInt("Sender's world", ref MWorld);
-            if (MWorld <= 0) MWorld = (int)(Svc.ClientState.LocalPlayer?.HomeWorld.Id ?? 0);
+            if(MWorld <= 0) MWorld = (int)(Svc.ClientState.LocalPlayer?.HomeWorld.Id ?? 0);
             ImGui.InputText($"Message", ref MMessage, 500);
-            if (ImGui.Button("Fire event"))
+            if(ImGui.Button("Fire event"))
             {
                 var s = SeString.Empty;
-                if (MName != "")
+                if(MName != "")
                 {
                     s = new SeStringBuilder().Add(new PlayerPayload(MName, (uint)MWorld)).Build();
                 }
@@ -148,18 +150,18 @@ internal unsafe class TabDebug
             ImGui.Separator();
             ImGuiEx.Text($"Is in instance: {P.GameFunctions.IsInInstance()}");
             ImGuiEx.Text($"Last received message: {S.MessageProcessor.LastReceivedMessage.GetPlayerName()}");
-            if (ImGui.Button("Mark all as unread"))
+            if(ImGui.Button("Mark all as unread"))
             {
-                foreach (var x in S.MessageProcessor.Chats.Values)
+                foreach(var x in S.MessageProcessor.Chats.Values)
                 {
                     x.ChatWindow.Unread = true;
                 }
             }
 
-            if (ImGui.CollapsingHeader("Friends"))
+            if(ImGui.CollapsingHeader("Friends"))
             {
                 ImGuiEx.Text("Friend list: ");
-                foreach (var x in FriendList.Get())
+                foreach(var x in FriendList.Get())
                 {
                     ImGuiEx.TextCopy(x.IsOnline ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudWhite,
                         $"{x.Name} onl={x.OnlineStatus} home world={x.HomeWorld} current world={x.CurrentWorld} CID {x.ContentId:X16}");
@@ -176,24 +178,24 @@ internal unsafe class TabDebug
             }
             ImGui.Separator();
             ImGuiEx.Text("Target commands");
-            foreach (var x in P.TargetCommands)
+            foreach(var x in P.TargetCommands)
             {
                 ImGuiEx.Text(x);
             }
             ImGui.Separator();
             ImGuiEx.Text("Width-to-spaces");
 
-            foreach (var x in P.WhitespaceMap)
+            foreach(var x in P.WhitespaceMap)
             {
                 ImGuiEx.Text($"{x.Key} => {x.Value.Length}x");
             }
-            if (ImGui.Button("Fire logout event"))
+            if(ImGui.Button("Fire logout event"))
             {
                 P.ClientState_Logout();
             }
             ImGuiEx.Text($"a1[48]: {*(byte*)((nint)AgentCharaCard.Instance() + 48)}");
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.Log();
         }

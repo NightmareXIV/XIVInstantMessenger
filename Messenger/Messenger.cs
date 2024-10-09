@@ -96,9 +96,9 @@ public unsafe class Messenger : IDalamudPlugin
     private void OnLogin()
     {
         CurrentPlayer = Player.NameWithWorld;
-        if (C.SplitLogging)
+        if(C.SplitLogging)
         {
-            if (C.SplitAutoUnload)
+            if(C.SplitAutoUnload)
             {
                 Utils.UnloadAllChat();
             }
@@ -111,9 +111,9 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal void ClientState_Logout()
     {
-        if (C.CloseLogout)
+        if(C.CloseLogout)
         {
-            foreach (var x in S.MessageProcessor.Chats)
+            foreach(var x in S.MessageProcessor.Chats)
             {
                 x.Value.ChatWindow.IsOpen = false;
             }
@@ -124,7 +124,7 @@ public unsafe class Messenger : IDalamudPlugin
     {
         TabSystems.Each(WindowSystemMain.RemoveWindow);
         TabSystems.Clear();
-        foreach (var x in C.TabWindows)
+        foreach(var x in C.TabWindows)
         {
             TabSystems.Add(new(x));
         }
@@ -142,7 +142,7 @@ public unsafe class Messenger : IDalamudPlugin
         Svc.Framework.Update -= Tick;
         Safe(() => Logger.Dispose());
         Safe(() => PartyFunctions.Dispose());
-        if (FontManager != null) Safe(() => FontManager.Dispose());
+        if(FontManager != null) Safe(() => FontManager.Dispose());
         Svc.ClientState.Logout -= ClientState_Logout;
         ECommonsMain.Dispose();
         P = null;
@@ -150,7 +150,7 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal void Tabs(bool useTabs)
     {
-        if (useTabs)
+        if(useTabs)
         {
             Svc.PluginInterface.UiBuilder.Draw -= WindowSystemChat.Draw;
         }
@@ -165,13 +165,13 @@ public unsafe class Messenger : IDalamudPlugin
         MessageHistory previous = null;
         var timeDiff = long.MaxValue;
         var timeCurrent = current.GetLatestMessageTime();
-        foreach (var x in S.MessageProcessor.Chats.Values)
+        foreach(var x in S.MessageProcessor.Chats.Values)
         {
             var latest = x.GetLatestMessageTime();
-            if (latest != 0)
+            if(latest != 0)
             {
                 var curDiff = timeCurrent - latest;
-                if (curDiff < timeDiff && curDiff > 0)
+                if(curDiff < timeDiff && curDiff > 0)
                 {
                     timeDiff = curDiff;
                     previous = x;
@@ -185,10 +185,10 @@ public unsafe class Messenger : IDalamudPlugin
     {
         MessageHistory chat = null;
         long time = 0;
-        foreach (var x in S.MessageProcessor.Chats.Values)
+        foreach(var x in S.MessageProcessor.Chats.Values)
         {
             var latest = x.GetLatestMessageTime();
-            if (latest > time && (exclude == null || exclude.Value != x.HistoryPlayer))
+            if(latest > time && (exclude == null || exclude.Value != x.HistoryPlayer))
             {
                 chat = x;
                 time = latest;
@@ -199,16 +199,16 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal string GetWhitespacesForLen(float len)
     {
-        if (WhitespaceMap.TryGetValue(len, out var x))
+        if(WhitespaceMap.TryGetValue(len, out var x))
         {
             return x;
         }
         else
         {
             var spc = " ";
-            for (var i = 0; i < 500; i++)
+            for(var i = 0; i < 500; i++)
             {
-                if (ImGui.CalcTextSize(spc).X < len)
+                if(ImGui.CalcTextSize(spc).X < len)
                 {
                     spc += " ";
                 }
@@ -217,7 +217,7 @@ public unsafe class Messenger : IDalamudPlugin
                     break;
                 }
             }
-            if (!C.IncreaseSpacing) spc = spc[0..^1];
+            if(!C.IncreaseSpacing) spc = spc[0..^1];
             WhitespaceMap[len] = spc;
             return spc;
         }
@@ -225,18 +225,18 @@ public unsafe class Messenger : IDalamudPlugin
 
     private void OnCommand(string cmd, string args)
     {
-        if (args == "")
+        if(args == "")
         {
             GuiSettings.IsOpen = true;
         }
-        else if (args.EqualsAny("hide", "h"))
+        else if(args.EqualsAny("hide", "h"))
         {
             Hidden = !Hidden;
             Notify.Success($"Current chat windows have been {(Hidden ? "hidden" : "shown")}");
         }
-        else if (args.EqualsAny("close", "c"))
+        else if(args.EqualsAny("close", "c"))
         {
-            foreach (var x in S.MessageProcessor.Chats.Values)
+            foreach(var x in S.MessageProcessor.Chats.Values)
             {
                 x.ChatWindow.IsOpen = false;
             }
@@ -244,9 +244,9 @@ public unsafe class Messenger : IDalamudPlugin
         }
         else
         {
-            foreach (var x in S.MessageProcessor.Chats)
+            foreach(var x in S.MessageProcessor.Chats)
             {
-                if (x.Key.GetChannelName().Contains(args, StringComparison.OrdinalIgnoreCase))
+                if(x.Key.GetChannelName().Contains(args, StringComparison.OrdinalIgnoreCase))
                 {
                     P.OpenMessenger(x.Key, true);
                     S.MessageProcessor.Chats[x.Key].SetFocusAtNextFrame();
@@ -260,29 +260,29 @@ public unsafe class Messenger : IDalamudPlugin
 
     private void Tick(object framework)
     {
-        if (C.EnableKey)
+        if(C.EnableKey)
         {
-            if ((ImGuiEx.IsKeyPressed((int)C.Key, false) || Svc.KeyState.GetRawValue(C.Key) != 0)
+            if((ImGuiEx.IsKeyPressed((int)C.Key, false) || Svc.KeyState.GetRawValue(C.Key) != 0)
                 && ModifierKeyMatch(C.ModifierKey))
             {
                 Svc.KeyState.SetRawValue(C.Key, 0);
                 var toOpen = lastHistory;
-                if (C.CycleChatHotkey)
+                if(C.CycleChatHotkey)
                 {
-                    foreach (var x in S.MessageProcessor.Chats.Values)
+                    foreach(var x in S.MessageProcessor.Chats.Values)
                     {
-                        if (x.ChatWindow.IsFocused)
+                        if(x.ChatWindow.IsFocused)
                         {
                             toOpen = GetPreviousMessageHistory(x) ?? toOpen;
                             break;
                         }
                     }
                 }
-                if (toOpen != null)
+                if(toOpen != null)
                 {
                     toOpen.ChatWindow.IsOpen = true;
                     toOpen.SetFocusAtNextFrame();
-                    if (Svc.Condition[ConditionFlag.InCombat])
+                    if(Svc.Condition[ConditionFlag.InCombat])
                     {
                         toOpen.ChatWindow.KeepInCombat = true;
                         Notify.Info("This chat will not be hidden in combat");
@@ -298,19 +298,19 @@ public unsafe class Messenger : IDalamudPlugin
 
     private static bool ModifierKeyMatch(ModifierKey k)
     {
-        if (k == ModifierKey.None)
+        if(k == ModifierKey.None)
         {
             return !ImGui.GetIO().KeyAlt && !ImGui.GetIO().KeyCtrl && !ImGui.GetIO().KeyShift;
         }
-        else if (k == ModifierKey.Alt)
+        else if(k == ModifierKey.Alt)
         {
             return ImGui.GetIO().KeyAlt && !ImGui.GetIO().KeyCtrl && !ImGui.GetIO().KeyShift;
         }
-        else if (k == ModifierKey.Ctrl)
+        else if(k == ModifierKey.Ctrl)
         {
             return !ImGui.GetIO().KeyAlt && ImGui.GetIO().KeyCtrl && !ImGui.GetIO().KeyShift;
         }
-        else if (k == ModifierKey.Shift)
+        else if(k == ModifierKey.Shift)
         {
             return !ImGui.GetIO().KeyAlt && !ImGui.GetIO().KeyCtrl && ImGui.GetIO().KeyShift;
         }
@@ -320,14 +320,14 @@ public unsafe class Messenger : IDalamudPlugin
     internal void OpenMessenger(Sender s, bool open = true)
     {
         PluginLog.Verbose($"Sender is {s.Name}");
-        if (s.Name != null)
+        if(s.Name != null)
         {
-            if (!S.MessageProcessor.Chats.TryGetValue(s, out var value))
+            if(!S.MessageProcessor.Chats.TryGetValue(s, out var value))
             {
                 value = new(s);
                 S.MessageProcessor.Chats[s] = value;
             }
-            if (open) value.ChatWindow.IsOpen = true;
+            if(open) value.ChatWindow.IsOpen = true;
         }
     }
 
@@ -335,11 +335,11 @@ public unsafe class Messenger : IDalamudPlugin
     {
         try
         {
-            if (Svc.ClientState.LocalPlayer == null)
+            if(Svc.ClientState.LocalPlayer == null)
             {
                 return "Not logged in";
             }
-            if (generic)
+            if(generic)
             {
                 var c = $"/{destination} {message}";
                 PluginLog.Verbose($"Sending command generic: {c}");
@@ -362,7 +362,7 @@ public unsafe class Messenger : IDalamudPlugin
             }
             return null;
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.Log();
             return e.Message;
@@ -371,9 +371,9 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal bool IsFriend(Sender s)
     {
-        foreach (var x in FriendList.Get())
+        foreach(var x in FriendList.Get())
         {
-            if (x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
+            if(x.Name.ToString() == s.Name && x.HomeWorld == s.HomeWorld)
             {
                 return true;
             }
@@ -383,20 +383,20 @@ public unsafe class Messenger : IDalamudPlugin
 
     internal void OpenCharaCard(Sender player)
     {
-        if (!EzThrottler.Throttle($"CharaCard{player.GetPlayerName()}", 1000))
+        if(!EzThrottler.Throttle($"CharaCard{player.GetPlayerName()}", 1000))
         {
             Notify.Error("Too fast, please wait!");
         }
-        foreach (var x in Svc.Objects)
+        foreach(var x in Svc.Objects)
         {
-            if (x is IPlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable)
+            if(x is IPlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable)
             {
                 AgentCharaCard.Instance()->OpenCharaCard(x.Struct());
                 PluginLog.Debug($"Opening characard via gameobject {x}");
                 return;
             }
         }
-        if (S.MessageProcessor.TryFindCID(player, out var cid))
+        if(S.MessageProcessor.TryFindCID(player, out var cid))
         {
             AgentCharaCard.Instance()->OpenCharaCard(cid);
             PluginLog.Debug($"Opening characard via cid {cid:X16}");
@@ -412,20 +412,20 @@ public unsafe class Messenger : IDalamudPlugin
     {
         //Notify.Error("Invite to party is temporarily disabled");
         //return "Invite to party is temporarily disabled";
-        if (Svc.ClientState.LocalPlayer == null)
+        if(Svc.ClientState.LocalPlayer == null)
         {
             return "Not logged in";
         }
-        if (Svc.Condition[ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance])
+        if(Svc.Condition[ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance])
         {
             return "Cross-world parties are not supported";
         }
-        if (Svc.ClientState.LocalPlayer.CurrentWorld.GameData.DataCenter.Value.RowId !=
+        if(Svc.ClientState.LocalPlayer.CurrentWorld.GameData.DataCenter.Value.RowId !=
             Svc.Data.GetExcelSheet<World>().GetRow(player.HomeWorld).DataCenter.Value.RowId)
         {
             return "Target is located in different data center";
         }
-        if (TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
+        if(TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
         {
             var party = Svc.Party;
             var leader = (ulong?)party[(int)party.PartyLeaderIndex]?.ContentId;
@@ -434,29 +434,29 @@ public unsafe class Messenger : IDalamudPlugin
             var isInParty = member != default;
             var inInstance = GameFunctions.IsInInstance();
             //var inPartyInstance = Svc.Data.GetExcelSheet<TerritoryType>()!.GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse is (41 or 47 or 48 or 52 or 53);
-            if (isLeader)
+            if(isLeader)
             {
-                if (!isInParty)
+                if(!isInParty)
                 {
-                    if (!inInstance)
+                    if(!inInstance)
                     {
-                        if (sameWorld)
+                        if(sameWorld)
                         {
-                            if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
+                            if(!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                             PartyFunctions.InviteSameWorld(player.Name, (ushort)player.HomeWorld, cidOverride ?? 0);
                             return null;
                         }
                         else
                         {
-                            if (cidOverride != null && cidOverride.Value != 0)
+                            if(cidOverride != null && cidOverride.Value != 0)
                             {
-                                if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
+                                if(!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                                 PartyFunctions.InviteOtherWorld(cidOverride.Value, (ushort)player.HomeWorld);
                                 return null;
                             }
-                            else if (S.MessageProcessor.TryFindCID(player, out var cid))
+                            else if(S.MessageProcessor.TryFindCID(player, out var cid))
                             {
-                                if (!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
+                                if(!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                                 PartyFunctions.InviteOtherWorld(cid, (ushort)player.HomeWorld);
                                 return null;
                             }

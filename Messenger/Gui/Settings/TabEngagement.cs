@@ -30,7 +30,7 @@ public static class TabEngagement
             ImGui.TableSetupColumn("##control");
             ImGui.TableHeadersRow();
 
-            for(int i = 0; i < C.Engagements.Count; i++)
+            for(var i = 0; i < C.Engagements.Count; i++)
             {
                 var e = C.Engagements[i];
                 ImGui.PushID($"Eng{i}");
@@ -53,13 +53,13 @@ public static class TabEngagement
                 ImGui.TableNextColumn();
                 if(ImGuiEx.IconButton(FontAwesomeIcon.Trash, enabled: ImGuiEx.Ctrl))
                 {
-                    new TickScheduler(() => C.Engagements.Remove(e) );
+                    new TickScheduler(() => C.Engagements.Remove(e));
                     Utils.Unload(e.GetSender());
                 }
                 ImGuiEx.Tooltip($"Removing an engagement will not cause it's log to be also deleted. If you will create an engagement with same name, log entries from it's log will be loaded. Hold CTRL and click to delete.");
                 ImGui.PopID();
             }
-            
+
             ImGui.EndTable();
         }
     }
@@ -162,7 +162,7 @@ public static class TabEngagement
                     ImGuiEx.TextV($"{x.GetPlayerName()}");
                     ImGui.TableNextColumn();
                     ImGui.PushFont(UiBuilder.IconFont);
-                    ImGuiEx.CollectionButtonCheckbox(FontAwesomeIcon.PeopleArrows.ToIconString(), x, e.DisallowDMs, EColor.Green, inverted:true);
+                    ImGuiEx.CollectionButtonCheckbox(FontAwesomeIcon.PeopleArrows.ToIconString(), x, e.DisallowDMs, EColor.Green, inverted: true);
                     ImGui.PopFont();
                     ImGuiEx.Tooltip($"When enabled, Direct Messages from this player will be redirected to the engagement window. ");
                     ImGui.TableNextColumn();

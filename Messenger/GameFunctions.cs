@@ -28,7 +28,7 @@ internal unsafe class GameFunctions : IDisposable
 
     internal void SendFriendRequest(string name, ushort world)
     {
-        if (ExcelWorldHelper.Get(world) != null && EzThrottler.Throttle("AddToFriendlist"))
+        if(ExcelWorldHelper.Get(world) != null && EzThrottler.Throttle("AddToFriendlist"))
         {
             S.Memory.ReplaceName = $"{name}@{ExcelWorldHelper.GetName(world)}";
             Chat.Instance.ExecuteCommand($"/friendlist add {S.Memory.Placeholder}");
@@ -37,7 +37,7 @@ internal unsafe class GameFunctions : IDisposable
 
     internal void AddToBlacklist(string name, ushort world)
     {
-        if (ExcelWorldHelper.Get(world) != null && EzThrottler.Throttle("AddToFriendlist"))
+        if(ExcelWorldHelper.Get(world) != null && EzThrottler.Throttle("AddToFriendlist"))
         {
             S.Memory.ReplaceName = $"{name}@{ExcelWorldHelper.GetName(world)}";
             Chat.Instance.ExecuteCommand($"/blacklist add {S.Memory.Placeholder}");

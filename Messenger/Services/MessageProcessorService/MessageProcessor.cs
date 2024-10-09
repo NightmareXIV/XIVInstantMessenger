@@ -1,12 +1,12 @@
-﻿using Dalamud.Game.Text.SeStringHandling.Payloads;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using ECommons.GameFunctions;
-using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using ECommons.PartyFunctions;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.EzEventManager;
+using ECommons.GameFunctions;
+using ECommons.PartyFunctions;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Messenger.Configuration;
 
 namespace Messenger.Services.MessageProcessorService;
@@ -31,10 +31,10 @@ public unsafe class MessageProcessor : IDisposable
     {
         try
         {
-            if (type == XivChatType.ErrorMessage && RecentReceiver != null)
+            if(type == XivChatType.ErrorMessage && RecentReceiver != null)
             {
                 var pattern = $"Message to {RecentReceiver.Value.Name} could not be sent.";
-                if (message.ToString().EqualsAny(
+                if(message.ToString().EqualsAny(
                     pattern,
                     "Unable to send /tell. Recipient is in a restricted area.",
                     "Your message was not heard. You must wait before using /tell, /say, /yell, or /shout again."
@@ -54,18 +54,18 @@ public unsafe class MessageProcessor : IDisposable
                         History = history,
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {message.ToString()}"
                     });
-                    if (C.DefaultChannelCustomization.SuppressDMs)
+                    if(C.DefaultChannelCustomization.SuppressDMs)
                     {
                         isHandled = true;
                     }
                 }
                 RecentReceiver = null;
             }
-            if (Utils.DecodeSender(sender, type, out var s))
+            if(Utils.DecodeSender(sender, type, out var s))
             {
-                if (type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
+                if(type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
                 {
-                    if (s.Name.StartsWith("Gm "))
+                    if(s.Name.StartsWith("Gm "))
                     {
                         PluginLog.Debug($"Skipping processing of GameMaster's {s} message");
                         LastReceivedMessage = default;
@@ -113,7 +113,7 @@ public unsafe class MessageProcessor : IDisposable
                         P.GameFunctions.PlaySound(C.IncomingTellSound);
                     }
                 }
-                else if (type.GetCommand() != null)
+                else if(type.GetCommand() != null)
                 {
                     //generic
                     var incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
@@ -126,13 +126,13 @@ public unsafe class MessageProcessor : IDisposable
                         ParsedMessage = new(message),
                         XivChatType = type,
                     };
-                    foreach (var payload in message.Payloads)
+                    foreach(var payload in message.Payloads)
                     {
-                        if (payload.Type == PayloadType.MapLink)
+                        if(payload.Type == PayloadType.MapLink)
                         {
                             addedMessage.MapPayload = (MapLinkPayload)payload;
                         }
-                        if (payload.Type == PayloadType.Item)
+                        if(payload.Type == PayloadType.Item)
                         {
                             addedMessage.Item = (ItemPayload)payload;
                         }
@@ -159,7 +159,7 @@ public unsafe class MessageProcessor : IDisposable
                 new TickScheduler(UpdateCIDList);
             }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             PluginLog.Error($"{e.Message}\n{e.StackTrace ?? ""}");
         }
@@ -253,11 +253,11 @@ public unsafe class MessageProcessor : IDisposable
     {
         var ret = new List<LogMessage>();
         var r = RaptureLogModule.Instance();
-        for (int i = 0; i < r->MsgSourceArrayLength; i++)
+        for(var i = 0; i < r->MsgSourceArrayLength; i++)
         {
             var src = r->MsgSourceArray[i];
             var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out var logKind, out _);
-            if (det)
+            if(det)
             {
                 ret.Add(new(
                     SeString.Parse(sender.AsSpan()),
@@ -274,18 +274,18 @@ public unsafe class MessageProcessor : IDisposable
     public void UpdateCIDList()
     {
         var r = RaptureLogModule.Instance();
-        for (int i = 0; i < r->MsgSourceArrayLength; i++)
+        for(var i = 0; i < r->MsgSourceArrayLength; i++)
         {
             var src = r->MsgSourceArray[i];
-            if (src.ContentId != 0)
+            if(src.ContentId != 0)
             {
                 var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out var logKind, out _);
-                if (det)
+                if(det)
                 {
-                    if (SeString.Parse(sender.AsSpan()).Payloads.FirstOrDefault(x => x.Type == PayloadType.Player) is PlayerPayload payload)
+                    if(SeString.Parse(sender.AsSpan()).Payloads.FirstOrDefault(x => x.Type == PayloadType.Player) is PlayerPayload payload)
                     {
                         var p = new Sender(payload.PlayerName, payload.World.RowId);
-                        if (!CIDlist.ContainsKey(p))
+                        if(!CIDlist.ContainsKey(p))
                         {
                             PluginLog.Verbose($"New Content ID for {p}: {src.ContentId:X16}");
                         }
@@ -310,7 +310,7 @@ public unsafe class MessageProcessor : IDisposable
             if(x is IPlayerCharacter pc && pc.Name.ToString() == name && pc.HomeWorld.Id == world)
             {
                 cid = pc.Struct()->ContentId;
-                if (cid != 0)
+                if(cid != 0)
                 {
                     //PluginLog.Debug($"{name}@{world} CID found via ObjectTable: {cid:X16}");
                     return true;
@@ -338,14 +338,14 @@ public unsafe class MessageProcessor : IDisposable
             }
         }
         var r = RaptureLogModule.Instance();
-        for (int i = 0; i < r->MsgSourceArrayLength; i++)
+        for(var i = 0; i < r->MsgSourceArrayLength; i++)
         {
             var src = r->MsgSourceArray[i];
             var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out var logKind, out _);
-            if (det && SeString.Parse(sender.AsSpan()).Payloads.TryGetFirst(x => x.Type == PayloadType.Player, out var payload))
+            if(det && SeString.Parse(sender.AsSpan()).Payloads.TryGetFirst(x => x.Type == PayloadType.Player, out var payload))
             {
                 var playerPayload = (PlayerPayload)payload;
-                if (playerPayload.PlayerName == name && playerPayload.World.RowId == world)
+                if(playerPayload.PlayerName == name && playerPayload.World.RowId == world)
                 {
                     cid = src.ContentId;
                     //PluginLog.Debug($"{name}@{world} CID found via Log: {cid:X16}");

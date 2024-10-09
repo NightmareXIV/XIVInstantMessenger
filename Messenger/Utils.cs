@@ -71,15 +71,15 @@ internal static unsafe class Utils
                 var extraLength = 20 + command.Length + (C.SplitterIndicatorOverride == null ? 0 : C.SplitterIndicatorOverride.Length);
                 var ret = new List<string>();
                 var spacePositions = new List<int>();
-                for(int i = 0; i < message.Length; i++)
+                for(var i = 0; i < message.Length; i++)
                 {
                     if(message[i] == ' ') spacePositions.Add(i);
                 }
                 if(spacePositions.Count > 1)
                 {
                     remainder = null;
-                    int lastSpacePos = 0;
-                    for(int i = 1; i < spacePositions.Count; i++)
+                    var lastSpacePos = 0;
+                    for(var i = 1; i < spacePositions.Count; i++)
                     {
                         var next = spacePositions[i];
                         var len = GetLength(destination, message[lastSpacePos..next]);
@@ -104,14 +104,14 @@ internal static unsafe class Utils
             {
                 if(C.SplitterIndicatorOverride != null)
                 {
-                    for(int i = 0; i < splitList.Count - 1; i++)
+                    for(var i = 0; i < splitList.Count - 1; i++)
                     {
                         splitList[i] = $"{command}{splitList[i]}{C.SplitterIndicatorOverride}";
                     }
                 }
                 else
                 {
-                    for(int i = 0; i < splitList.Count - 1; i++)
+                    for(var i = 0; i < splitList.Count - 1; i++)
                     {
                         splitList[i] = $"{command}{splitList[i]}{C.SplitterManualIndicator}";
                     }
@@ -200,7 +200,7 @@ internal static unsafe class Utils
         {
             return s.GetCommand();
         }
-        return null; 
+        return null;
     }
 
     public static EngagementInfo GetEngagementInfo(this Sender s)
@@ -243,7 +243,7 @@ internal static unsafe class Utils
         {
             worldId = SuperchannelID;
             return true;
-        } 
+        }
         if(ExcelWorldHelper.TryGet(str, out var world))
         {
             worldId = world.RowId;
@@ -302,23 +302,23 @@ internal static unsafe class Utils
     {
         var chunk = 0;
         var max = ImGui.GetContentRegionMax().X - ScrollbarPadding;
-        foreach (var s in str.Split("\n"))
+        foreach(var s in str.Split("\n"))
         {
             var canRestart = true;
         Start:
             var start = 0;
-            for (var i = 0; i < s.Length; i++)
+            for(var i = 0; i < s.Length; i++)
             {
-                if (start >= s.Length) break;
+                if(start >= s.Length) break;
                 var text = s[start..i];
                 var size = ImGui.CalcTextSize(text).X;
                 var avail = ImGui.GetContentRegionAvail().X - ScrollbarPadding;
-                if (size > avail)
+                if(size > avail)
                 {
                     //try to match wrapping symbol first
-                    for (var z = i; z >= start; z--)
+                    for(var z = i; z >= start; z--)
                     {
-                        if (WrapSymbols.Contains(s[z]) && start != z)
+                        if(WrapSymbols.Contains(s[z]) && start != z)
                         {
                             ImGuiEx.Text(s[start..z]);
                             postMessageFunctions?.Invoke();
@@ -327,9 +327,9 @@ internal static unsafe class Utils
                             //PluginLog.Information($"start is now {start} chunk {++chunk}");
                             break;
                         }
-                        else if (z == start)
+                        else if(z == start)
                         {
-                            if (max > avail && canRestart)
+                            if(max > avail && canRestart)
                             {
                                 //PluginLog.Information($"Restart, max:{max}, avail: {avail}");
                                 //we can use more space at next line, restart everything
@@ -346,7 +346,7 @@ internal static unsafe class Utils
                     }
                 }
             }
-            if (start < s.Length)
+            if(start < s.Length)
             {
                 ImGuiEx.Text(s[start..]);
                 postMessageFunctions?.Invoke();
@@ -358,20 +358,20 @@ internal static unsafe class Utils
 
     public static string GetAddonName(this string s)
     {
-        if (s == "") return "No element/whole screen";
-        if (s == "_NaviMap") return "Mini-map";
-        if (s == "_DTR") return "Server status bar";
-        if (s == "ChatLog") return "Chat window";
+        if(s == "") return "No element/whole screen";
+        if(s == "_NaviMap") return "Mini-map";
+        if(s == "_DTR") return "Server status bar";
+        if(s == "ChatLog") return "Chat window";
         return s;
     }
 
     public static ChannelCustomization GetCustomization(this Sender s)
     {
-        if (s.IsGenericChannel())
+        if(s.IsGenericChannel())
         {
-            if (Enum.TryParse<XivChatType>(s.Name, out var e))
+            if(Enum.TryParse<XivChatType>(s.Name, out var e))
             {
-                if (C.SpecificChannelCustomizations.TryGetValue(e, out var cust))
+                if(C.SpecificChannelCustomizations.TryGetValue(e, out var cust))
                 {
                     return cust;
                 }
@@ -379,7 +379,7 @@ internal static unsafe class Utils
         }
         else
         {
-            if (C.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out var cust))
+            if(C.SpecificChannelCustomizations.TryGetValue(XivChatType.TellIncoming, out var cust))
             {
                 return cust;
             }
@@ -402,19 +402,19 @@ internal static unsafe class Utils
             }
         }*/
 
-        if (type.EqualsAny(XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8))
+        if(type.EqualsAny(XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8))
         {
             var num = int.Parse(type.ToString()[^1..]);
             var proxy = (InfoProxyCrossWorldLinkshell*)Framework.Instance()->UIModule->GetInfoModule()->GetInfoProxyById(InfoProxyId.CrossWorldLinkshell);
             var name = proxy->CrossWorldLinkshells[num - 1].Name;
             var str = MemoryHelper.ReadSeString(&name).ExtractText();
-            if (str != "")
+            if(str != "")
             {
                 return $"(CWLS{num}) {str}";
             }
         }
 
-        if (TabIndividual.Types.Contains(type))
+        if(TabIndividual.Types.Contains(type))
         {
             return TabIndividual.Names[Array.IndexOf(TabIndividual.Types, type)];
         }
@@ -423,42 +423,42 @@ internal static unsafe class Utils
 
     public static string GetCommand(this XivChatType type)
     {
-        if (type == XivChatType.Party) return "p";
-        if (type == XivChatType.Say) return "say";
-        if (type == XivChatType.Shout) return "shout";
-        if (type == XivChatType.Yell) return "yell";
-        if (type == XivChatType.Alliance) return "alliance";
-        if (type == XivChatType.Ls1) return "linkshell1";
-        if (type == XivChatType.Ls2) return "linkshell2";
-        if (type == XivChatType.Ls3) return "linkshell3";
-        if (type == XivChatType.Ls4) return "linkshell4";
-        if (type == XivChatType.Ls5) return "linkshell5";
-        if (type == XivChatType.Ls6) return "linkshell6";
-        if (type == XivChatType.Ls7) return "linkshell7";
-        if (type == XivChatType.Ls8) return "linkshell8";
-        if (type == XivChatType.CrossLinkShell1) return "cwl1";
-        if (type == XivChatType.CrossLinkShell2) return "cwl2";
-        if (type == XivChatType.CrossLinkShell3) return "cwl3";
-        if (type == XivChatType.CrossLinkShell4) return "cwl4";
-        if (type == XivChatType.CrossLinkShell5) return "cwl5";
-        if (type == XivChatType.CrossLinkShell6) return "cwl6";
-        if (type == XivChatType.CrossLinkShell7) return "cwl7";
-        if (type == XivChatType.CrossLinkShell8) return "cwl8";
-        if (type == XivChatType.FreeCompany) return "fc";
-        if (type == XivChatType.NoviceNetwork) return "novice";
-        if (type == XivChatType.CustomEmote) return "emote";
+        if(type == XivChatType.Party) return "p";
+        if(type == XivChatType.Say) return "say";
+        if(type == XivChatType.Shout) return "shout";
+        if(type == XivChatType.Yell) return "yell";
+        if(type == XivChatType.Alliance) return "alliance";
+        if(type == XivChatType.Ls1) return "linkshell1";
+        if(type == XivChatType.Ls2) return "linkshell2";
+        if(type == XivChatType.Ls3) return "linkshell3";
+        if(type == XivChatType.Ls4) return "linkshell4";
+        if(type == XivChatType.Ls5) return "linkshell5";
+        if(type == XivChatType.Ls6) return "linkshell6";
+        if(type == XivChatType.Ls7) return "linkshell7";
+        if(type == XivChatType.Ls8) return "linkshell8";
+        if(type == XivChatType.CrossLinkShell1) return "cwl1";
+        if(type == XivChatType.CrossLinkShell2) return "cwl2";
+        if(type == XivChatType.CrossLinkShell3) return "cwl3";
+        if(type == XivChatType.CrossLinkShell4) return "cwl4";
+        if(type == XivChatType.CrossLinkShell5) return "cwl5";
+        if(type == XivChatType.CrossLinkShell6) return "cwl6";
+        if(type == XivChatType.CrossLinkShell7) return "cwl7";
+        if(type == XivChatType.CrossLinkShell8) return "cwl8";
+        if(type == XivChatType.FreeCompany) return "fc";
+        if(type == XivChatType.NoviceNetwork) return "novice";
+        if(type == XivChatType.CustomEmote) return "emote";
         return null;
     }
 
     public static string GetChannelName(this Sender s, bool includeWorld = true)
     {
-        if (s.IsGenericChannel(out var t))
+        if(s.IsGenericChannel(out var t))
         {
             return t.GetName();
         }
         else
         {
-            if (includeWorld)
+            if(includeWorld)
             {
                 return s.GetPlayerName();
             }
@@ -481,7 +481,7 @@ internal static unsafe class Utils
 
     public static bool IsGenericChannel(this Sender s, out XivChatType type)
     {
-        if (TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out var z))
+        if(TabIndividual.Types.TryGetFirst(x => x.ToString() == s.Name, out var z))
         {
             type = z;
             return true;
@@ -495,7 +495,7 @@ internal static unsafe class Utils
 
     public static List<Payload> GetItemPayload(Item item, bool hq)
     {
-        if (item == null)
+        if(item == null)
         {
             throw new Exception("Tried to link NULL item.");
         }
@@ -522,7 +522,7 @@ internal static unsafe class Utils
     public static long GetLatestMessageTime(this MessageHistory history)
     {
         var timeCurrent = 0L;
-        if (history.Messages.TryGetLast(x => !x.IsSystem, out var currentLastMessage))
+        if(history.Messages.TryGetLast(x => !x.IsSystem, out var currentLastMessage))
         {
             timeCurrent = currentLastMessage.Time;
         }
@@ -532,12 +532,12 @@ internal static unsafe class Utils
     public static bool TryGetSender(this string value, out Sender sender)
     {
         var a = value.Split("@");
-        if (a.Length != 2)
+        if(a.Length != 2)
         {
             sender = default;
             return false;
         }
-        if (Svc.Data.GetExcelSheet<World>().TryGetFirst(x => x.Name.ToString().EqualsIgnoreCase(a[1]), out var world))
+        if(Svc.Data.GetExcelSheet<World>().TryGetFirst(x => x.Name.ToString().EqualsIgnoreCase(a[1]), out var world))
         {
             sender = new(a[0], world.RowId);
             return true;
@@ -574,20 +574,20 @@ internal static unsafe class Utils
 
     public static bool DecodeSender(SeString sender, XivChatType type, out Sender senderStruct)
     {
-        if (sender == null)
+        if(sender == null)
         {
             senderStruct = default;
             return false;
         }
-        foreach (var x in sender.Payloads)
+        foreach(var x in sender.Payloads)
         {
-            if (x is PlayerPayload p)
+            if(x is PlayerPayload p)
             {
                 senderStruct = new(p.PlayerName, p.World.RowId);
                 return true;
             }
         }
-        if (Player.Available && IsGenericChannel(type))
+        if(Player.Available && IsGenericChannel(type))
         {
             senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Svc.ClientState.LocalPlayer.HomeWorld.Id);
             return true;
@@ -607,7 +607,7 @@ internal static unsafe class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (var x in S.MessageProcessor.Chats)
+            foreach(var x in S.MessageProcessor.Chats)
             {
                 P.WindowSystemChat.RemoveWindow(x.Value.ChatWindow);
             }
@@ -620,7 +620,7 @@ internal static unsafe class Utils
     {
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            foreach (var x in S.MessageProcessor.Chats)
+            foreach(var x in S.MessageProcessor.Chats)
             {
                 x.Value.LoadHistory();
             }
@@ -631,7 +631,7 @@ internal static unsafe class Utils
     public static string GetLogStorageFolder()
     {
         var baseFolder = C.LogStorageFolder.IsNullOrEmpty() ? Svc.PluginInterface.GetPluginConfigDirectory() : C.LogStorageFolder;
-        if (C.SplitLogging && P.CurrentPlayer != null && !C.SplitBlacklist.Contains(P.CurrentPlayer))
+        if(C.SplitLogging && P.CurrentPlayer != null && !C.SplitBlacklist.Contains(P.CurrentPlayer))
         {
             baseFolder = Path.Combine(baseFolder, P.CurrentPlayer);
         }
@@ -639,7 +639,7 @@ internal static unsafe class Utils
         {
             Directory.CreateDirectory(baseFolder);
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.Log();
         }

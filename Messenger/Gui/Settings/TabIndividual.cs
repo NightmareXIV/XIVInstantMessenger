@@ -68,17 +68,17 @@ internal class TabIndividual
 
     internal void Draw()
     {
-        if (ImGui.BeginTable("##table", 2, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.Borders))
+        if(ImGui.BeginTable("##table", 2, ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.Borders))
         {
             ImGui.TableSetupColumn("col1");
             ImGui.TableSetupColumn("col2");
 
             ImGui.TableNextColumn();
 
-            if (ImGui.BeginChild("Col1"))
+            if(ImGui.BeginChild("Col1"))
             {
                 ImGuiEx.Text($"Process following generic channels:");
-                for (var i = 1; i < Types.Length; i++)
+                for(var i = 1; i < Types.Length; i++)
                 {
                     ImGuiEx.CollectionCheckbox($"{Names[i]}", Types[i], C.Channels);
                 }
@@ -86,15 +86,15 @@ internal class TabIndividual
             ImGui.EndChild();
 
             ImGui.TableNextColumn();
-            if (ImGui.BeginChild("Col2"))
+            if(ImGui.BeginChild("Col2"))
             {
                 ImGuiEx.SetNextItemFullWidth();
-                if (ImGui.BeginCombo("###custom", Selected == XivChatType.None ? "Customize settings for specific channel..." : $"Customize settings for: {Selected.GetName()}"))
+                if(ImGui.BeginCombo("###custom", Selected == XivChatType.None ? "Customize settings for specific channel..." : $"Customize settings for: {Selected.GetName()}"))
                 {
-                    for (var i = 0; i < Types.Length; i++)
+                    for(var i = 0; i < Types.Length; i++)
                     {
-                        if (i != 0 && !C.Channels.Contains(Types[i])) continue;
-                        if (ImGui.Selectable($"{Names[i]}"))
+                        if(i != 0 && !C.Channels.Contains(Types[i])) continue;
+                        if(ImGui.Selectable($"{Names[i]}"))
                         {
                             Selected = Types[i];
                         }
@@ -102,16 +102,16 @@ internal class TabIndividual
                     ImGui.EndCombo();
                 }
                 ImGui.Separator();
-                if (Selected != XivChatType.None)
+                if(Selected != XivChatType.None)
                 {
-                    if (C.SpecificChannelCustomizations.TryGetValue(Selected, out var customizations))
+                    if(C.SpecificChannelCustomizations.TryGetValue(Selected, out var customizations))
                     {
-                        if (ImGui.Button("Copy to clipboard"))
+                        if(ImGui.Button("Copy to clipboard"))
                         {
                             ImGui.SetClipboardText(JsonConvert.SerializeObject(customizations));
                         }
                         ImGui.SameLine();
-                        if (ImGuiEx.ButtonCtrl("Remove customization"))
+                        if(ImGuiEx.ButtonCtrl("Remove customization"))
                         {
                             C.SpecificChannelCustomizations.Remove(Selected);
                         }
@@ -121,17 +121,17 @@ internal class TabIndividual
                     else
                     {
                         ImGuiEx.Text($"There are no overrides for this channel.");
-                        if (ImGui.Button("Create overrides"))
+                        if(ImGui.Button("Create overrides"))
                         {
                             C.SpecificChannelCustomizations[Selected] = C.DefaultChannelCustomization.JSONClone();
                         }
-                        if (ImGui.Button($"Paste overrides from clipboard"))
+                        if(ImGui.Button($"Paste overrides from clipboard"))
                         {
                             try
                             {
                                 C.SpecificChannelCustomizations[Selected] = JsonConvert.DeserializeObject<ChannelCustomization>(ImGui.GetClipboardText());
                             }
-                            catch (Exception e)
+                            catch(Exception e)
                             {
                                 Notify.Error(e.Message);
                             }
@@ -149,7 +149,7 @@ internal class TabIndividual
     {
         ImGui.Checkbox("Open window on incoming message", ref data.AutoOpenTellIncoming);
         ImGui.Checkbox("Open window on outgoing message", ref data.AutoOpenTellOutgoing);
-        if (data.AutoOpenTellOutgoing)
+        if(data.AutoOpenTellOutgoing)
         {
             ImGuiEx.Spacing();
             ImGui.Checkbox("Auto-activate input after window opens on outgoing message", ref data.AutoFocusTellOutgoing);
@@ -161,7 +161,7 @@ internal class TabIndividual
         ImGui.ColorEdit4("Outgoing messages: message color", ref data.ColorToMessage, ImGuiColorEditFlags.NoInputs);
         ImGui.ColorEdit4("Unread message flashing title color", ref data.ColorTitleFlash, ImGuiColorEditFlags.NoInputs);
         ImGui.Checkbox("Don't show sent and received messages in game chat", ref data.SuppressDMs);
-        if (!isGlobal)
+        if(!isGlobal)
         {
             ImGui.Checkbox("Never mark this channel as unread", ref data.NoUnread);
         }

@@ -6,7 +6,7 @@ internal class OpenLinkWindow : Window
     private bool flash = false;
     public OpenLinkWindow(string link) : base($"XIVInstantMessenger: warning##{ImGui.GetFrameCount()}", ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.AlwaysAutoResize)
     {
-        if (C.NoWarningWhenOpenLinks)
+        if(C.NoWarningWhenOpenLinks)
         {
             ShellStart(link);
             return;
@@ -24,7 +24,7 @@ internal class OpenLinkWindow : Window
     public override void PreDraw()
     {
         flash = (Environment.TickCount % 2000 > 1000 || C.NoFlashing);
-        if (flash)
+        if(flash)
         {
             ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiColors.DalamudRed);
             ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ImGuiColors.DalamudRed);
@@ -41,13 +41,13 @@ internal class OpenLinkWindow : Window
         ImGui.Separator();
         ImGuiEx.LineCentered($"openlink{Link}", delegate
         {
-            if (ImGui.Button("Open link"))
+            if(ImGui.Button("Open link"))
             {
                 ShellStart(Link);
                 IsOpen = false;
             }
             ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
+            if(ImGui.Button("Cancel"))
             {
                 IsOpen = false;
             }
@@ -56,7 +56,7 @@ internal class OpenLinkWindow : Window
 
     public override void PostDraw()
     {
-        if (flash)
+        if(flash)
         {
             ImGui.PopStyleColor(3);
         }

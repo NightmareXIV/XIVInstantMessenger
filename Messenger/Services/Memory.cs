@@ -20,7 +20,7 @@ public unsafe class Memory : IDisposable
 
     private nint ResolveTextCommandPlaceholderDetour(IntPtr a1, byte* placeholderText, byte a3, byte a4)
     {
-        if (ReplaceName != null && MemoryHelper.ReadStringNullTerminated((nint)placeholderText) == Placeholder)
+        if(ReplaceName != null && MemoryHelper.ReadStringNullTerminated((nint)placeholderText) == Placeholder)
         {
             MemoryHelper.WriteString(PlaceholderNamePtr, ReplaceName);
             ReplaceName = null;

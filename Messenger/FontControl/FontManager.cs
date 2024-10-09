@@ -15,19 +15,19 @@ public unsafe class FontManager
         {
             FontConfiguration = EzConfig.LoadConfiguration<FontConfiguration>("FontConfiguration.json");
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             FontConfiguration = new();
             Notify.Error($"Failed to load font configuration.\nFont settings have been reset.");
             e.Log();
         }
-        if (C.UseCustomFont)
+        if(C.UseCustomFont)
         {
             try
             {
                 Handle = FontConfiguration.Font.CreateFontHandle(Svc.PluginInterface.UiBuilder.FontAtlas);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 e.Log();
             }
@@ -50,14 +50,14 @@ public unsafe class FontManager
 
     public void PushFont()
     {
-        if (FontPushed)
+        if(FontPushed)
         {
             if(EzThrottler.Throttle("Error", 10000)) DuoLog.Error($"A critical error occurred. Please send logs to developer.");
             throw new InvalidOperationException("Font is already pushed.");
         }
-        if (C.UseCustomFont)
+        if(C.UseCustomFont)
         {
-            if (Handle != null && Handle.Available)
+            if(Handle != null && Handle.Available)
             {
                 Handle.Push();
                 FontPushed = true;
@@ -67,7 +67,7 @@ public unsafe class FontManager
 
     public void PopFont()
     {
-        if (FontPushed)
+        if(FontPushed)
         {
             Handle.Pop();
             FontPushed = false;

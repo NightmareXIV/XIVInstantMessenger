@@ -14,7 +14,7 @@ internal class TabStyle
         ImGui.Separator();
         ImGuiEx.Text("Message timestamp format:");
         ImGui.SameLine();
-        if (ImGui.SmallButton("Help"))
+        if(ImGui.SmallButton("Help"))
         {
             ShellStart("https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings");
         }
@@ -23,12 +23,12 @@ internal class TabStyle
             ImGui.InputText("##i1", ref C.MessageTimestampFormat, 100);
         }, delegate
         {
-            if (ImGui.Button("12 hours"))
+            if(ImGui.Button("12 hours"))
             {
                 C.MessageTimestampFormat = "hh:mm:ss tt";
             }
             ImGui.SameLine();
-            if (ImGui.Button("24 hours"))
+            if(ImGui.Button("24 hours"))
             {
                 C.MessageTimestampFormat = "HH:mm:ss";
             }
@@ -60,7 +60,7 @@ internal class TabStyle
 
         ImGui.Separator();
         ImGui.Checkbox("Enable window cascading", ref C.WindowCascading);
-        if (C.WindowCascading)
+        if(C.WindowCascading)
         {
             ImGuiEx.Text("Initial window position (game window relative): X:");
             ImGui.SameLine();

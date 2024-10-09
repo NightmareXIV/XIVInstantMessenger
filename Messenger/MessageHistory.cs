@@ -56,17 +56,17 @@ public partial class MessageHistory
             Safe(delegate
             {
                 using FileStream reader = new(LogFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                if (reader.Length > LoadBytes)
+                if(reader.Length > LoadBytes)
                 {
                     reader.Seek(-LoadBytes, SeekOrigin.End);
                 }
                 using StreamReader reader2 = new(reader);
-                foreach (var x in reader2.ReadToEnd().Split("\n"))
+                foreach(var x in reader2.ReadToEnd().Split("\n"))
                 {
                     PluginLog.Verbose("Have read line: " + x);
                     //[Mon, 20 Jun 2022 12:44:41 GMT] To Falalala lala@Omega: fgdfgdfg
                     var parsed = MessageRegex().Match(x);
-                    if (parsed.Success)
+                    if(parsed.Success)
                     {
                         Safe(delegate
                         {
@@ -74,7 +74,7 @@ public partial class MessageHistory
                             PluginLog.Verbose($"Parsed line: {parsed.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
                             var matches = parsed.Groups.Values.ToArray();
-                            if (matches.Length == 5)
+                            if(matches.Length == 5)
                             {
                                 var name = matches[2].ToString() + "@" + matches[3].ToString();
                                 PluginLog.Debug($"name: {name}, subject: {subject}");
@@ -93,13 +93,13 @@ public partial class MessageHistory
                     else
                     {
                         var systemMessage = SystemMessageRegex().Match(x);
-                        if (systemMessage.Success) Safe(delegate
+                        if(systemMessage.Success) Safe(delegate
                         {
                             var i = 0;
                             PluginLog.Verbose($"Parsed system message line: {systemMessage.Groups.Values.Select(x => i++ + ":" + x.ToString()).Join("\n")}");
 
                             var matches = systemMessage.Groups.Values.ToArray();
-                            if (matches.Length == 3)
+                            if(matches.Length == 3)
                             {
                                 PluginLog.Verbose($"subject: {subject}");
                                 LoadedMessages.Insert(0, new()
@@ -116,7 +116,7 @@ public partial class MessageHistory
                     }
                 }
                 //LoadedMessages.Reverse();
-                if (LoadedMessages.Count > C.HistoryAmount)
+                if(LoadedMessages.Count > C.HistoryAmount)
                 {
                     LoadedMessages = LoadedMessages.Take(C.HistoryAmount).ToList();
                 }

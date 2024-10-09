@@ -13,7 +13,7 @@ public abstract class ChatWindowTitleButton
             Icon = Icon,
             Click = (m) =>
             {
-                if (!ImGuiEx.Ctrl)
+                if(!ImGuiEx.Ctrl)
                 {
                     OnLeftClick();
                 }

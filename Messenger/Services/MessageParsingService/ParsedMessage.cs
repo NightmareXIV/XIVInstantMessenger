@@ -11,25 +11,25 @@ public partial class ParsedMessage
     public ParsedMessage(SeString message)
     {
         List<ISegment> segments = [];
-        foreach (var payload in message.Payloads)
+        foreach(var payload in message.Payloads)
         {
             if(payload is AutoTranslatePayload atPayload)
             {
                 segments.Add(new SegmentAutoTranslate(atPayload.Text));
             }
-            else if (payload is TextPayload textPayload)
+            else if(payload is TextPayload textPayload)
             {
-                if (textPayload.Text == null) continue;
+                if(textPayload.Text == null) continue;
                 var splitMessage = EmojiRegex().Split(textPayload.Text).Where(x => x.Length > 0).ToArray();
                 PluginLog.Verbose($"Message parts: \n- {splitMessage.Print("\n- ")}");
-                foreach (var str in splitMessage)
+                foreach(var str in splitMessage)
                 {
-                    if (str.StartsWith(':') && str.EndsWith(':'))
+                    if(str.StartsWith(':') && str.EndsWith(':'))
                     {
                         var e = str[1..^1];
-                        if (e.StartsWith("s-"))
+                        if(e.StartsWith("s-"))
                         {
-                            if (splitMessage.Length == 1)
+                            if(splitMessage.Length == 1)
                             {
                                 segments.Add(new SegmentSticker(e[2..]));
                             }
@@ -40,7 +40,7 @@ public partial class ParsedMessage
                         }
                         else
                         {
-                            if (splitMessage.Length == 1)
+                            if(splitMessage.Length == 1)
                             {
                                 segments.Add(new SegmentDoubleEmoji(e));
                             }
@@ -62,7 +62,7 @@ public partial class ParsedMessage
 
     public void Draw(Action? postMessageFunction = null)
     {
-        foreach (var x in Segments)
+        foreach(var x in Segments)
         {
             x.Draw(postMessageFunction);
         }

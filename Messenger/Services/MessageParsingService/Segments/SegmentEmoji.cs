@@ -12,7 +12,7 @@ public class SegmentEmoji : ISegment
 
     public void Draw(float sizeMult, Action? postMessageAction = null)
     {
-        if (!C.EnableEmoji)
+        if(!C.EnableEmoji)
         {
             ImGuiEx.Text($":{Emoji}:");
             ImGui.SameLine(0, 0);
@@ -21,12 +21,12 @@ public class SegmentEmoji : ISegment
         Vector2 size = new(MathF.Floor(ImGui.CalcTextSize(" ").Y));
         ImGui.SameLine(0, 0);
         //PluginLog.Information($"{ImGui.GetContentRegionAvail().X} >= {size.X}");
-        if (ImGui.GetContentRegionAvail().X < size.X)
+        if(ImGui.GetContentRegionAvail().X < size.X)
         {
             ImGui.NewLine();
         }
         var tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
-        if (tex != null)
+        if(tex != null)
         {
             ImGui.Image(tex.ImGuiHandle, size * sizeMult);
             postMessageAction?.Invoke();
@@ -34,9 +34,9 @@ public class SegmentEmoji : ISegment
         }
         else
         {
-            if (S.EmojiLoader.DownloaderTaskRunning)
+            if(S.EmojiLoader.DownloaderTaskRunning)
             {
-                if (S.EmojiLoader.Loading.GetTextureWrap() != null)
+                if(S.EmojiLoader.Loading.GetTextureWrap() != null)
                 {
                     ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size * sizeMult);
                     postMessageAction?.Invoke();
@@ -49,7 +49,7 @@ public class SegmentEmoji : ISegment
             }
             else
             {
-                if (S.EmojiLoader.Error.GetTextureWrap() != null)
+                if(S.EmojiLoader.Error.GetTextureWrap() != null)
                 {
                     ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size * sizeMult);
                     postMessageAction?.Invoke();

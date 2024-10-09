@@ -25,7 +25,7 @@ internal class SavedMessage
 
     public void Draw(string prefix = "", string suffix = "", Action? postMessageAction = null)
     {
-        if (ParsedMessage == null)
+        if(ParsedMessage == null)
         {
             Utils.DrawWrappedText($"{prefix}{Message}{suffix}", postMessageAction);
         }

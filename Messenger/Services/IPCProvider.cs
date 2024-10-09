@@ -9,25 +9,25 @@ public class IPCProvider
     }
 
     [EzIPC]
-    int GetConversationCount()
+    private int GetConversationCount()
     {
         return S.MessageProcessor.Chats.Count;
     }
 
     [EzIPC]
-    int GetUnreadConversationCount()
+    private int GetUnreadConversationCount()
     {
         return S.MessageProcessor.Chats.Count(x => x.Value.ChatWindow.Unread);
     }
 
     [EzIPC]
-    List<(string NameWithWorld, bool IsUnread)> GetConversations()
+    private List<(string NameWithWorld, bool IsUnread)> GetConversations()
     {
         return S.MessageProcessor.Chats.Select(x => (x.Value.HistoryPlayer.ToString(), x.Value.ChatWindow.Unread)).ToList();
     }
 
     [EzIPC]
-    void OpenMessenger(string nameWithWorld, bool setFocus)
+    private void OpenMessenger(string nameWithWorld, bool setFocus)
     {
         if(Utils.TryGetSender(nameWithWorld, out var s))
         {
@@ -37,7 +37,7 @@ public class IPCProvider
     }
 
     [EzIPC]
-    string InviteToParty(string nameWithWorld, bool sameWorld)
+    private string InviteToParty(string nameWithWorld, bool sameWorld)
     {
         if(Utils.TryGetSender(nameWithWorld, out var s))
         {
@@ -48,7 +48,7 @@ public class IPCProvider
     }
 
     [EzIPC]
-    ulong GetCID(string nameWithWorld)
+    private ulong GetCID(string nameWithWorld)
     {
         if(Utils.TryGetSender(nameWithWorld, out var s))
         {

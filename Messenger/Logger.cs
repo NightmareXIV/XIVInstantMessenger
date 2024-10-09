@@ -13,10 +13,10 @@ internal class Logger : IDisposable
         {
             try
             {
-                while (!Tasks.IsCompleted)
+                while(!Tasks.IsCompleted)
                 {
                     var task = Tasks.Take();
-                    while (!task.History.LogLoaded)
+                    while(!task.History.LogLoaded)
                     {
                         PluginLog.Debug("Waiting for log to be loaded first...");
                         Thread.Sleep(200);
@@ -27,10 +27,10 @@ internal class Logger : IDisposable
                     });
                 }
             }
-            catch (InvalidOperationException)
+            catch(InvalidOperationException)
             {
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 e.Log();
             }
@@ -39,7 +39,7 @@ internal class Logger : IDisposable
 
     internal void Log(LogTask task)
     {
-        if (!Tasks.TryAdd(task))
+        if(!Tasks.TryAdd(task))
         {
             S.ThreadPool.Run(() => Tasks.Add(task));
         }

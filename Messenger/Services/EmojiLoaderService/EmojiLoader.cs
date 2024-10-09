@@ -24,25 +24,25 @@ public sealed class EmojiLoader : IDisposable
     {
         PastEmojiSearchRequests.Add(lowerId);
         EmojiSearchRequests.Enqueue(lowerId);
-        if (!DownloaderTaskRunning) BeginDownloaderTask();
+        if(!DownloaderTaskRunning) BeginDownloaderTask();
     }
 
     public ImageFile GetEmoji(string id)
     {
         {
-            if (Emoji.TryGetValue(id, out var image))
+            if(Emoji.TryGetValue(id, out var image))
             {
                 return image;
             }
         }
         {
-            if (Emoji.TryGetFirst(x => x.Key.EqualsIgnoreCase(id), out var image))
+            if(Emoji.TryGetFirst(x => x.Key.EqualsIgnoreCase(id), out var image))
             {
                 return image.Value;
             }
         }
         var lowerId = id.ToLower();
-        if (!PastEmojiSearchRequests.Contains(lowerId) && C.DownloadUnknownEmoji)
+        if(!PastEmojiSearchRequests.Contains(lowerId) && C.DownloadUnknownEmoji)
         {
             Search(lowerId);
         }
@@ -58,9 +58,9 @@ public sealed class EmojiLoader : IDisposable
             try
             {
                 var idle = 0;
-                while (idle < 100)
+                while(idle < 100)
                 {
-                    if (EmojiSearchRequests.TryDequeue(out var request))
+                    if(EmojiSearchRequests.TryDequeue(out var request))
                     {
                         try
                         {
@@ -70,13 +70,13 @@ public sealed class EmojiLoader : IDisposable
                             var result = Client.GetStringAsync("https://api.betterttv.net/3/emotes/shared/search?query=" + request).Result;
                             PluginLog.Verbose($"  Result: {result}");
                             var emoji = JsonConvert.DeserializeObject<List<BetterTTWEmoji.EmoteData>>(result);
-                            foreach (var e in emoji)
+                            foreach(var e in emoji)
                             {
                                 PluginLog.Verbose($"    Emoji: {e.code}");
                                 DownloadEmojiToCache(e.id, e.imageType, e.code, true, C.DynamicBetterTTVEmojiCache, request);
                             }
                         }
-                        catch (Exception e)
+                        catch(Exception e)
                         {
                             e.Log();
                         }
@@ -88,7 +88,7 @@ public sealed class EmojiLoader : IDisposable
                     }
                 }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 e.Log();
             }
@@ -105,9 +105,9 @@ public sealed class EmojiLoader : IDisposable
     {
         try
         {
-            foreach (var fname in C.StaticBetterTTVEmojiCache.Keys.ToArray())
+            foreach(var fname in C.StaticBetterTTVEmojiCache.Keys.ToArray())
             {
-                if (!File.Exists(Path.Combine(CachePath, C.StaticBetterTTVEmojiCache[fname])))
+                if(!File.Exists(Path.Combine(CachePath, C.StaticBetterTTVEmojiCache[fname])))
                 {
                     PluginLog.Warning($"Deleting corrupted emoji {fname} from static bttv cache");
                     C.StaticBetterTTVEmojiCache.Remove(fname);
@@ -121,9 +121,9 @@ public sealed class EmojiLoader : IDisposable
         }
         try
         {
-            foreach (var fname in C.DynamicBetterTTVEmojiCache.Keys.ToArray())
+            foreach(var fname in C.DynamicBetterTTVEmojiCache.Keys.ToArray())
             {
-                if (!File.Exists(Path.Combine(CachePath, C.DynamicBetterTTVEmojiCache[fname])))
+                if(!File.Exists(Path.Combine(CachePath, C.DynamicBetterTTVEmojiCache[fname])))
                 {
                     PluginLog.Warning($"Deleting corrupted emoji {fname} from dynamic bttv cache");
                     C.DynamicBetterTTVEmojiCache.Remove(fname);
@@ -212,7 +212,7 @@ public sealed class EmojiLoader : IDisposable
         Svc.Framework.RunOnFrameworkThread(() =>
         {
             var key = code;
-            if (skipExisting && cache.ContainsKey(key))
+            if(skipExisting && cache.ContainsKey(key))
             {
                 if(key == overwrite)
                 {
@@ -224,7 +224,7 @@ public sealed class EmojiLoader : IDisposable
                 }
             }
             var i = 1;
-            while (cache.ContainsKey(key))
+            while(cache.ContainsKey(key))
             {
                 key = $"{code}{i}";
                 i++;
@@ -237,7 +237,7 @@ public sealed class EmojiLoader : IDisposable
     public void Dispose()
     {
         Client?.Dispose();
-        foreach (var x in Emoji)
+        foreach(var x in Emoji)
         {
             x.Value.Dispose();
         }
@@ -249,7 +249,7 @@ public sealed class EmojiLoader : IDisposable
         try
         {
             var defaultEmojiFolder = Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "images", "emoji");
-            foreach (var f in Directory.GetFiles(defaultEmojiFolder))
+            foreach(var f in Directory.GetFiles(defaultEmojiFolder))
             {
                 PluginLog.Verbose($"Loading default emoji {f} exists={File.Exists(f)}");
                 Emoji[Path.GetFileNameWithoutExtension(f)] = new(f);
@@ -269,16 +269,16 @@ public sealed class EmojiLoader : IDisposable
         PluginLog.Information($"Loading BetterTTV emoji");
         try
         {
-            foreach (var x in C.StaticBetterTTVEmojiCache)
+            foreach(var x in C.StaticBetterTTVEmojiCache)
             {
                 Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
             }
-            foreach (var x in C.DynamicBetterTTVEmojiCache)
+            foreach(var x in C.DynamicBetterTTVEmojiCache)
             {
                 Emoji[x.Key] = new(Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "BetterTTVCache", x.Value));
             }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             PluginLog.Error($"Error loading emoji cache:");
             e.Log();

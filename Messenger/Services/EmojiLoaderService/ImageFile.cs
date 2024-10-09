@@ -25,11 +25,11 @@ public sealed class ImageFile : IDisposable
             //PluginLog.Verbose($"Loading image {Path}");
             var bytes = File.ReadAllBytes(Path);
             var image = Image.Load(bytes);
-            if (image.Frames.Count > 1)
+            if(image.Frames.Count > 1)
             {
                 PngEncoder pngEncoder = new();
                 //PluginLog.Verbose($" Animation detected");
-                for (var i = 0; i < image.Frames.Count; i++)
+                for(var i = 0; i < image.Frames.Count; i++)
                 {
                     var frame = image.Frames.CloneFrame(i);
                     var meta = image.Frames[i].Metadata.GetGifMetadata();
@@ -51,7 +51,7 @@ public sealed class ImageFile : IDisposable
                 Data.Add(img);
             }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.Log();
         }
@@ -60,25 +60,25 @@ public sealed class ImageFile : IDisposable
 
     public IDalamudTextureWrap GetTextureWrap()
     {
-        if (Status == LoadStatus.NotLoaded)
+        if(Status == LoadStatus.NotLoaded)
         {
             Status = LoadStatus.Loading;
             S.ThreadPool.Run(Load);
         }
-        if (Status == LoadStatus.Loaded)
+        if(Status == LoadStatus.Loaded)
         {
-            if (Data.Count == 1)
+            if(Data.Count == 1)
             {
                 return Data[0].Texture;
             }
-            else if (Data.Count > 1)
+            else if(Data.Count > 1)
             {
                 var currentDelay = Environment.TickCount64 % TotalLength;
                 var pos = 0;
-                for (var i = 0; i < Data.Count; i++)
+                for(var i = 0; i < Data.Count; i++)
                 {
                     pos += Data[i].DelayMS;
-                    if (currentDelay < pos) return Data[i].Texture;
+                    if(currentDelay < pos) return Data[i].Texture;
                 }
             }
         }
@@ -87,7 +87,7 @@ public sealed class ImageFile : IDisposable
 
     public void Dispose()
     {
-        foreach (var x in Data)
+        foreach(var x in Data)
         {
             x.Texture.Dispose();
         }

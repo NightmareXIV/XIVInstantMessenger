@@ -19,7 +19,7 @@ internal class TabHistory
 
     internal void Draw()
     {
-        if (LoadingRequested)
+        if(LoadingRequested)
         {
             LoadingRequested = false;
             PluginLog.Information("Loading chats from files");
@@ -29,10 +29,10 @@ internal class TabHistory
                 {
                     var logFolder = Utils.GetLogStorageFolder();
                     var files = Directory.GetFiles(logFolder);
-                    foreach (var file in files)
+                    foreach(var file in files)
                     {
                         FileInfo fileInfo = new(file);
-                        if (file.EndsWith(".txt") && file.Contains("@") && fileInfo.Length > 0)
+                        if(file.EndsWith(".txt") && file.Contains("@") && fileInfo.Length > 0)
                         {
                             var t = fileInfo.Name.Replace(".txt", "").Split("@");
                             if(Utils.TryParseWorldWithSubstitutions(t[1], out var worldId))
@@ -46,7 +46,7 @@ internal class TabHistory
             });
         }
 
-        if (!LoadingFinished)
+        if(!LoadingFinished)
         {
             ImGuiEx.Text("Loading...");
         }
@@ -54,10 +54,10 @@ internal class TabHistory
         {
             ImGuiEx.SetNextItemFullWidth();
             ImGui.InputTextWithHint("##fltr", "Filter...", ref search, 50);
-            foreach (var x in S.MessageProcessor.Chats)
+            foreach(var x in S.MessageProcessor.Chats)
             {
-                if (search.Length > 0 && !x.Key.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
-                if (ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count(x => !x.IsSystem)} messages)"))
+                if(search.Length > 0 && !x.Key.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
+                if(ImGui.Selectable($"{x.Key.GetChannelName()} ({x.Value.Messages.Count(x => !x.IsSystem)} messages)"))
                 {
                     P.OpenMessenger(x.Key, true);
                     S.MessageProcessor.Chats[x.Key].SetFocusAtNextFrame();
@@ -65,10 +65,10 @@ internal class TabHistory
             }
             ImGuiEx.WithTextColor(ImGuiColors.DalamudGrey2, delegate
             {
-                foreach (var x in fileChatList)
+                foreach(var x in fileChatList)
                 {
-                    if (search.Length > 0 && !x.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
-                    if (!S.MessageProcessor.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetChannelName()} (unloaded)"))
+                    if(search.Length > 0 && !x.GetChannelName().Contains(search, StringComparison.OrdinalIgnoreCase)) continue;
+                    if(!S.MessageProcessor.Chats.ContainsKey(x) && ImGui.Selectable($"{x.GetChannelName()} (unloaded)"))
                     {
                         P.OpenMessenger(x, true);
                         S.MessageProcessor.Chats[x].SetFocusAtNextFrame();

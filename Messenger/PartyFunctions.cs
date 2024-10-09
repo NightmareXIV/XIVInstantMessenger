@@ -16,16 +16,16 @@ internal sealed unsafe class PartyFunctions : IDisposable
 
     internal void InviteSameWorld(string name, ushort world, ulong contentId)
     {
-        if (!Player.Available) return;
-        fixed (byte* namePtr = name.ToTerminatedBytes())
+        if(!Player.Available) return;
+        fixed(byte* namePtr = name.ToTerminatedBytes())
         {
             InfoProxyPartyInvite.Instance()->InviteToParty(contentId, namePtr, world);
         }
     }
     internal void InviteOtherWorld(ulong contentId, ushort world)
     {
-        if (!Player.Available) return;
-        if (contentId != 0)
+        if(!Player.Available) return;
+        if(contentId != 0)
         {
             InfoProxyPartyInvite.Instance()->InviteToPartyContentId(contentId, world);
         }

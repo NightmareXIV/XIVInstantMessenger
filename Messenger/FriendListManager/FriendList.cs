@@ -17,14 +17,14 @@ public static unsafe class FriendList
         try
         {
             var p = AgentFriendlist.Instance()->InfoProxy;
-            for (uint i = 0; i < p->InfoProxyCommonList.DataSize; i++)
+            for(uint i = 0; i < p->InfoProxyCommonList.DataSize; i++)
             {
                 var entry = p->InfoProxyCommonList.GetEntry(i);
-                if (entry == null || entry->ContentId == 0) continue;
+                if(entry == null || entry->ContentId == 0) continue;
                 l.Add(new(entry));
             }
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             e.LogInternal();
         }

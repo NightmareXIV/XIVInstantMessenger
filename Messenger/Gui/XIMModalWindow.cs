@@ -9,9 +9,9 @@ public unsafe class XIMModalWindow : EzOverlayWindow
     private BackgroundWindow Modal;
     public XIMModalWindow() : base("###ximmdl", HorizontalPosition.Middle, VerticalPosition.Middle)
     {
-        this.IsOpen = false;
-        this.Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse;
-        this.RespectCloseHotkey = false;
+        IsOpen = false;
+        Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse;
+        RespectCloseHotkey = false;
         Modal = new(this);
         P.WindowSystemMain.AddWindow(Modal);
         P.WindowSystemMain.AddWindow(this);
@@ -21,9 +21,9 @@ public unsafe class XIMModalWindow : EzOverlayWindow
     {
         WindowDrawAction = drawAction;
         WindowOnClose = onClose;
-        this.WindowName = title + "###ximmdl";
-        this.IsOpen = true;
-        this.Modal.IsOpen = true;
+        WindowName = title + "###ximmdl";
+        IsOpen = true;
+        Modal.IsOpen = true;
     }
 
     public override void DrawAction()
@@ -39,10 +39,10 @@ public unsafe class XIMModalWindow : EzOverlayWindow
 
     private class BackgroundWindow : Window
     {
-        XIMModalWindow ParentWindow;
+        private XIMModalWindow ParentWindow;
         public BackgroundWindow(XIMModalWindow parentWindow) : base($"XIM Modal Window background", ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse, true)
         {
-            this.RespectCloseHotkey = false;
+            RespectCloseHotkey = false;
             ParentWindow = parentWindow;
         }
 
@@ -60,8 +60,8 @@ public unsafe class XIMModalWindow : EzOverlayWindow
 
         public override void Draw()
         {
-            if(ImGui.Button("x")) this.IsOpen = false;
-            if(!ParentWindow.IsOpen) this.IsOpen = false;
+            if(ImGui.Button("x")) IsOpen = false;
+            if(!ParentWindow.IsOpen) IsOpen = false;
             CImGui.igBringWindowToDisplayBack(CImGui.igGetCurrentWindow());
         }
 
