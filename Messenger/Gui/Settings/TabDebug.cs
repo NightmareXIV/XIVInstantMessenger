@@ -23,6 +23,10 @@ internal unsafe class TabDebug
 
         try
         {
+            if(ImGui.CollapsingHeader("MultilineInput"))
+            {
+                ImGuiEx.InputTextWrapMultilineExpanding("Test", ref Ref<string>.Get(), 10000);
+            }
             if(ImGui.CollapsingHeader("IPC"))
             {
                 try

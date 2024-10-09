@@ -2,6 +2,7 @@
 using ECommons.Interop;
 using Messenger.Services.EmojiLoaderService;
 using PInvoke;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace Messenger.Gui;
@@ -231,13 +232,17 @@ public unsafe partial class PseudoMultilineInput
                     cursor = spaceIndex == -1 ? data->BufTextLen : spaceIndex + 1;
                     prevSpaceIndex = spaceIndex;
                 }
-                data->BufDirty = 1;
             }
+            var old = MemoryHelper.ReadRaw((nint)data->Buf, data->BufTextLen);
             Process();
             if(numNewlines >= MaxLines)
             {
                 TextWidth -= ImGui.GetStyle().ScrollbarSize;
                 Process();
+            }
+            if(!MemoryHelper.ReadRaw((nint)data->Buf, data->BufTextLen).SequenceEqual(old))
+            {
+                data->BufDirty = 1;
             }
             return 0;
         }
