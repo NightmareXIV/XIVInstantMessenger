@@ -8,7 +8,7 @@ internal class TabSystem : Window
     internal string Name = null;
     internal IEnumerable<ChatWindow> Windows => P.WindowSystemChat.Windows.Cast<ChatWindow>().Where(x => (Name == null && !C.TabWindows.Contains(x.OwningTab)) || x.OwningTab == Name);
 
-    public TabSystem(string name) : base($"XIV Instant Messenger - {name ?? "Default Window"}")
+    public TabSystem(string name) : base($"XIV Instant Messenger - {name ?? "Default Window"}", ImGuiWindowFlags.NoScrollbar)
     {
         RespectCloseHotkey = false;
         IsOpen = true;

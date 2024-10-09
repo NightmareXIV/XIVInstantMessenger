@@ -11,7 +11,6 @@ public unsafe class XIMModalWindow : EzOverlayWindow
     {
         this.IsOpen = false;
         this.Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoCollapse;
-        this.Flags &= ~ImGuiWindowFlags.NoFocusOnAppearing;
         this.RespectCloseHotkey = false;
         Modal = new(this);
         P.WindowSystemMain.AddWindow(Modal);

@@ -9,5 +9,6 @@ public class EngagementInfo
     public bool OpenOnGenericOutgoing = false;
     public long LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     public Sender? DefaultTarget = null;
+    public List<Sender> DisallowDMs = [];
     internal bool IsActive => Enabled && Participants.Count > 0;
 }

@@ -110,4 +110,14 @@ public class Config : IEzConfig
     public bool EnableEngagementsContext = true;
     public bool EngagementPreventsIndi = true;
     public List<EngagementInfo> Engagements = [];
+
+    public bool DoubleEnterSend = false;
+    public int DoubleEnterDelay = 250;
+
+    public bool SplitterEnable = false;
+    public bool SplitterNotificationDismissed = false;
+    public bool SplitterOnSpace = false;
+    public bool SplitterManually = true;
+    public string SplitterManualIndicator = ">>>";
+    public string SplitterIndicatorOverride = null;
 }

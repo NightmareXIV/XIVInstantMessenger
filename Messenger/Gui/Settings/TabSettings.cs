@@ -104,6 +104,11 @@ internal class TabSettings
                 if (ImGui.Checkbox("Display when game UI is hidden", ref C.UIShowHidden)) P.ReapplyVisibilitySettings();
                 if (ImGui.Checkbox("Display in cutscenes", ref C.UIShowCutscene)) P.ReapplyVisibilitySettings();
                 if (ImGui.Checkbox("Display in group pose", ref C.UIShowGPose)) P.ReapplyVisibilitySettings();
+                ImGui.Checkbox("Double-press enter to send message", ref C.DoubleEnterSend);
+                ImGui.Indent();
+                ImGui.SetNextItemWidth(150f);
+                ImGuiEx.SliderIntAsFloat("Maximum double-press delay", ref C.DoubleEnterDelay, 200, 500);
+                ImGui.Unindent();
             }, null, true),
             ("Quick button", delegate
             {
@@ -223,6 +228,31 @@ internal class TabSettings
                     
                     Once they are uploaded, you can now search for them in the picker by typing in the "emote code" you set when uploading and hitting the search icon on the right. It will now show up by default when searching for it from now on for you. Recipients who have enabled "Attempt to search for unknown emoji on BetterTTV" will also be able to see your custom emoji.
                     """);
+            }, null, true), 
+            ("Splitter", delegate
+            {
+                ImGui.Checkbox("Enable message splitter", ref C.SplitterEnable);
+                ImGuiEx.HelpMarker($"When you write message longer than normally possible, XIM will split it in few sequential parts. You will have to press send button multiple times to send multiple messages.");
+                ImGui.Indent();
+                ImGui.Checkbox("Enable manual splitting", ref C.SplitterManually);
+                ImGui.Indent();
+                ImGui.SetNextItemWidth(100f);
+                ImGui.InputText($"Split/continuation indicator", ref C.SplitterManualIndicator, 10);
+                ImGui.Unindent();
+                ImGui.Checkbox("Split automatically on space", ref C.SplitterOnSpace);
+                var replace = C.SplitterIndicatorOverride != null;
+                if(ImGui.Checkbox("Replace continuation indicator", ref replace))
+                {
+                    C.SplitterIndicatorOverride = replace ? "" : null;
+                }
+                if(C.SplitterIndicatorOverride != null)
+                {
+                    ImGui.Indent();
+                    ImGui.SetNextItemWidth(100f);
+                    ImGui.InputText($"Split/continuation indicator override", ref C.SplitterIndicatorOverride, 10);
+                    ImGui.Unindent();
+                }
+                ImGui.Unindent();
             }, null, true)
         );
     }

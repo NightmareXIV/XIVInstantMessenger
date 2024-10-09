@@ -2,6 +2,7 @@
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using ECommons.Automation;
+using ECommons.Throttlers;
 using Messenger.Configuration;
 using Messenger.Gui.Settings;
 using Messenger.Gui.TitleButtons;
@@ -39,7 +40,7 @@ public unsafe class ChatWindow : Window
 
     public ChatWindow(MessageHistory messageHistory) :
         base($"Chat with {messageHistory.HistoryPlayer.GetChannelName()}###Messenger - {messageHistory.HistoryPlayer.Name}{messageHistory.HistoryPlayer.HomeWorld}"
-            , ImGuiWindowFlags.NoFocusOnAppearing)
+            , ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoScrollbar)
     {
         MessageHistory = messageHistory;
         SizeConstraints = new()
@@ -57,11 +58,11 @@ public unsafe class ChatWindow : Window
     public void UpdateTitleButtons(Window window)
     {
         window.TitleBarButtons.Clear();
-        if (InviteToPartyButton.ShouldDisplay()) window.TitleBarButtons.Add(InviteToPartyButton.Button);
-        if (AddFriendButton.ShouldDisplay()) window.TitleBarButtons.Add(AddFriendButton.Button);
-        if (AddToBlacklistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToBlacklistButton.Button);
-        if (OpenLogButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenLogButton.Button);
-        if (OpenCharaCardButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenCharaCardButton.Button);
+        if(InviteToPartyButton.ShouldDisplay()) window.TitleBarButtons.Add(InviteToPartyButton.Button);
+        if(AddFriendButton.ShouldDisplay()) window.TitleBarButtons.Add(AddFriendButton.Button);
+        if(AddToBlacklistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToBlacklistButton.Button);
+        if(OpenLogButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenLogButton.Button);
+        if(OpenCharaCardButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenCharaCardButton.Button);
     }
 
     internal void SetTransparency(bool isTransparent)
@@ -74,15 +75,15 @@ public unsafe class ChatWindow : Window
     public override bool DrawConditions()
     {
         var ret = true;
-        if (P.Hidden)
+        if(P.Hidden)
         {
             ret = false;
         }
-        if (HideByCombat)
+        if(HideByCombat)
         {
             ret = false;
         }
-        if (!ret)
+        if(!ret)
         {
             MessageHistory.UnsetFocus();
         }
@@ -92,11 +93,11 @@ public unsafe class ChatWindow : Window
     public override void OnOpen()
     {
         P.lastHistory = MessageHistory;
-        if (C.WindowCascading)
+        if(C.WindowCascading)
         {
             SetPosition = true;
         }
-        if (!C.NoBringWindowToFrontIfTyping || !ImGui.GetIO().WantCaptureKeyboard)
+        if(!C.NoBringWindowToFrontIfTyping || !ImGui.GetIO().WantCaptureKeyboard)
         {
             BringToFront = true;
         }
@@ -105,7 +106,7 @@ public unsafe class ChatWindow : Window
     public override void OnClose()
     {
         KeepInCombat = false;
-        if (S.MessageProcessor.Chats.All(x => !x.Value.ChatWindow.IsOpen))
+        if(S.MessageProcessor.Chats.All(x => !x.Value.ChatWindow.IsOpen))
         {
             //Notify.Info("Cascading has been reset");
             ChatWindow.CascadingPosition = 0;
@@ -121,17 +122,17 @@ public unsafe class ChatWindow : Window
     public void UpdateLastFrame()
     {
         var f = ImGui.GetFrameCount();
-        if (f - FrameCount > 1)
+        if(f - FrameCount > 1)
         {
             PluginLog.Debug($"Window {MessageHistory.HistoryPlayer} just opened");
-            this.DisplayCap = C.DisplayedMessages;
+            DisplayCap = C.DisplayedMessages;
         }
         FrameCount = f;
     }
 
     public override void PreDraw()
     {
-        if (C.NoResize && !ImGui.GetIO().KeyCtrl)
+        if(C.NoResize && !ImGui.GetIO().KeyCtrl)
         {
             Flags |= ImGuiWindowFlags.NoResize;
         }
@@ -139,7 +140,7 @@ public unsafe class ChatWindow : Window
         {
             Flags &= ~ImGuiWindowFlags.NoResize;
         }
-        if (C.NoMove && !ImGui.GetIO().KeyCtrl)
+        if(C.NoMove && !ImGui.GetIO().KeyCtrl)
         {
             Flags |= ImGuiWindowFlags.NoMove;
         }
@@ -151,17 +152,17 @@ public unsafe class ChatWindow : Window
         SizeCondition = C.ResetSizeOnAppearing ? ImGuiCond.Appearing : ImGuiCond.FirstUseEver;
         IsTransparent = Transparency < 1f;
         TitleColored = false;
-        if (Unread)
+        if(Unread)
         {
             TitleColored = true;
             ImGui.PushStyleColor(ImGuiCol.TitleBg, ImGuiCol.TitleBg.GetFlashColor(Cust));
             ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiCol.TitleBgCollapsed.GetFlashColor(Cust));
         }
-        if (IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
-        if (SetPosition)
+        if(IsTransparent) ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Transparency);
+        if(SetPosition)
         {
             SetPosition = false;
-            if (C.WindowCascading)
+            if(C.WindowCascading)
             {
                 var cPos = CascadingPosition % C.WindowCascadingReset;
                 var xmult = (int)(CascadingPosition / C.WindowCascadingReset);
@@ -169,7 +170,7 @@ public unsafe class ChatWindow : Window
                     + new Vector2(C.WindowCascadingX, C.WindowCascadingY)
                     + new Vector2(C.WindowCascadingXDelta * cPos + C.WindowCascadingXDelta * xmult, C.WindowCascadingYDelta * cPos));
                 CascadingPosition++;
-                if (CascadingPosition > C.WindowCascadingReset * C.WindowCascadingMaxColumns)
+                if(CascadingPosition > C.WindowCascadingReset * C.WindowCascadingMaxColumns)
                 {
                     CascadingPosition = 0;
                 }
@@ -182,7 +183,7 @@ public unsafe class ChatWindow : Window
     {
         InviteToPartyButton.DrawPopup();
         UpdateTitleButtons(this);
-        if (P.FontManager.FontPushed && !P.FontManager.FontReady)
+        if(P.FontManager.FontPushed && !P.FontManager.FontReady)
         {
             ImGuiEx.Text($"Loading font, please wait...");
             return;
@@ -191,14 +192,14 @@ public unsafe class ChatWindow : Window
         /*ImGuiEx.Text($"{(prev == null ? "null" : prev.Player)}");
         ImGui.SameLine();
         ImGuiEx.TextCopy($"{this.messageHistory.GetLatestMessageTime()}");*/
-        if (ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
+        if(ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
         {
             Unread = false;
             Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
         }
         else
         {
-            if (!C.DisallowTransparencyHovered && ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
+            if(!C.DisallowTransparencyHovered && ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
             {
                 Transparency = Math.Min(C.TransMax, Transparency + C.TransDelta);
             }
@@ -207,7 +208,7 @@ public unsafe class ChatWindow : Window
                 Transparency = Math.Max(C.TransMin, Transparency - C.TransDelta);
             }
         }
-        if (BringToFront)
+        if(BringToFront)
         {
             BringToFront = false;
             CImGui.igBringWindowToDisplayFront(CImGui.igGetCurrentWindow());
@@ -236,14 +237,14 @@ public unsafe class ChatWindow : Window
         var subjectNoWorld = MessageHistory.HistoryPlayer.GetPlayerName().Split("@")[0];
         var me = Svc.ClientState.LocalPlayer?.Name.ToString().Split("@")[0] ?? "Me";
         ImGui.BeginChild($"##ChatChild{subject}", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - fieldHeight));
-        if (MessageHistory.Messages.Count == 0)
+        if(MessageHistory.Messages.Count == 0)
         {
             Utils.DrawWrappedText($"This is the beginning of your chat with {subject}");
         }
         bool? isIncoming = null;
-        if (MessageHistory.LogLoaded && MessageHistory.LoadedMessages.Count > 0)
+        if(MessageHistory.LogLoaded && MessageHistory.LoadedMessages.Count > 0)
         {
-            foreach (var message in MessageHistory.LoadedMessages)
+            foreach(var message in MessageHistory.LoadedMessages)
             {
                 MessageHistory.Messages.Insert(0, message);
             }
@@ -258,14 +259,14 @@ public unsafe class ChatWindow : Window
             ImGuiEx.TextWrapped(EColor.OrangeBright, $"For performance reasons, {startIndex} messages have been hidden.");
             if(ImGui.Button($"Display {Math.Min(startIndex, C.DisplayedMessages)} more messages"))
             {
-                Svc.Framework.RunOnTick(() => ScrollToMessage = startIndex, delayTicks:1);
+                Svc.Framework.RunOnTick(() => ScrollToMessage = startIndex, delayTicks: 1);
                 DisplayCap += C.DisplayedMessages;
             }
         }
-        for (var n = startIndex; n<MessageHistory.Messages.Count;n++)
+        for(var n = startIndex; n < MessageHistory.Messages.Count; n++)
         {
             var message = MessageHistory.Messages[n];
-            if (message.IsSystem)
+            if(message.IsSystem)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
                 message.Draw();
@@ -273,19 +274,19 @@ public unsafe class ChatWindow : Window
             }
             else
             {
-                if (!message.IsIncoming && Cust.NoOutgoing) continue;
+                if(!message.IsIncoming && Cust.NoOutgoing) continue;
                 var time = DateTimeOffset.FromUnixTimeMilliseconds(message.Time).ToLocalTime();
-                if (C.PrintDate)
+                if(C.PrintDate)
                 {
-                    if (!(time.DayOfYear == currentDay.day && time.Year == currentDay.year))
+                    if(!(time.DayOfYear == currentDay.day && time.Year == currentDay.year))
                     {
                         ImGuiEx.Text(Cust.ColorGeneric, $"[{time.ToString(C.DateFormat)}]");
-                        if (C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
+                        if(C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
                         currentDay = (time.Year, time.DayOfYear);
                     }
                 }
                 var timestamp = time.ToString(C.MessageTimestampFormat);
-                if (C.IRCStyle)
+                if(C.IRCStyle)
                 {
                     var messageColor = message.IsIncoming ? Cust.ColorFromMessage : Cust.ColorToMessage;
                     var subjectColor = message.IsIncoming ? Cust.ColorFromTitle : Cust.ColorToTitle;
@@ -297,7 +298,7 @@ public unsafe class ChatWindow : Window
                         ImGui.SameLine(0, 0);
                     }
                     ImGuiEx.Text(subjectColor, $"{message.OverrideName?.Split("@")[0] ?? (message.IsIncoming ? subjectNoWorld : me)}");
-                    ImGui.SameLine(0, 0); 
+                    ImGui.SameLine(0, 0);
                     if(message.XivChatType != XivChatType.CustomEmote)
                     {
                         ImGuiEx.Text(messageColor, $"] ");
@@ -310,10 +311,10 @@ public unsafe class ChatWindow : Window
                 }
                 else
                 {
-                    if (message.IsIncoming != isIncoming)
+                    if(message.IsIncoming != isIncoming)
                     {
                         isIncoming = message.IsIncoming;
-                        if (message.IsIncoming)
+                        if(message.IsIncoming)
                         {
                             ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorFromTitle);
                             Utils.DrawWrappedText($"From {message.OverrideName?.Split("@")[0] ?? subjectNoWorld}");
@@ -335,21 +336,21 @@ public unsafe class ChatWindow : Window
                 }
             }
 
-            if (ScrollToMessage == n)
+            if(ScrollToMessage == n)
             {
                 PluginLog.Debug($"Set scroll to {n}");
                 ImGui.SetScrollHereY();
                 ScrollToMessage = -1;
             }
-            if (C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
+            if(C.MessageSpacing > 0) ImGui.Dummy(new(C.MessageSpacing));
         }
         ImGui.PopStyleVar();
-        if (MessageHistory.DoScroll > 0)
+        if(MessageHistory.DoScroll > 0)
         {
             MessageHistory.DoScroll--;
             ImGui.SetScrollHereY();
         }
-        if (C.PMLScrollDown && C.PMLEnable && Input.IsInputActive)
+        if(C.PMLScrollDown && C.PMLEnable && Input.IsInputActive)
         {
             ImGui.SetScrollHereY();
         }
@@ -359,27 +360,38 @@ public unsafe class ChatWindow : Window
         //ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - afterInputWidth);
         Input.Width = ImGui.GetContentRegionAvail().X - afterInputWidth;
         var inputCol = false;
-        if (isCmd)
+        if(isCmd)
         {
             inputCol = true;
             ImGui.PushStyleColor(ImGuiCol.FrameBg, ImGui.GetStyle().Colors[(int)ImGuiCol.TitleBgActive] with { W = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg].W });
         }
         var cur = ImGui.GetCursorPosY();
         Input.Draw();
-        if (Input.EnterWasPressed())
+        string firstMessage = null;
+        string remainder = null;
+        var split = C.SplitterEnable ? Utils.SplitMessage(Input.SinglelineText, tellTarget, out firstMessage, out remainder) : null;
+        var isSplit = split != null && split.Count > 1 && firstMessage != null && remainder != null;
+        if(Input.EnterWasPressed() && EzThrottler.Check("SendMessage"))
         {
-            var wasSent = SendMessage(tellTarget);
-            if (wasSent && Input.IsMultiline)
+            if(!C.DoubleEnterSend || !EzThrottler.Check("DoubleEnter"))
             {
-                ImGui.SetWindowFocus(null);
-                ImGui.SetWindowFocus(WindowName);
+                var wasSent = SendMessage(tellTarget);
+                if(wasSent && Input.IsMultiline)
+                {
+                    ImGui.SetWindowFocus(null);
+                    ImGui.SetWindowFocus(WindowName);
+                }
+            }
+            else
+            {
+                EzThrottler.Throttle("DoubleEnter", C.DoubleEnterDelay, true);
             }
         }
-        if (inputCol)
+        if(inputCol)
         {
             ImGui.PopStyleColor();
         }
-        if (MessageHistory.ShouldSetFocus())
+        if(MessageHistory.ShouldSetFocus())
         {
             SetTransparency(false);
             ImGui.SetWindowFocus();
@@ -391,20 +403,20 @@ public unsafe class ChatWindow : Window
         var icur1 = ImGui.GetCursorPos();
         ImGui.Dummy(Vector2.Zero);
 
-        if (C.EnableEmoji && C.EnableEmojiPicker)
+        if(C.EnableEmoji && C.EnableEmojiPicker)
         {
             ImGui.SameLine(0, 2);
-            if (ImGuiEx.IconButton(FontAwesomeIcon.SmileWink, "Insert emoji"))
+            if(ImGuiEx.IconButton(FontAwesomeIcon.SmileWink, "Insert emoji"))
             {
-                if (!BlockEmojiSelection) Input.OpenEmojiSelector();
+                if(!BlockEmojiSelection) Input.OpenEmojiSelector();
             }
-            if (ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Left) && Input.IsSelectingEmoji)
+            if(ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Left) && Input.IsSelectingEmoji)
             {
                 BlockEmojiSelection = true;
             }
-            if (BlockEmojiSelection)
+            if(BlockEmojiSelection)
             {
-                if (ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                if(ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Left))
                 {
                     //
                 }
@@ -416,12 +428,19 @@ public unsafe class ChatWindow : Window
             ImGuiEx.Tooltip("Open Emoji selector");
         }
 
-        if (C.ButtonSend)
+        if(C.ButtonSend)
         {
             ImGui.SameLine(0, 2);
-            if (isCmd)
+            var col = !EzThrottler.Check("DoubleEnter");
+            if(col)
             {
-                if (ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command"))
+                ImGui.PushStyleColor(ImGuiCol.Button, EColor.Green);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, EColor.Green);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, EColor.Green);
+            }
+            if(isCmd)
+            {
+                if(ImGuiEx.IconButton(FontAwesomeIcon.FastForward, "Execute command", enabled: EzThrottler.Check("SendMessage")))
                 {
                     SendMessage(tellTarget);
                 }
@@ -429,21 +448,54 @@ public unsafe class ChatWindow : Window
             }
             else
             {
-                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send"))
+
+                if(ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight, "Send", enabled: EzThrottler.Check("SendMessage")))
                 {
                     SendMessage(tellTarget);
                 }
                 ImGuiEx.Tooltip("Send message");
             }
+            if(col)
+            {
+                ImGui.PopStyleColor(3);
+            }
         }
         ImGui.SameLine(0, 0);
         afterInputWidth = ImGui.GetCursorPosX() - icur1.X;
         ImGui.Dummy(Vector2.Zero);
-        var bytes = Utils.GetLength(subject, Input.SinglelineText);
-        var fraction = (float)bytes.current / (float)bytes.max;
-        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f ? ImGuiColors.DalamudRed : Cust.ColorGeneric);
-        ImGui.ProgressBar(fraction, new Vector2(ImGui.GetContentRegionAvail().X, 3f), "");
-        ImGui.PopStyleColor();
+        if(isSplit)
+        {
+            var begin = ImGui.GetCursorScreenPos();
+            foreach(var x in split)
+            {
+                var bytes = Utils.GetLength(tellTarget, x);
+                var fraction = (float)bytes.current / (float)bytes.max;
+                ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f ? ImGuiColors.DalamudRed : Cust.ColorGeneric);
+                ImGui.ProgressBar(fraction, new Vector2(ImGui.GetContentRegionAvail().X, 3f), "");
+                ImGui.PopStyleColor();
+            }
+            if(ImGui.IsMouseHoveringRect(begin, new(begin.X + ImGui.GetContentRegionAvail().X, ImGui.GetCursorScreenPos().Y)))
+            {
+                ImGui.PushFont(UiBuilder.DefaultFont);
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 45f);
+                ImGuiEx.Text($"This message will be split. Keep pressing send button or enter to sequentially send the following messages:\n\n{split.Print("\n\n")}");
+                ImGui.Separator();
+                ImGuiEx.Text(ImGuiColors.DalamudGrey3, $"Debug:\nFirst message:\n{firstMessage}\n\nRemainder:\n{remainder}");
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
+                ImGui.PopFont();
+            }
+        }
+        else
+        {
+
+            var bytes = Utils.GetLength(tellTarget, Input.SinglelineText);
+            var fraction = (float)bytes.current / (float)bytes.max;
+            ImGui.PushStyleColor(ImGuiCol.PlotHistogram, fraction > 1f ? ImGuiColors.DalamudRed : Cust.ColorGeneric);
+            ImGui.ProgressBar(fraction, new Vector2(ImGui.GetContentRegionAvail().X, 3f), "");
+            ImGui.PopStyleColor();
+        }
         fieldHeight = ImGui.GetCursorPosY() - cursor;
         ImGui.SetWindowFontScale(1);
 
@@ -455,7 +507,7 @@ public unsafe class ChatWindow : Window
                 var engagementInfo = C.Engagements.FirstOrDefault(x => x.Name == MessageHistory.HistoryPlayer.Name);
                 if(engagementInfo != null)
                 {
-                    ImGuiEx.LineCentered($"Engagement{this.MessageHistory.HistoryPlayer.GetPlayerName()}", () =>
+                    ImGuiEx.LineCentered($"Engagement{MessageHistory.HistoryPlayer.GetPlayerName()}", () =>
                     {
                         ImGui.Checkbox("##enableEng", ref engagementInfo.Enabled);
                         ImGui.SameLine();
@@ -511,7 +563,7 @@ public unsafe class ChatWindow : Window
                                 }, null, false),
                                 ("Generic channels", () =>
                                 {
-                                    for(int i = 1; i < TabIndividual.Types.Length; i++)
+                                    for(var i = 1; i < TabIndividual.Types.Length; i++)
                                     {
                                         var x = new Sender(TabIndividual.Types[i].ToString(), 0);
                                         if(ImGui.Selectable(x.GetChannelName(), x == engagementInfo.DefaultTarget))
@@ -540,7 +592,7 @@ public unsafe class ChatWindow : Window
                     }
                     if(ImGui.BeginMenu("- Channels -"))
                     {
-                        for(int i = 1; i < TabIndividual.Types.Length; i++)
+                        for(var i = 1; i < TabIndividual.Types.Length; i++)
                         {
                             if(TabIndividual.Types[i].EqualsAny(XivChatType.Say, XivChatType.CustomEmote)) continue;
                             var x = new Sender(TabIndividual.Types[i].ToString(), 0);
@@ -553,7 +605,7 @@ public unsafe class ChatWindow : Window
                     }
                     ImGui.Separator();
 
-                    for(int i = 1; i < TabIndividual.Types.Length; i++)
+                    for(var i = 1; i < TabIndividual.Types.Length; i++)
                     {
                         if(!TabIndividual.Types[i].EqualsAny(XivChatType.Say, XivChatType.CustomEmote)) continue;
                         var x = new Sender(TabIndividual.Types[i].ToString(), 0);
@@ -570,27 +622,104 @@ public unsafe class ChatWindow : Window
                 e.Log();
             }
 
-            
-
             ImGui.PopFont();
             fieldHeight = ImGui.GetCursorPosY() - cursor;
+        }
+
+        bool SendMessage(string subject, bool? generic = null)
+        {
+            if(!EzThrottler.Check("SendMessage")) return false;
+            remainder ??= "";
+            var ret = false;
+            string trimmed;
+            if(isSplit)
+            {
+                trimmed = firstMessage;
+            }
+            else
+            {
+                trimmed = Input.SinglelineText.Trim();
+            }
+            if(subject == null && !(trimmed.StartsWith('/') && C.CommandPassthrough))
+            {
+                ImGui.OpenPopup("SelectSendSubject");
+                return ret;
+            }
+            if(MessageHistory.IsEngagement)
+            {
+                generic ??= MessageHistory.HistoryPlayer.GetEngagementInfo().DefaultTarget?.IsGenericChannel() ?? false;
+            }
+            else
+            {
+                generic ??= MessageHistory.HistoryPlayer.IsGenericChannel();
+            }
+            var bytes = Utils.GetLength(subject, trimmed);
+            if(trimmed.Length == 0)
+            {
+                //Notify.Error("Message is empty!");
+            }
+            else if(bytes.current > bytes.max)
+            {
+                Notify.Error("Message is too long!");
+            }
+            else if(trimmed.StartsWith('/') && C.CommandPassthrough)
+            {
+                if(!generic.Value && C.AutoTarget &&
+                (P.TargetCommands.Any(x => trimmed.Equals(x, StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
+                && Svc.Objects.TryGetFirst(x => x is IPlayerCharacter pc && pc.GetPlayerName() == subject && x.IsTargetable, out var obj))
+                {
+                    Svc.Targets.SetTarget(obj);
+                    //Notify.Info($"Targeting {subject}");
+                    new TickScheduler(delegate { Chat.Instance.SendMessage(trimmed); }, 100);
+                    ret = true;
+                }
+                else
+                {
+                    Chat.Instance.SendMessage(trimmed);
+                    ret = true;
+                }
+                P.MessageCache.PushBack(trimmed);
+                Input.SinglelineText = isSplit ? remainder : "";
+                if(isSplit) EzThrottler.Throttle("SendMessage", 2000, true);
+            }
+            else
+            {
+                PluginLog.Verbose($"Begin send message to {subject} {generic}: {trimmed}");
+                var error = P.SendDirectMessage(subject, trimmed, generic.Value);
+                if(error == null)
+                {
+                    ret = true;
+                    P.MessageCache.PushBack(trimmed);
+                    Input.SinglelineText = isSplit ? remainder : "";
+                    if(isSplit) EzThrottler.Throttle("SendMessage", 2000, true);
+                }
+                else
+                {
+                    Notify.Error(Input.SinglelineText);
+                }
+            }
+            if(C.RefocusInputAfterSending)
+            {
+                MessageHistory.SetFocusAtNextFrame();
+            }
+            return ret;
         }
     }
 
     private void PostMessageFunctionsShared(SavedMessage x)
     {
-        if (C.ClickToOpenLink && ImGui.IsItemHovered())
+        if(C.ClickToOpenLink && ImGui.IsItemHovered())
         {
-            foreach (var s in x.Message.Split(" "))
+            foreach(var s in x.Message.Split(" "))
             {
-                if (s.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                if(s.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
                     || s.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
                     ImGuiEx.SetTooltip($"Link found:\n{s}\nClick to open");
                     ImGui.PopStyleColor();
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-                    if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                    if(ImGui.IsItemClicked(ImGuiMouseButton.Left))
                     {
                         new OpenLinkWindow(s);
                     }
@@ -598,7 +727,7 @@ public unsafe class ChatWindow : Window
                 }
             }
         }
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+        if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
         {
             ImGui.OpenPopup($"MessageDetail{x.GUID}");
         }
@@ -606,38 +735,38 @@ public unsafe class ChatWindow : Window
 
     private void PostMessageFunctions(SavedMessage x)
     {
-        if (ImGui.BeginPopup($"MessageDetail{x.GUID}"))
+        if(ImGui.BeginPopup($"MessageDetail{x.GUID}"))
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
             //this.SetTransparency(false);
             ImGui.SetNextItemWidth(400f);
             var msg = x.Message;
             ImGui.InputText("##copyTextMsg", ref msg, 10000);
-            if (ImGui.Selectable($"Copy message to clipboard"))
+            if(ImGui.Selectable($"Copy message to clipboard"))
             {
                 ImGui.SetClipboardText(x.Message);
             }
             var linkN = false;
-            foreach (var s in x.Message.Split(" "))
+            foreach(var s in x.Message.Split(" "))
             {
-                if (s.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                if(s.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
                     || s.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!linkN)
+                    if(!linkN)
                     {
                         linkN = true;
                         ImGui.Separator();
                         ImGuiEx.Text("Found links in message:");
                     }
-                    if (ImGui.Selectable($"{s}"))
+                    if(ImGui.Selectable($"{s}"))
                     {
                         new OpenLinkWindow(s);
                     }
                 }
             }
-            if (x.MapPayload != null)
+            if(x.MapPayload != null)
             {
-                if (ImGui.Selectable("Open map link"))
+                if(ImGui.Selectable("Open map link"))
                 {
                     Safe(delegate
                     {
@@ -645,9 +774,9 @@ public unsafe class ChatWindow : Window
                     });
                 }
             }
-            if (x.Item != null)
+            if(x.Item != null)
             {
-                if (ImGui.Selectable("Print item details"))
+                if(ImGui.Selectable("Print item details"))
                 {
                     Safe(delegate
                     {
@@ -664,75 +793,10 @@ public unsafe class ChatWindow : Window
     public override void PostDraw()
     {
         P.FontManager.PopFont();
-        if (IsTransparent) ImGui.PopStyleVar();
-        if (TitleColored)
+        if(IsTransparent) ImGui.PopStyleVar();
+        if(TitleColored)
         {
             ImGui.PopStyleColor(2);
         }
-    }
-
-    private bool SendMessage(string subject, bool? generic = null)
-    {
-        var ret = false;
-        var trimmed = Input.SinglelineText.Trim();
-        if(subject == null && !(trimmed.StartsWith('/') && C.CommandPassthrough))
-        {
-            ImGui.OpenPopup("SelectSendSubject");
-            return ret;
-        }
-        if(MessageHistory.IsEngagement)
-        {
-            generic ??= MessageHistory.HistoryPlayer.GetEngagementInfo().DefaultTarget?.IsGenericChannel() ?? false;
-        }
-        else
-        {
-            generic ??= MessageHistory.HistoryPlayer.IsGenericChannel();
-        }
-        var bytes = Utils.GetLength(subject, Input.SinglelineText);
-        if (trimmed.Length == 0)
-        {
-            //Notify.Error("Message is empty!");
-        }
-        else if (bytes.current > bytes.max)
-        {
-            Notify.Error("Message is too long!");
-        }
-        else if (trimmed.StartsWith('/') && C.CommandPassthrough)
-        {
-            if (!generic.Value && C.AutoTarget &&
-            (P.TargetCommands.Any(x => Input.SinglelineText.Equals(x, StringComparison.OrdinalIgnoreCase) || Input.SinglelineText.StartsWith($"{x} ", StringComparison.OrdinalIgnoreCase)))
-            && Svc.Objects.TryGetFirst(x => x is IPlayerCharacter pc && pc.GetPlayerName() == subject && x.IsTargetable, out var obj))
-            {
-                Svc.Targets.SetTarget(obj);
-                //Notify.Info($"Targeting {subject}");
-                new TickScheduler(delegate { Chat.Instance.SendMessage(trimmed); }, 100);
-                ret = true;
-            }
-            else
-            {
-                Chat.Instance.SendMessage(trimmed);
-                ret = true;
-            }
-            Input.SinglelineText = "";
-        }
-        else
-        {
-            PluginLog.Verbose($"Begin send message to {subject} {generic}: {trimmed}");
-            var error = P.SendDirectMessage(subject, trimmed, generic.Value);
-            if (error == null)
-            {
-                ret = true;
-                Input.SinglelineText = "";
-            }
-            else
-            {
-                Notify.Error(Input.SinglelineText);
-            }
-        }
-        if (C.RefocusInputAfterSending)
-        {
-            MessageHistory.SetFocusAtNextFrame();
-        }
-        return ret;
     }
 }

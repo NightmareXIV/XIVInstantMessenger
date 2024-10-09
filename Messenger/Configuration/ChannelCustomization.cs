@@ -1,6 +1,6 @@
 ﻿namespace Messenger.Configuration;
 
-public struct ChannelCustomization
+public class ChannelCustomization
 {
     public bool AutoOpenTellIncoming = true;
     public bool AutoOpenTellOutgoing = true;

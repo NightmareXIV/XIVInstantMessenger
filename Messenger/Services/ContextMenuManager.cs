@@ -66,13 +66,19 @@ public class ContextMenuManager : IDisposable
                     OnClicked = (o) =>
                     {
                         List<MenuItem> items = [];
+                        items.Add(new()
+                        {
+                            Name = "Create new Engagement",
+                            OnClicked = (_) => Utils.OpenEngagementCreation([sender]),
+                            Prefix = (SeIconChar)'',
+                        });
                         foreach(var x in C.Engagements.Where(s => s.Enabled).OrderByDescending(s => s.LastUpdated))
                         {
                             if(x.Participants.Contains(sender))
                             {
                                 items.Add(new()
                                 {
-                                    Prefix = (SeIconChar)'',
+                                    Prefix = (SeIconChar)'',
                                     Name = x.Name,
                                     OnClicked = (_) =>
                                     {

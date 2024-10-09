@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.Automation;
+using ECommons.CircularBuffers;
 using ECommons.Configuration;
 using ECommons.Events;
 using ECommons.Funding;
@@ -40,6 +41,7 @@ public unsafe class Messenger : IDalamudPlugin
     internal TabSystem TabSystem;
     internal List<TabSystem> TabSystems = [];
     public string CurrentPlayer = null;
+    internal CircularBuffer<string> MessageCache = new(100);
 
     public Messenger(IDalamudPluginInterface pi)
     {

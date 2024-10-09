@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.ClientState.JobGauge.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -12,6 +13,8 @@ using Messenger.Configuration;
 using Messenger.Gui.Settings;
 using PInvoke;
 using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Action = System.Action;
 
 namespace Messenger;
@@ -21,6 +24,175 @@ internal static unsafe class Utils
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
     public const uint EngagementID = 1000000;
     public const uint SuperchannelID = 1000001;
+
+    public static List<string> SplitMessage(string message, string destination, out string firstMessage, out string remainder)
+    {
+        try
+        {
+            var messageCopy = message;
+            string command;
+            if(message.StartsWith('/'))
+            {
+                var m = Regex.Match(message, @"\/(t|tell)\s+(.+)@([a-z]+)\s", RegexOptions.IgnoreCase);
+                if(m.Success)
+                {
+                    command = $"/{m.Groups[1]} {m.Groups[2]}@{m.Groups[3]} ";
+                    message = message[(m.Groups[0].Length + 1)..];
+                }
+                else
+                {
+                    var spl = message.Split(" ");
+                    if(spl.Length <= 1)
+                    {
+                        firstMessage = null;
+                        remainder = null;
+                        return null;
+                    }
+                    command = $"{spl[0]} ";
+                    message = $"{spl[1..].Print(" ")}";
+                }
+            }
+            else
+            {
+                command = "";
+            }
+
+            if(C.SplitterManually && C.SplitterManualIndicator.Length > 0 && message.Contains(C.SplitterManualIndicator))
+            {
+                var splitList = message.Split(C.SplitterManualIndicator, StringSplitOptions.TrimEntries).ToList();
+                var secondarySplitList = message.Split(C.SplitterManualIndicator, 2, StringSplitOptions.TrimEntries).ToList();
+                ProcessSplitList(splitList);
+                firstMessage = splitList[0];
+                remainder = $"{command}{secondarySplitList[1]}";
+                return splitList;
+            }
+            else if(C.SplitterOnSpace)
+            {
+                var extraLength = 20 + command.Length + (C.SplitterIndicatorOverride == null ? 0 : C.SplitterIndicatorOverride.Length);
+                var ret = new List<string>();
+                var spacePositions = new List<int>();
+                for(int i = 0; i < message.Length; i++)
+                {
+                    if(message[i] == ' ') spacePositions.Add(i);
+                }
+                if(spacePositions.Count > 1)
+                {
+                    remainder = null;
+                    int lastSpacePos = 0;
+                    for(int i = 1; i < spacePositions.Count; i++)
+                    {
+                        var next = spacePositions[i];
+                        var len = GetLength(destination, message[lastSpacePos..next]);
+                        if(len.current > len.max - extraLength)
+                        {
+                            ret.Add(message[lastSpacePos..spacePositions[i - 1]].Trim());
+                            remainder ??= command + message[spacePositions[i - 1]..].Trim();
+                            lastSpacePos = spacePositions[i - 1];
+                        }
+                    }
+                    if(lastSpacePos != spacePositions.Count - 1)
+                    {
+                        ret.Add(message[lastSpacePos..].Trim());
+                    }
+                    ProcessSplitList(ret);
+                    firstMessage = ret[0];
+                    return ret;
+                }
+            }
+
+            void ProcessSplitList(List<string> splitList)
+            {
+                if(C.SplitterIndicatorOverride != null)
+                {
+                    for(int i = 0; i < splitList.Count - 1; i++)
+                    {
+                        splitList[i] = $"{command}{splitList[i]}{C.SplitterIndicatorOverride}";
+                    }
+                }
+                else
+                {
+                    for(int i = 0; i < splitList.Count - 1; i++)
+                    {
+                        splitList[i] = $"{command}{splitList[i]}{C.SplitterManualIndicator}";
+                    }
+                }
+                splitList[^1] = $"{command}{splitList[^1]}";
+            }
+        }
+        catch(Exception e)
+        {
+            PluginLog.Error("Error splitting message.");
+            e.Log();
+        }
+
+        firstMessage = null;
+        remainder = null;
+        return null;
+    }
+
+    public static Sender ToSender(this IPlayerCharacter pc)
+    {
+        return new(pc.Name.ToString(), pc.HomeWorld.Id);
+    }
+
+    public static void OpenEngagementCreation(List<Sender> includedPlayers = null)
+    {
+        S.XIMModalWindow.Open("Create new engagement", () =>
+        {
+            var cur = ImGui.GetCursorPos();
+            ImGui.Dummy(new Vector2(300, 300));
+            ImGui.SetCursorPos(cur);
+            if(includedPlayers != null && includedPlayers.Count > 0)
+            {
+                ImGuiEx.Text($"The following players will be added into this engagement:");
+                ImGuiEx.Text(includedPlayers.Select(x => $"- {x.GetPlayerName()}").Print("\n"));
+            }
+            ref var newName = ref Ref<string>.Get();
+            ImGui.SetNextItemWidth(300f);
+            ImGui.InputText($"##engname", ref newName, 30);
+            if(newName.Length == 0)
+            {
+                ImGuiEx.Text(EColor.RedBright, $"Name can't be empty");
+            }
+            else if(newName.ContainsAny(Path.GetInvalidFileNameChars()))
+            {
+                ImGuiEx.Text(EColor.RedBright, $"Name can't contain any of these characters:\n{Path.GetInvalidFileNameChars().Print("")}");
+            }
+            else if(newName.ContainsAny(Path.GetInvalidPathChars()))
+            {
+                ImGuiEx.Text(EColor.RedBright, $"Name can't contain any of these characters:\n{Path.GetInvalidPathChars().Print("")}");
+            }
+            else if(newName.Trim() != newName)
+            {
+                ImGuiEx.Text(EColor.RedBright, $"Name can't start or end with whitespace character");
+            }
+            else if(Utils.HasEngagementWithName(newName))
+            {
+                ImGuiEx.Text(EColor.RedBright, "Engagement with this name already exists");
+            }
+            else
+            {
+                if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Plus, "Add"))
+                {
+                    var e = new EngagementInfo()
+                    {
+                        Name = newName,
+                    };
+                    if(includedPlayers != null)
+                    {
+                        foreach(var p in includedPlayers)
+                        {
+                            e.Participants.Add(p);
+                        }
+                    }
+                    C.Engagements.Add(e);
+                    newName = "";
+                    S.XIMModalWindow.IsOpen = false;
+                    P.OpenMessenger(e.GetSender());
+                }
+            }
+        });
+    }
 
     public static string GetGenericCommand(Sender sender)
     {

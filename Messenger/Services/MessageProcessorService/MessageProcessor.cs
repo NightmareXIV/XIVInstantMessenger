@@ -95,11 +95,16 @@ public unsafe class MessageProcessor : IDisposable
                     var isEngagementOpen = false;
                     if(C.EnableEngagements)
                     {
-                        foreach(var x in C.Engagements.Where(x => x.IsActive && x.Participants.Contains(s)))
+                        var addedMessageCopy = addedMessage.JSONClone();
+                        if(!addedMessageCopy.IsIncoming)
+                        {
+                            addedMessageCopy.OverrideName = $"{Svc.ClientState.LocalPlayer.GetPlayerName()}→{s.GetPlayerName()}";
+                        }
+                        foreach(var x in C.Engagements.Where(x => x.IsActive && x.Participants.Contains(s) && !x.DisallowDMs.Contains(s)))
                         {
                             PluginLog.Debug($"Processing tell for engagement {x.Name}");
                             x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                            isEngagementOpen = ProcessOpenOnTell(x.GetSender(), s, type, ref message, ref isHandled, addedMessage, false);
+                            isEngagementOpen = ProcessOpenOnTell(x.GetSender(), s, type, ref message, ref isHandled, addedMessageCopy, false);
                         }
                     }
                     ProcessOpenOnTell(s, s, type, ref message, ref isHandled, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);

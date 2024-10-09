@@ -8,7 +8,7 @@ namespace Messenger.Gui;
 public unsafe partial class PseudoMultilineInput
 {
     private string Label = "PML";
-    private uint MaxLength = 1500;
+    private uint MaxLength = 15000;
     private string Text = "";
     private float TextWidth = 0f;
     public float? Width = null;
