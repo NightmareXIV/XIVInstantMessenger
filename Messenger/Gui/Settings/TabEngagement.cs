@@ -51,6 +51,10 @@ public static class TabEngagement
                     S.XIMModalWindow.Open($"Member editing for {e.Name}", () => EditMemberList(e));
                 }
                 ImGui.TableNextColumn();
+                DrawArchiveButton(e, e.Name + "ArchiveTab");
+                ImGui.SameLine();
+                DrawRenameButton(e, e.Name + "RenameTab");
+                ImGui.SameLine();
                 if(ImGuiEx.IconButton(FontAwesomeIcon.Trash, enabled: ImGuiEx.Ctrl))
                 {
                     new TickScheduler(() => C.Engagements.Remove(e));
@@ -64,7 +68,106 @@ public static class TabEngagement
         }
     }
 
-    private static void EditMemberList(EngagementInfo e)
+    public static void DrawRenameButton(EngagementInfo e, string id)
+    {
+        ImGui.PushID(id);
+        if(ImGuiEx.IconButton(FontAwesomeIcon.Edit))
+        {
+            ImGui.OpenPopup("RenameEngagement");
+        }
+        ImGuiEx.Tooltip($"Rename this engagement. It will be automatically closed and it will be renamed together with it's log. ");
+        if(ImGui.BeginPopup("RenameEngagement"))
+        {
+            ImGuiEx.Text($"New name:");
+            ImGui.SetNextItemWidth(150f);
+            ref var logName = ref Ref<string>.Get("EngagementName");
+            ImGui.InputText($"##editlog", ref logName, 30);
+            if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Edit, "Rename"))
+            {
+                try
+                {
+                    var fname = e.GetSender().GetPlayerName() + ".txt";
+                    var logFile = Path.Combine(Utils.GetLogStorageFolder(), fname);
+                    var target = Path.Combine(Utils.GetLogStorageFolder(), $"{logName}@Eng.txt");
+                    if(Utils.IsFileNameInvalid(logName, out var error))
+                    {
+                        throw new InvalidDataException(error);
+                    }
+                    if(File.Exists(target))
+                    {
+                        throw new InvalidOperationException($"File {logName}.txt already exists!");
+                    }
+                    File.Move(logFile, target);
+                    if(S.MessageProcessor.Chats.TryGetValue(e.GetSender(), out var m))
+                    {
+                        Utils.Unload(e.GetSender());
+                    }
+                    e.Name = logName;
+                    logName = "";
+                    ImGui.CloseCurrentPopup();
+                }
+                catch(Exception ex)
+                {
+                    DuoLog.Error(ex.Message);
+                    ex.Log();
+                }
+            }
+            ImGui.EndPopup();
+        }
+        ImGui.PopID();
+    }
+
+    public static void DrawArchiveButton(EngagementInfo e, string id)
+    {
+        ImGui.PushID(id);
+        if(ImGuiEx.IconButton(FontAwesomeIcon.Database))
+        {
+            ImGui.OpenPopup("ArchiveEngagement");
+        }
+        ImGuiEx.Tooltip($"Archive this engagement. It will be automatically closed and it's log will be moved to archive folder and renamed. The engagement won't be deleted, it will simply restart anew.");
+        if(ImGui.BeginPopup("ArchiveEngagement"))
+        {
+            ImGuiEx.Text($"Name the archived log:");
+            ImGui.SetNextItemWidth(150f);
+            ref var logName = ref Ref<string>.Get("ArchiveLogName");
+            ImGui.InputText($"##editlog", ref logName, 50);
+            if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Database, "Archive"))
+            {
+                try
+                {
+                    var fname = e.GetSender().GetPlayerName() + ".txt";
+                    var logFile = Path.Combine(Utils.GetLogStorageFolder(), fname);
+                    var archiveDir = Path.Combine(Utils.GetLogStorageFolder(), "Archive");
+                    if(Utils.IsFileNameInvalid(logName, out var error))
+                    {
+                        throw new InvalidDataException(error);
+                    }
+                    var target = Path.Combine(archiveDir, $"{logName}.txt");
+                    if(File.Exists(target))
+                    {
+                        throw new InvalidOperationException($"File {logName}.txt already exists!");
+                    }
+                    Directory.CreateDirectory(archiveDir);
+                    File.Move(logFile, target);
+                    if(S.MessageProcessor.Chats.TryGetValue(e.GetSender(), out var m))
+                    {
+                        Utils.Unload(e.GetSender());
+                    }
+                    logName = "";
+                    ImGui.CloseCurrentPopup();
+                }
+                catch(Exception ex)
+                {
+                    DuoLog.Error(ex.Message);
+                    ex.Log();
+                }
+            }
+            ImGui.EndPopup();
+        }
+        ImGui.PopID();
+    }
+
+    public static void EditMemberList(EngagementInfo e)
     {
         var cur = ImGui.GetCursorPos();
         ImGui.Dummy(new Vector2(400, 400));
@@ -148,33 +251,38 @@ public static class TabEngagement
         });
         if(e.Participants.Count > 0)
         {
-            if(ImGui.BeginTable("##editMemListTable", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.NoSavedSettings))
+            DrawEngagementEditTable(e, true);
+        }
+    }
+
+    public static void DrawEngagementEditTable(EngagementInfo e, bool widthStretch)
+    {
+        if(ImGui.BeginTable("##editMemListTable", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.NoSavedSettings))
+        {
+            ImGui.TableSetupColumn("##name", widthStretch?ImGuiTableColumnFlags.WidthStretch:default);
+            ImGui.TableSetupColumn("##ctrl1");
+            ImGui.TableSetupColumn("##ctrl2");
+
+            foreach(var x in e.Participants)
             {
-                ImGui.TableSetupColumn("##name", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("##ctrl1");
-                ImGui.TableSetupColumn("##ctrl2");
-
-                foreach(var x in e.Participants)
+                ImGui.PushID(x.GetPlayerName());
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGuiEx.TextV($"{x.GetPlayerName()}");
+                ImGui.TableNextColumn();
+                ImGui.PushFont(UiBuilder.IconFont);
+                ImGuiEx.CollectionButtonCheckbox(FontAwesomeIcon.PeopleArrows.ToIconString(), x, e.DisallowDMs, EColor.Green, inverted: true);
+                ImGui.PopFont();
+                ImGuiEx.Tooltip($"When enabled, Direct Messages from this player will be redirected to the engagement window. ");
+                ImGui.TableNextColumn();
+                if(ImGuiEx.IconButton(FontAwesomeIcon.Trash))
                 {
-                    ImGui.PushID(x.GetPlayerName());
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGuiEx.TextV($"{x.GetPlayerName()}");
-                    ImGui.TableNextColumn();
-                    ImGui.PushFont(UiBuilder.IconFont);
-                    ImGuiEx.CollectionButtonCheckbox(FontAwesomeIcon.PeopleArrows.ToIconString(), x, e.DisallowDMs, EColor.Green, inverted: true);
-                    ImGui.PopFont();
-                    ImGuiEx.Tooltip($"When enabled, Direct Messages from this player will be redirected to the engagement window. ");
-                    ImGui.TableNextColumn();
-                    if(ImGuiEx.IconButton(FontAwesomeIcon.Trash))
-                    {
-                        new TickScheduler(() => e.Participants.Remove(x));
-                    }
-                    ImGui.PopID();
+                    new TickScheduler(() => e.Participants.Remove(x));
                 }
-
-                ImGui.EndTable();
+                ImGui.PopID();
             }
+
+            ImGui.EndTable();
         }
     }
 }

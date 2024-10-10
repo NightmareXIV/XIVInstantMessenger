@@ -95,7 +95,7 @@ public unsafe class MessageProcessor : IDisposable
                     var isEngagementOpen = false;
                     if(C.EnableEngagements)
                     {
-                        var addedMessageCopy = addedMessage.JSONClone();
+                        var addedMessageCopy = addedMessage.Clone();
                         if(!addedMessageCopy.IsIncoming)
                         {
                             addedMessageCopy.OverrideName = $"{Svc.ClientState.LocalPlayer.GetPlayerName()}→{s.GetPlayerName()}";
@@ -180,7 +180,7 @@ public unsafe class MessageProcessor : IDisposable
         Chats[messageHistoryOwner].Scroll();
         if(!incoming)
         {
-            if(messageHistoryOwner.GetCustomization().AutoFocusTellOutgoing && !isOpen)
+            if(messageHistoryOwner.GetCustomization().AutoFocusTellOutgoing && !isOpen && !Utils.IsAnyXIMWindowActive())
             {
                 Chats[messageHistoryOwner].SetFocusAtNextFrame();
             }
@@ -189,7 +189,7 @@ public unsafe class MessageProcessor : IDisposable
         {
             if(!messageHistoryOwner.GetCustomization().NoUnread)
             {
-                Chats[messageHistoryOwner].ChatWindow.Unread = incoming;
+                if(!forceHide) Chats[messageHistoryOwner].ChatWindow.Unread = incoming;
             }
             else
             {
@@ -225,7 +225,7 @@ public unsafe class MessageProcessor : IDisposable
         Chats[messageHistoryOwner].Scroll();
         if(type == XivChatType.TellOutgoing)
         {
-            if(messageHistoryOwner.GetCustomization().AutoFocusTellOutgoing && !isOpen)
+            if(messageHistoryOwner.GetCustomization().AutoFocusTellOutgoing && !isOpen && !Utils.IsAnyXIMWindowActive())
             {
                 Chats[messageHistoryOwner].SetFocusAtNextFrame();
             }
@@ -234,7 +234,7 @@ public unsafe class MessageProcessor : IDisposable
         else
         {
             LastReceivedMessage = messageSender;
-            Chats[messageHistoryOwner].ChatWindow.Unread = true;
+            if(!forceHide) Chats[messageHistoryOwner].ChatWindow.Unread = true;
             Chats[messageHistoryOwner].ChatWindow.SetTransparency(true);
         }
         P.Logger.Log(new()

@@ -11,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.Configuration;
 using Messenger.Gui.Settings;
+using Newtonsoft.Json;
 using PInvoke;
 using System.IO;
 using System.Reflection;
@@ -19,11 +20,25 @@ using Action = System.Action;
 
 namespace Messenger;
 
-internal static unsafe class Utils
+internal static unsafe partial class Utils
 {
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
     public const uint EngagementID = 1000000;
     public const uint SuperchannelID = 1000001;
+
+    public static bool IsAnyXIMWindowActive()
+    {
+        if(P.TabSystem.IsFocused) return true;
+        foreach(var x in S.MessageProcessor.Chats.Values)
+        {
+            if(x.ChatWindow.IsFocused) return true;
+        }
+        foreach(var x in P.TabSystems)
+        {
+            if(x.IsFocused) return true;
+        }
+        return false;
+    }
 
     public static List<string> SplitMessage(string message, string destination, out string firstMessage, out string remainder)
     {
@@ -33,7 +48,7 @@ internal static unsafe class Utils
             string command;
             if(message.StartsWith('/'))
             {
-                var m = Regex.Match(message, @"\/(t|tell)\s+(.+)@([a-z]+)\s", RegexOptions.IgnoreCase);
+                var m = TellCommandRegex().Match(message);
                 if(m.Success)
                 {
                     command = $"/{m.Groups[1]} {m.Groups[2]}@{m.Groups[3]} ";
@@ -150,21 +165,9 @@ internal static unsafe class Utils
             ref var newName = ref Ref<string>.Get();
             ImGui.SetNextItemWidth(300f);
             ImGui.InputText($"##engname", ref newName, 30);
-            if(newName.Length == 0)
+            if(IsFileNameInvalid(newName, out var error))
             {
-                ImGuiEx.Text(EColor.RedBright, $"Name can't be empty");
-            }
-            else if(newName.ContainsAny(Path.GetInvalidFileNameChars()))
-            {
-                ImGuiEx.Text(EColor.RedBright, $"Name can't contain any of these characters:\n{Path.GetInvalidFileNameChars().Print("")}");
-            }
-            else if(newName.ContainsAny(Path.GetInvalidPathChars()))
-            {
-                ImGuiEx.Text(EColor.RedBright, $"Name can't contain any of these characters:\n{Path.GetInvalidPathChars().Print("")}");
-            }
-            else if(newName.Trim() != newName)
-            {
-                ImGuiEx.Text(EColor.RedBright, $"Name can't start or end with whitespace character");
+                ImGuiEx.Text(EColor.RedBright, error);
             }
             else if(Utils.HasEngagementWithName(newName))
             {
@@ -192,6 +195,31 @@ internal static unsafe class Utils
                 }
             }
         });
+    }
+
+    public static bool IsFileNameInvalid(string newName, out string error)
+    {
+        if(newName.Length == 0)
+        {
+            error = $"Name can't be empty";
+        }
+        else if(newName.ContainsAny(Path.GetInvalidFileNameChars()))
+        {
+            error = $"Name can't contain any of these characters:\n{Path.GetInvalidFileNameChars().Print("")}";
+        }
+        else if(newName.ContainsAny(Path.GetInvalidPathChars()))
+        {
+            error = $"Name can't contain any of these characters:\n{Path.GetInvalidPathChars().Print("")}";
+        }
+        else if(newName.Trim() != newName)
+        {
+            error = $"Name can't start or end with whitespace character";
+        }
+        else
+        {
+            error = null;
+        }
+        return error != null;
     }
 
     public static string GetGenericCommand(Sender sender)
@@ -645,4 +673,7 @@ internal static unsafe class Utils
         }
         return baseFolder;
     }
+
+    [GeneratedRegex(@"\/(t|tell)\s+(.+)@([a-z]+)\s", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex TellCommandRegex();
 }

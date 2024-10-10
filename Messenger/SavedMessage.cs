@@ -23,6 +23,25 @@ internal class SavedMessage
 
     internal string GUID = Guid.NewGuid().ToString();
 
+    public SavedMessage Clone()
+    {
+        return new()
+        {
+            ParsedMessage = ParsedMessage,
+            Message = Message,
+            Time = Time,
+            IsIncoming = IsIncoming,
+            OverrideName = OverrideName,
+            IsSystem = IsSystem,
+            MapPayload = MapPayload,
+            Item = Item,
+            TranslatedMessage = TranslatedMessage,
+            IgnoreTranslation = IgnoreTranslation,
+            AwaitingTranslation = AwaitingTranslation,
+            XivChatType = XivChatType
+        };
+    }
+
     public void Draw(string prefix = "", string suffix = "", Action? postMessageAction = null)
     {
         if(ParsedMessage == null)

@@ -510,29 +510,28 @@ public unsafe class ChatWindow : Window
                     ImGuiEx.LineCentered($"Engagement{MessageHistory.HistoryPlayer.GetPlayerName()}", () =>
                     {
                         ImGui.Checkbox("##enableEng", ref engagementInfo.Enabled);
+                        ImGuiEx.Tooltip("Enable this engagement. If you disable it, no new messages will be added.");
                         ImGui.SameLine();
-                        ImGui.SetNextItemWidth(100f);
+                        ImGui.SetNextItemWidth(110f);
                         if(ImGui.BeginCombo("##ctrl", $"{engagementInfo.Participants.Count} participants", ImGuiComboFlags.HeightLarge))
                         {
-                            foreach(var x in engagementInfo.Participants)
-                            {
-                                ImGuiEx.TextV($"{x.GetPlayerName()}");
-                                ImGui.SameLine();
-                                if(ImGuiEx.IconButton(FontAwesomeIcon.Trash, enabled: ImGuiEx.Ctrl))
-                                {
-                                    new TickScheduler(() => engagementInfo.Participants.Remove(x));
-                                }
-                                ImGuiEx.Tooltip($"Hold CTRL and click to remove member from engagement");
-                            }
+                            TabEngagement.DrawEngagementEditTable(engagementInfo, false);
                             ImGui.EndCombo();
                         }
                         ImGui.SameLine();
-                        if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Plus, "Target", Svc.Targets.Target is IPlayerCharacter pc && pc.ObjectIndex != 0 && !engagementInfo.Participants.Contains(new(pc.Name.ToString(), pc.HomeWorld.Id))))
+                        if(ImGuiEx.IconButton(FontAwesomeIcon.UserEdit))
+                        {
+                            S.XIMModalWindow.Open($"Member editing for {engagementInfo.Name}", () => TabEngagement.EditMemberList(engagementInfo));
+                        }
+                        ImGuiEx.Tooltip("Edit member list");
+                        ImGui.SameLine();
+                        if(ImGuiEx.IconButton(FontAwesomeIcon.Crosshairs, enabled: Svc.Targets.Target is IPlayerCharacter pc && pc.ObjectIndex != 0 && !engagementInfo.Participants.Contains(new(pc.Name.ToString(), pc.HomeWorld.Id))))
                         {
                             engagementInfo.Participants.Add(new(Svc.Targets.Target.Name.ToString(), ((IPlayerCharacter)Svc.Targets.Target).HomeWorld.Id));
                         }
+                        ImGuiEx.Tooltip("Add targeted player to this engagement");
                         ImGui.SameLine();
-                        ImGui.SetNextItemWidth(100f);
+                        ImGui.SetNextItemWidth(120f);
                         string targetName;
                         if(engagementInfo.DefaultTarget == null)
                         {
