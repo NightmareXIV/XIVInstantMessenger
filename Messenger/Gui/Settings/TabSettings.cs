@@ -235,16 +235,16 @@ internal class TabSettings
                 ImGuiEx.HelpMarker($"When you write message longer than normally possible, XIM will split it in few sequential parts. You will have to press send button multiple times to send multiple messages.");
                 ImGui.Indent();
                 ImGui.Checkbox("Enable manual splitting", ref C.SplitterManually);
-                ImGui.Indent();
                 ImGui.SetNextItemWidth(100f);
                 ImGui.InputText($"Split/continuation indicator", ref C.SplitterManualIndicator, 10);
-                ImGui.Unindent();
+                ImGuiEx.HelpMarker("Upon reaching this indicator, XIM will start new message.");
                 ImGui.Checkbox("Split automatically on space", ref C.SplitterOnSpace);
                 var replace = C.SplitterIndicatorOverride != null;
                 if(ImGui.Checkbox("Replace continuation indicator", ref replace))
                 {
                     C.SplitterIndicatorOverride = replace ? "" : null;
                 }
+                ImGuiEx.HelpMarker("Replace manual continuation indicator with another one.");
                 if(C.SplitterIndicatorOverride != null)
                 {
                     ImGui.Indent();
@@ -252,6 +252,9 @@ internal class TabSettings
                     ImGui.InputText($"Split/continuation indicator override", ref C.SplitterIndicatorOverride, 10);
                     ImGui.Unindent();
                 }
+                ImGui.SetNextItemWidth(150f);
+                ImGuiEx.SliderIntAsFloat("Delay between messages being sent, seconds", ref C.IntervalBetweenSends, 200, 2000);
+                ImGuiEx.HelpMarker($"Choose delay big enough to not get throttled by the server in channels that you're mostly using.");
                 ImGui.Unindent();
             }, null, true)
         );

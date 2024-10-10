@@ -679,7 +679,7 @@ public unsafe class ChatWindow : Window
                 }
                 P.MessageCache.PushBack(trimmed);
                 Input.SinglelineText = isSplit ? remainder : "";
-                if(isSplit) EzThrottler.Throttle("SendMessage", 2000, true);
+                if(isSplit) EzThrottler.Throttle("SendMessage", C.IntervalBetweenSends, true);
             }
             else
             {
@@ -690,7 +690,7 @@ public unsafe class ChatWindow : Window
                     ret = true;
                     P.MessageCache.PushBack(trimmed);
                     Input.SinglelineText = isSplit ? remainder : "";
-                    if(isSplit) EzThrottler.Throttle("SendMessage", 2000, true);
+                    if(isSplit) EzThrottler.Throttle("SendMessage", C.IntervalBetweenSends, true);
                 }
                 else
                 {

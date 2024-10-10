@@ -120,4 +120,5 @@ public class Config : IEzConfig
     public bool SplitterManually = true;
     public string SplitterManualIndicator = ">>>";
     public string SplitterIndicatorOverride = null;
+    public int IntervalBetweenSends = 1000;
 }
