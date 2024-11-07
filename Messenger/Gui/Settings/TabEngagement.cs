@@ -257,6 +257,7 @@ public static class TabEngagement
 
     public static void DrawEngagementEditTable(EngagementInfo e, bool widthStretch)
     {
+        ImGui.Checkbox("Play sound on incoming message", ref e.PlaySound);
         if(ImGui.BeginTable("##editMemListTable", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.NoSavedSettings))
         {
             ImGui.TableSetupColumn("##name", widthStretch?ImGuiTableColumnFlags.WidthStretch:default);
@@ -271,7 +272,7 @@ public static class TabEngagement
                 ImGuiEx.TextV($"{x.GetPlayerName()}");
                 ImGui.TableNextColumn();
                 ImGui.PushFont(UiBuilder.IconFont);
-                ImGuiEx.CollectionButtonCheckbox(FontAwesomeIcon.PeopleArrows.ToIconString(), x, e.DisallowDMs, EColor.Green, inverted: true);
+                ImGuiEx.CollectionButtonCheckbox(FontAwesomeIcon.PeopleArrows.ToIconString(), x, e.AllowDMs, EColor.Green, inverted: false);
                 ImGui.PopFont();
                 ImGuiEx.Tooltip($"When enabled, Direct Messages from this player will be redirected to the engagement window. ");
                 ImGui.TableNextColumn();

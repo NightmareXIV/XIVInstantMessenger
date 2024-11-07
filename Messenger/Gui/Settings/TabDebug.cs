@@ -23,6 +23,16 @@ internal unsafe class TabDebug
 
         try
         {
+            if(ImGui.Button("Open assist window")) S.GPT4All.Window.IsOpen = true;
+            if(ImGui.CollapsingHeader("AI"))
+            {
+                ref var cont = ref Ref<string>.Get("AIPromptDebug");
+                ImGui.InputTextMultiline("##ai", ref cont, 1000, new Vector2(ImGui.GetContentRegionAvail().X, 150));
+                if(ImGui.Button("Do request"))
+                {
+                    S.GPT4All.ResendRequest(cont);
+                }
+            }
             if(ImGui.CollapsingHeader("MultilineInput"))
             {
                 ImGuiEx.InputTextWrapMultilineExpanding("Test", ref Ref<string>.Get(), 10000);

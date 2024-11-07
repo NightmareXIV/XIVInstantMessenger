@@ -5,6 +5,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.EzEventManager;
 using ECommons.GameFunctions;
 using ECommons.PartyFunctions;
+using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Messenger.Configuration;
@@ -100,7 +101,7 @@ public unsafe class MessageProcessor : IDisposable
                         {
                             addedMessageCopy.OverrideName = $"{Svc.ClientState.LocalPlayer.GetPlayerName()}→{s.GetPlayerName()}";
                         }
-                        foreach(var x in C.Engagements.Where(x => x.IsActive && x.Participants.Contains(s) && !x.DisallowDMs.Contains(s)))
+                        foreach(var x in C.Engagements.Where(x => x.IsActive && x.Participants.Contains(s) && x.AllowDMs.Contains(s)))
                         {
                             PluginLog.Debug($"Processing tell for engagement {x.Name}");
                             x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -108,7 +109,7 @@ public unsafe class MessageProcessor : IDisposable
                         }
                     }
                     ProcessOpenOnTell(s, s, type, ref message, ref isHandled, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);
-                    if(C.IncomingTellSound != Sounds.None)
+                    if(type == XivChatType.TellIncoming && C.IncomingTellSound != Sounds.None)
                     {
                         P.GameFunctions.PlaySound(C.IncomingTellSound);
                     }
@@ -140,11 +141,16 @@ public unsafe class MessageProcessor : IDisposable
                     var isEngagementOpen = false;
                     if(C.EnableEngagements)
                     {
-                        foreach(var x in C.Engagements.Where(x => x.IsActive && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
+                        foreach(var engagement in C.Engagements.Where(x => x.IsActive && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
                         {
-                            PluginLog.Debug($"Processing generic message for engagement {x.Name}");
-                            x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                            isEngagementOpen = ProcessOpenOnGeneric(x.GetSender(), genericSender, s, incoming, type, ref message, ref isHandled, addedMessage, false);
+                            PluginLog.Debug($"Processing generic message for engagement {engagement.Name}");
+                            engagement.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            isEngagementOpen = ProcessOpenOnGeneric(engagement.GetSender(), genericSender, s, incoming, type, ref message, ref isHandled, addedMessage, false);
+
+                            if(incoming && C.IncomingTellSound != Sounds.None && engagement.PlaySound && FrameThrottler.Throttle("PlayEngagementSound", 1))
+                            {
+                                P.GameFunctions.PlaySound(C.IncomingTellSound);
+                            }
                         }
                     }
                     if(C.Channels.Contains(type))
