@@ -356,41 +356,6 @@ public unsafe class ChatWindow : Window
             ImGui.SetScrollHereY();
         }
         ImGui.EndChild();
-        if(ImGui.IsWindowFocused()) 
-        {
-            try
-            {
-                var text = Input.SinglelineText.Replace(C.SplitterManualIndicator, " ");
-                List<string> parts = [];
-                var begin = 0;
-                var block = false;
-                for(int i = 0; i < text.Length; i++)
-                {
-                    if(text[i] == '"') block = !block;
-                    if(!block)
-                    {
-                        if(text[i].EqualsAny('.', '!', '?'))
-                        {
-                            parts.Add(text[begin..i]);
-                            begin = i+1;
-                        }
-                    }
-                }
-                if(text.Length - begin > 10)
-                {
-                    parts.Add(text[begin..]);
-                }
-                S.GPT4All.Window.Parts = parts;
-                if(parts.Count > 0)
-                {
-                    S.GPT4All.Window.SuggestedMessage = parts.Last();
-                }
-            }
-            catch(Exception e)
-            {
-                e.Log();
-            }
-        }
         var isCmd = C.CommandPassthrough && Input.SinglelineText.Trim().StartsWith("/");
         var cursor = ImGui.GetCursorPosY();
         //ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - afterInputWidth);
