@@ -109,6 +109,12 @@ internal class TabSettings
                 ImGui.SetNextItemWidth(150f);
                 ImGuiEx.SliderIntAsFloat("Maximum double-press delay", ref C.DoubleEnterDelay, 200, 500);
                 ImGui.Unindent();
+                ImGui.Checkbox("Enable auto-save", ref C.UseAutoSave);
+                ImGuiEx.HelpMarker($"As you type, XIM will periodically auto-save message. Should you accidentally delete it, or should it fail to be sent, you can retrieve it from \"Recent\" tab. Auto-save also happens before message gets sent and when you unfocus input area.");
+                ImGui.Indent();
+                ImGui.SetNextItemWidth(150f);
+                ImGui.SliderInt("Auto-save interval, seconds", ref C.AutoSaveInterval, 10, 60);
+                ImGui.Unindent();
             }, null, true),
             ("Quick button", delegate
             {

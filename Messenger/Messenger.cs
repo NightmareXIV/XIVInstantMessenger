@@ -41,7 +41,6 @@ public unsafe class Messenger : IDalamudPlugin
     internal TabSystem TabSystem;
     internal List<TabSystem> TabSystems = [];
     public string CurrentPlayer = null;
-    internal CircularBuffer<string> MessageCache = new(100);
 
     public Messenger(IDalamudPluginInterface pi)
     {

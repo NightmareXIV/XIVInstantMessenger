@@ -6,10 +6,12 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using Lumina.Excel.GeneratedSheets;
 using Messenger.Configuration;
+using Messenger.Gui;
 using Messenger.Gui.Settings;
 using Newtonsoft.Json;
 using PInvoke;
@@ -25,6 +27,40 @@ internal static unsafe partial class Utils
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
     public const uint EngagementID = 1000000;
     public const uint SuperchannelID = 1000001;
+
+    public static void AutoSaveMessage(ChatWindow window, bool bypassTimer)
+    {
+        if(bypassTimer || EzThrottler.Throttle("MessageAutoSave", C.AutoSaveInterval * 1000))
+        {
+            if(window.Input.SinglelineText.Length < 15) return;
+                for(int i = 0; i < C.AutoSavedMessages.Count; i++)
+            {
+                var m = C.AutoSavedMessages[i];
+                if(m.Target == window.MessageHistory.HistoryPlayer && m.Message == window.Input.SinglelineText)
+                {
+                    //already have this message, move it to 0
+                    if(i != 0)
+                    {
+                        C.AutoSavedMessages.RemoveAt(i);
+                        C.AutoSavedMessages.Insert(0, m);
+                    }
+                    return;
+                }
+            }
+            //not found, add new
+            var sm = new AutoSavedMessage()
+            {
+                Target = window.MessageHistory.HistoryPlayer,
+                Message = window.Input.SinglelineText,
+                Time = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+            };
+            C.AutoSavedMessages.Insert(0, sm);
+            while(C.AutoSavedMessages.Count > 100)
+            {
+                C.AutoSavedMessages.RemoveAt(C.AutoSavedMessages.Count - 1);
+            }
+        }
+    }
 
     public static bool IsAnyXIMWindowActive()
     {

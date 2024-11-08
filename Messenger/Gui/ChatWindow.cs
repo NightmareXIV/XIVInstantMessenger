@@ -23,7 +23,7 @@ public unsafe class ChatWindow : Window
     private bool IsTransparent = true;
     internal bool SetPosition = false;
     internal new bool BringToFront = false;
-    private PseudoMultilineInput Input = new();
+    internal PseudoMultilineInput Input = new();
     private bool BlockEmojiSelection = false;
     internal int DisplayCap = C.DisplayedMessages;
     private int FrameCount = 0;
@@ -368,6 +368,17 @@ public unsafe class ChatWindow : Window
         }
         var cur = ImGui.GetCursorPosY();
         Input.Draw();
+        if(C.UseAutoSave)
+        {
+            if(Input.IsInputActive)
+            {
+                Utils.AutoSaveMessage(this, false);
+            }
+            if(ImGui.IsItemDeactivated())
+            {
+                Utils.AutoSaveMessage(this, true);
+            }
+        }
         string firstMessage = null;
         string remainder = null;
         var split = C.SplitterEnable ? Utils.SplitMessage(Input.SinglelineText, tellTarget, out firstMessage, out remainder) : null;
@@ -678,7 +689,7 @@ public unsafe class ChatWindow : Window
                     Chat.Instance.SendMessage(trimmed);
                     ret = true;
                 }
-                P.MessageCache.PushBack(trimmed);
+                if(C.UseAutoSave) Utils.AutoSaveMessage(this, true);
                 Input.SinglelineText = isSplit ? remainder : "";
                 if(isSplit) EzThrottler.Throttle("SendMessage", C.IntervalBetweenSends, true);
             }
@@ -689,7 +700,7 @@ public unsafe class ChatWindow : Window
                 if(error == null)
                 {
                     ret = true;
-                    P.MessageCache.PushBack(trimmed);
+                    if(C.UseAutoSave) Utils.AutoSaveMessage(this, true);
                     Input.SinglelineText = isSplit ? remainder : "";
                     if(isSplit) EzThrottler.Throttle("SendMessage", C.IntervalBetweenSends, true);
                 }

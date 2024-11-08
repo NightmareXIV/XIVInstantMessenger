@@ -23,6 +23,20 @@ internal unsafe class TabDebug
 
         try
         {
+            if(ImGui.CollapsingHeader("Auto-saved"))
+            {
+                ref var when = ref Ref<int>.Get("AutoSavedDebug");
+                ImGui.InputInt("diff", ref when);
+                if(ImGui.Button("Add"))
+                {
+                    C.AutoSavedMessages.Add(new()
+                    {
+                        Message = $"Lorem ipsum test message {Random.Shared.Next()}",
+                        Target = new("Test Sender", 408),
+                        Time = DateTimeOffset.Now.ToUnixTimeMilliseconds() - when
+                    });
+                }
+            }
             if(ImGui.CollapsingHeader("MultilineInput"))
             {
                 ImGuiEx.InputTextWrapMultilineExpanding("Test", ref Ref<string>.Get(), 10000);

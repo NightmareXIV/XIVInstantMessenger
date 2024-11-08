@@ -121,4 +121,7 @@ public class Config : IEzConfig
     public string SplitterManualIndicator = ">>>";
     public string SplitterIndicatorOverride = null;
     public int IntervalBetweenSends = 1000;
+    public bool UseAutoSave = true;
+    public int AutoSaveInterval = 15;
+    public List<AutoSavedMessage> AutoSavedMessages = [];
 }
