@@ -16,7 +16,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
     public override void OnLeftClick()
     {
         if(Svc.Objects.Any(c => c is IPlayerCharacter pc
-            && pc.HomeWorld.Id == MessageHistory.HistoryPlayer.HomeWorld && pc.Name.ToString() == MessageHistory.HistoryPlayer.Name))
+            && pc.HomeWorld.RowId == MessageHistory.HistoryPlayer.HomeWorld && pc.Name.ToString() == MessageHistory.HistoryPlayer.Name))
         {
             var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
             if(result != null)
@@ -39,7 +39,7 @@ public class InviteToPartyButton : ChatWindowTitleButton
                     flSuccess = true;
                     if(x.IsOnline)
                     {
-                        var sameWorld = Svc.ClientState.LocalPlayer.CurrentWorld.Id == x.CurrentWorld;
+                        var sameWorld = Player.CurrentWorldId == x.CurrentWorld;
                         var result = P.InviteToParty(MessageHistory.HistoryPlayer, sameWorld, x.ContentId);
                         if(result != null)
                         {

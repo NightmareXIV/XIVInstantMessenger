@@ -152,7 +152,7 @@ internal unsafe class TabDebug
             ImGuiEx.EnumCombo("XivChatType", ref MType);
             ImGui.InputText("Sender's name", ref MName, 50);
             ImGui.InputInt("Sender's world", ref MWorld);
-            if(MWorld <= 0) MWorld = (int)(Svc.ClientState.LocalPlayer?.HomeWorld.Id ?? 0);
+            if(MWorld <= 0) MWorld = (int)(Svc.ClientState.LocalPlayer?.HomeWorld.RowId ?? 0);
             ImGui.InputText($"Message", ref MMessage, 500);
             if(ImGui.Button("Fire event"))
             {
@@ -209,7 +209,7 @@ internal unsafe class TabDebug
             }
             if(ImGui.Button("Fire logout event"))
             {
-                P.ClientState_Logout();
+                P.ClientState_Logout(0,0);
             }
             ImGuiEx.Text($"a1[48]: {*(byte*)((nint)AgentCharaCard.Instance() + 48)}");
         }

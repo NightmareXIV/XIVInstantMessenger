@@ -9,7 +9,7 @@ using ECommons.GameHelpers;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Messenger.Configuration;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
@@ -183,7 +183,7 @@ internal static unsafe partial class Utils
 
     public static Sender ToSender(this IPlayerCharacter pc)
     {
-        return new(pc.Name.ToString(), pc.HomeWorld.Id);
+        return new(pc.Name.ToString(), pc.HomeWorld.RowId);
     }
 
     public static void OpenEngagementCreation(List<Sender> includedPlayers = null)
@@ -557,13 +557,13 @@ internal static unsafe partial class Utils
         }
     }
 
-    public static List<Payload> GetItemPayload(Item item, bool hq)
+    public static List<Payload> GetItemPayload(Item? itemNullable, bool hq)
     {
-        if(item == null)
+        if(itemNullable == null)
         {
             throw new Exception("Tried to link NULL item.");
         }
-
+        var item = itemNullable.Value;
         List<Payload> payloadList =
         [
             new UIForegroundPayload((ushort) (0x223 + item.Rarity * 2)),
@@ -574,9 +574,9 @@ internal static unsafe partial class Utils
             new TextPayload($"{(char) SeIconChar.LinkMarker}"),
             new UIForegroundPayload(0),
             new UIGlowPayload(0),
-            new TextPayload(item.Name + (item.CanBeHq && hq ? $" {(char)SeIconChar.HighQuality}" : "")),
-            new RawPayload(new byte[] {0x02, 0x27, 0x07, 0xCF, 0x01, 0x01, 0x01, 0xFF, 0x01, 0x03}),
-            new RawPayload(new byte[] {0x02, 0x13, 0x02, 0xEC, 0x03})
+            new TextPayload(item.Name.ToString() + (item.CanBeHq && hq ? $" {(char)SeIconChar.HighQuality}" : "")),
+            new RawPayload([0x02, 0x27, 0x07, 0xCF, 0x01, 0x01, 0x01, 0xFF, 0x01, 0x03]),
+            new RawPayload([0x02, 0x13, 0x02, 0xEC, 0x03])
         ];
 
         return payloadList;
@@ -653,7 +653,7 @@ internal static unsafe partial class Utils
         }
         if(Player.Available && IsGenericChannel(type))
         {
-            senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Svc.ClientState.LocalPlayer.HomeWorld.Id);
+            senderStruct = new(Svc.ClientState.LocalPlayer.Name.ToString(), Player.HomeWorldId);
             return true;
         }
         senderStruct = default;

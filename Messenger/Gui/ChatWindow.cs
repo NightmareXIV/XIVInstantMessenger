@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using ECommons.Automation;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using Lumina.Excel.Sheets;
 using Messenger.Configuration;
 using Messenger.Gui.Settings;
 using Messenger.Gui.TitleButtons;
@@ -537,9 +538,9 @@ public unsafe class ChatWindow : Window
                         }
                         ImGuiEx.Tooltip("Edit member list");
                         ImGui.SameLine();
-                        if(ImGuiEx.IconButton(FontAwesomeIcon.Crosshairs, enabled: Svc.Targets.Target is IPlayerCharacter pc && pc.ObjectIndex != 0 && !engagementInfo.Participants.Contains(new(pc.Name.ToString(), pc.HomeWorld.Id))))
+                        if(ImGuiEx.IconButton(FontAwesomeIcon.Crosshairs, enabled: Svc.Targets.Target is IPlayerCharacter pc && pc.ObjectIndex != 0 && !engagementInfo.Participants.Contains(new(pc.Name.ToString(), pc.HomeWorld.RowId))))
                         {
-                            engagementInfo.Participants.Add(new(Svc.Targets.Target.Name.ToString(), ((IPlayerCharacter)Svc.Targets.Target).HomeWorld.Id));
+                            engagementInfo.Participants.Add(new(Svc.Targets.Target.Name.ToString(), ((IPlayerCharacter)Svc.Targets.Target).HomeWorld.RowId));
                         }
                         ImGuiEx.Tooltip("Add targeted player to this engagement");
                         ImGui.SameLine();
@@ -791,7 +792,7 @@ public unsafe class ChatWindow : Window
                 {
                     Safe(delegate
                     {
-                        Svc.Chat.Print(new SeStringBuilder().Add(Utils.GetItemPayload(x.Item.Item, x.Item.IsHQ)).BuiltString);
+                        Svc.Chat.Print(new SeStringBuilder().Add(Utils.GetItemPayload(Svc.Data.GetExcelSheet<Item>().GetRowOrDefault(x.Item.Item.RowId), x.Item.IsHQ)).BuiltString);
                     });
                 }
             }

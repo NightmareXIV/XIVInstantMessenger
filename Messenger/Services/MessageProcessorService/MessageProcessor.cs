@@ -313,7 +313,7 @@ public unsafe class MessageProcessor : IDisposable
         }
         foreach(var x in Svc.Objects)
         {
-            if(x is IPlayerCharacter pc && pc.Name.ToString() == name && pc.HomeWorld.Id == world)
+            if(x is IPlayerCharacter pc && pc.Name.ToString() == name && pc.HomeWorld.RowId == world)
             {
                 cid = pc.Struct()->ContentId;
                 if(cid != 0)
@@ -336,7 +336,7 @@ public unsafe class MessageProcessor : IDisposable
         }
         foreach(var x in UniversalParty.Members)
         {
-            if(x.Name == name && x.HomeWorld.Id == world && x.ContentID != 0)
+            if(x.Name == name && x.HomeWorld.RowId == world && x.ContentID != 0)
             {
                 cid = x.ContentID;
                 //PluginLog.Debug($"{name}@{world} CID found via Party: {cid:X16}");

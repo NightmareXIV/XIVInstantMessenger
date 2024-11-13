@@ -39,9 +39,9 @@ public class ContextMenuManager : IDisposable
 
     private void OpenContextMenu(IMenuOpenedArgs args)
     {
-        if(C.ContextMenuEnable && ValidAddons.Contains(args.AddonName) && args.Target is MenuTargetDefault def && def.TargetName != null && ExcelWorldHelper.Get(def.TargetHomeWorld.Id, true) != null)
+        if(C.ContextMenuEnable && ValidAddons.Contains(args.AddonName) && args.Target is MenuTargetDefault def && def.TargetName != null && ExcelWorldHelper.Get(def.TargetHomeWorld.RowId, true) != null)
         {
-            Sender sender = new(def.TargetName, def.TargetHomeWorld.Id);
+            Sender sender = new(def.TargetName, def.TargetHomeWorld.RowId);
             args.AddMenuItem(new()
             {
                 OnClicked = (_) =>
@@ -59,7 +59,7 @@ public class ContextMenuManager : IDisposable
                 Priority = C.ContextMenuPriority,
                 Name = "Messenger",
             });
-            if(C.EnableEngagements && C.EnableEngagementsContext && sender != new Sender(Player.Name, Player.Object.HomeWorld.Id))
+            if(C.EnableEngagements && C.EnableEngagementsContext && sender != new Sender(Player.Name, Player.Object.HomeWorld.RowId))
             {
                 args.AddMenuItem(new()
                 {

@@ -199,7 +199,7 @@ public static class TabEngagement
                 foreach(var x in UniversalParty.Members)
                 {
                     if(x.NameWithWorld == Player.NameWithWorld) continue;
-                    var sender = new Sender(x.Name, x.HomeWorld.Id);
+                    var sender = new Sender(x.Name, x.HomeWorld.RowId);
                     if(e.Participants.Contains(sender)) continue;
                     if(fltr == "" || x.NameWithWorld.Contains(fltr, StringComparison.OrdinalIgnoreCase))
                     {

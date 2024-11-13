@@ -9,7 +9,7 @@ using ECommons.GameHelpers;
 using ECommons.Singletons;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Messenger.Configuration;
 using Messenger.FontControl;
 using Messenger.FriendListManager;
@@ -108,7 +108,7 @@ public unsafe class Messenger : IDalamudPlugin
         }
     }
 
-    internal void ClientState_Logout()
+    internal void ClientState_Logout(int a, int b)
     {
         if(C.CloseLogout)
         {
@@ -388,7 +388,7 @@ public unsafe class Messenger : IDalamudPlugin
         }
         foreach(var x in Svc.Objects)
         {
-            if(x is IPlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.Id == player.HomeWorld && pc.IsTargetable)
+            if(x is IPlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.RowId == player.HomeWorld && pc.IsTargetable)
             {
                 AgentCharaCard.Instance()->OpenCharaCard(x.Struct());
                 PluginLog.Debug($"Opening characard via gameobject {x}");
@@ -419,7 +419,7 @@ public unsafe class Messenger : IDalamudPlugin
         {
             return "Cross-world parties are not supported";
         }
-        if(Svc.ClientState.LocalPlayer.CurrentWorld.GameData.DataCenter.Value.RowId !=
+        if(Svc.ClientState.LocalPlayer.CurrentWorld.Value.DataCenter.Value.RowId !=
             Svc.Data.GetExcelSheet<World>().GetRow(player.HomeWorld).DataCenter.Value.RowId)
         {
             return "Target is located in different data center";
@@ -429,7 +429,7 @@ public unsafe class Messenger : IDalamudPlugin
             var party = Svc.Party;
             var leader = (ulong?)party[(int)party.PartyLeaderIndex]?.ContentId;
             var isLeader = party.Length == 0 || Svc.ClientState.LocalContentId == leader;
-            Dalamud.Game.ClientState.Party.IPartyMember member = party.FirstOrDefault(member => member.Name.TextValue == player.Name && member.World.Id == player.HomeWorld);
+            Dalamud.Game.ClientState.Party.IPartyMember member = party.FirstOrDefault(member => member.Name.TextValue == player.Name && member.World.RowId == player.HomeWorld);
             var isInParty = member != default;
             var inInstance = GameFunctions.IsInInstance();
             //var inPartyInstance = Svc.Data.GetExcelSheet<TerritoryType>()!.GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse is (41 or 47 or 48 or 52 or 53);
