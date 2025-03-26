@@ -262,7 +262,7 @@ public unsafe class MessageProcessor : IDisposable
         for(var i = 0; i < r->MsgSourceArrayLength; i++)
         {
             var src = r->MsgSourceArray[i];
-            var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out var logKind, out _);
+            var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out _, out _, out _, out _);
             if(det)
             {
                 ret.Add(new(
@@ -285,7 +285,7 @@ public unsafe class MessageProcessor : IDisposable
             var src = r->MsgSourceArray[i];
             if(src.ContentId != 0)
             {
-                var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out var logKind, out _);
+                var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out _, out _, out _, out _, out _);
                 if(det)
                 {
                     if(SeString.Parse(sender.AsSpan()).Payloads.FirstOrDefault(x => x.Type == PayloadType.Player) is PlayerPayload payload)
@@ -347,7 +347,7 @@ public unsafe class MessageProcessor : IDisposable
         for(var i = 0; i < r->MsgSourceArrayLength; i++)
         {
             var src = r->MsgSourceArray[i];
-            var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out var logKind, out _);
+            var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out _, out _, out _, out _, out _);
             if(det && SeString.Parse(sender.AsSpan()).Payloads.TryGetFirst(x => x.Type == PayloadType.Player, out var payload))
             {
                 var playerPayload = (PlayerPayload)payload;

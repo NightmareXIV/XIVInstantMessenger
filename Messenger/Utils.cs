@@ -239,11 +239,11 @@ internal static unsafe partial class Utils
         {
             error = $"Name can't be empty";
         }
-        else if(newName.ContainsAny(Path.GetInvalidFileNameChars()))
+        else if(GenericHelpers.ContainsAny(newName, Path.GetInvalidFileNameChars()))
         {
             error = $"Name can't contain any of these characters:\n{Path.GetInvalidFileNameChars().Print("")}";
         }
-        else if(newName.ContainsAny(Path.GetInvalidPathChars()))
+        else if(GenericHelpers.ContainsAny(newName, Path.GetInvalidPathChars()))
         {
             error = $"Name can't contain any of these characters:\n{Path.GetInvalidPathChars().Print("")}";
         }

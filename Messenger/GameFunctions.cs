@@ -18,7 +18,7 @@ internal unsafe class GameFunctions : IDisposable
 
     internal void PlaySound(Sounds id)
     {
-        UIModule.PlaySound((uint)id);
+        UIGlobals.PlaySoundEffect((uint)id);
     }
 
     internal bool IsInInstance()
