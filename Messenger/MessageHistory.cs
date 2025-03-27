@@ -51,6 +51,7 @@ public partial class MessageHistory
         LogFile = Path.Combine(Utils.GetLogStorageFolder(), HistoryPlayer.GetPlayerName() + ".txt");
 
         var subject = HistoryPlayer.GetPlayerName();
+        var currentPlayer = Player.NameWithWorld;
         S.ThreadPool.Run(delegate
         {
             Safe(delegate
@@ -80,7 +81,7 @@ public partial class MessageHistory
                                 PluginLog.Debug($"name: {name}, subject: {subject}");
                                 LoadedMessages.Insert(0, new()
                                 {
-                                    IsIncoming = name != Player.NameWithWorld,
+                                    IsIncoming = name != currentPlayer,
                                     Message = matches[4].ToString(),
                                     Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
                                     OverrideName = name,
