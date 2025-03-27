@@ -126,7 +126,7 @@ public unsafe class ChatWindow : Window
         var f = ImGui.GetFrameCount();
         if(f - FrameCount > 1)
         {
-            PluginLog.Debug($"Window {MessageHistory.HistoryPlayer} just opened");
+            PluginLog.Verbose($"Window {MessageHistory.HistoryPlayer} just opened");
             DisplayCap = C.DisplayedMessages;
         }
         FrameCount = f;
@@ -340,7 +340,7 @@ public unsafe class ChatWindow : Window
 
             if(ScrollToMessage == n)
             {
-                PluginLog.Debug($"Set scroll to {n}");
+                PluginLog.Verbose($"Set scroll to {n}");
                 ImGui.SetScrollHereY();
                 ScrollToMessage = -1;
             }

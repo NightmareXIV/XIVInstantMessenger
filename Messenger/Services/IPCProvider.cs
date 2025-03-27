@@ -41,7 +41,7 @@ public class IPCProvider
     {
         if(Utils.TryGetSender(nameWithWorld, out var s))
         {
-            PluginLog.Information($"IPC invite: {s}, sameWorld={sameWorld}");
+            PluginLog.Verbose($"IPC invite: {s}, sameWorld={sameWorld}");
             return P.InviteToParty(s, sameWorld);
         }
         return "Invalid player name or world";

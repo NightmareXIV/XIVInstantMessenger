@@ -128,7 +128,7 @@ public unsafe class Messenger : IDalamudPlugin
             TabSystems.Add(new(x));
         }
         TabSystems.Each(WindowSystemMain.AddWindow);
-        PluginLog.Debug($"Tab systems: {TabSystems.Select(x => x.Name).Join(",")}");
+        PluginLog.Verbose($"Tab systems: {TabSystems.Select(x => x.Name).Join(",")}");
     }
 
     public void Dispose()
@@ -391,14 +391,14 @@ public unsafe class Messenger : IDalamudPlugin
             if(x is IPlayerCharacter pc && pc.Name.ToString() == player.Name && pc.HomeWorld.RowId == player.HomeWorld && pc.IsTargetable)
             {
                 AgentCharaCard.Instance()->OpenCharaCard(x.Struct());
-                PluginLog.Debug($"Opening characard via gameobject {x}");
+                PluginLog.Verbose($"Opening characard via gameobject {x}");
                 return;
             }
         }
         if(S.MessageProcessor.TryFindCID(player, out var cid))
         {
             AgentCharaCard.Instance()->OpenCharaCard(cid);
-            PluginLog.Debug($"Opening characard via cid {cid:X16}");
+            PluginLog.Verbose($"Opening characard via cid {cid:X16}");
             return;
         }
         else

@@ -18,7 +18,7 @@ internal class Logger : IDisposable
                     var task = Tasks.Take();
                     while(!task.History.LogLoaded)
                     {
-                        PluginLog.Debug("Waiting for log to be loaded first...");
+                        PluginLog.Verbose("Waiting for log to be loaded first...");
                         Thread.Sleep(200);
                     }
                     Safe(delegate

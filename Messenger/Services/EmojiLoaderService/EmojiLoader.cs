@@ -245,7 +245,7 @@ public sealed class EmojiLoader : IDisposable
 
     private void LoadDefaultEmoji()
     {
-        PluginLog.Information($"Loading default emoji");
+        PluginLog.Verbose($"Loading default emoji");
         try
         {
             var defaultEmojiFolder = Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "images", "emoji");
@@ -266,7 +266,7 @@ public sealed class EmojiLoader : IDisposable
     {
         Emoji.Clear();
         LoadDefaultEmoji();
-        PluginLog.Information($"Loading BetterTTV emoji");
+        PluginLog.Verbose($"Loading BetterTTV emoji");
         try
         {
             foreach(var x in C.StaticBetterTTVEmojiCache)

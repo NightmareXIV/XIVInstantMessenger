@@ -24,7 +24,7 @@ public unsafe class Memory : IDisposable
         {
             MemoryHelper.WriteString(PlaceholderNamePtr, ReplaceName);
             ReplaceName = null;
-            PluginLog.Information($"Rewriting Placeholder to: {MemoryHelper.ReadStringNullTerminated(PlaceholderNamePtr)}");
+            PluginLog.Verbose($"Rewriting Placeholder to: {MemoryHelper.ReadStringNullTerminated(PlaceholderNamePtr)}");
             return PlaceholderNamePtr;
         }
         else

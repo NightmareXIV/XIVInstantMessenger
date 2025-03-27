@@ -22,7 +22,7 @@ internal class TabHistory
         if(LoadingRequested)
         {
             LoadingRequested = false;
-            PluginLog.Information("Loading chats from files");
+            PluginLog.Debug("Loading chats from files");
             S.ThreadPool.Run(delegate
             {
                 Safe(delegate

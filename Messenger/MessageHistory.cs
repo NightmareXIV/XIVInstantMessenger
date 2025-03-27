@@ -78,7 +78,7 @@ public partial class MessageHistory
                             if(matches.Length == 5)
                             {
                                 var name = matches[2].ToString() + "@" + matches[3].ToString();
-                                PluginLog.Debug($"name: {name}, subject: {subject}");
+                                PluginLog.Verbose($"name: {name}, subject: {subject}");
                                 LoadedMessages.Insert(0, new()
                                 {
                                     IsIncoming = name != currentPlayer,

@@ -103,7 +103,7 @@ public unsafe class MessageProcessor : IDisposable
                         }
                         foreach(var x in C.Engagements.Where(x => x.IsActive && x.Participants.Contains(s) && x.AllowDMs.Contains(s)))
                         {
-                            PluginLog.Debug($"Processing tell for engagement {x.Name}");
+                            PluginLog.Verbose($"Processing tell for engagement {x.Name}");
                             x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                             isEngagementOpen = ProcessOpenOnTell(x.GetSender(), s, type, ref message, ref isHandled, addedMessageCopy, false);
                         }
@@ -143,7 +143,7 @@ public unsafe class MessageProcessor : IDisposable
                     {
                         foreach(var engagement in C.Engagements.Where(x => x.IsActive && (x.Participants.Contains(s) || !addedMessage.IsIncoming)))
                         {
-                            PluginLog.Debug($"Processing generic message for engagement {engagement.Name}");
+                            PluginLog.Verbose($"Processing generic message for engagement {engagement.Name}");
                             engagement.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                             isEngagementOpen = ProcessOpenOnGeneric(engagement.GetSender(), genericSender, s, incoming, type, ref message, ref isHandled, addedMessage, false);
 
