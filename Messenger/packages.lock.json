@@ -8,6 +8,12 @@
         "resolved": "12.0.0",
         "contentHash": "J5TJLV3f16T/E2H2P17ClWjtfEBPpq3yxvqW46eN36JCm6wR+EaoaYkqG9Rm5sHqs3/nK/vKjWWyvEs/jhKoXw=="
       },
+      "ECommons": {
+        "type": "Direct",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "Frb4tiuV5ESubnpq4nG6g3QnJ/Il0I3ohzLh/XHyMCN5bnf9Gedrpleo5gr3A3LWHgGLTJT5H5W/CTDPRsmdJg=="
+      },
       "SharpDX.Direct2D1": {
         "type": "Direct",
         "requested": "[4.2.0, )",
@@ -940,13 +946,10 @@
           "System.Xml.ReaderWriter": "4.3.0"
         }
       },
-      "ecommons": {
-        "type": "Project"
-      },
       "nightmareui": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[2.2.0.2, )"
+          "ECommons": "[3.0.0, )"
         }
       }
     }

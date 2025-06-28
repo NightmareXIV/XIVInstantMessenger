@@ -68,6 +68,7 @@ internal class TabSettings
                         P.RebuildTabSystems();
                     }
                 }
+                C.ProxySettings.ImGuiDraw();
             }, null, true),
             ("Behavior", delegate
             {

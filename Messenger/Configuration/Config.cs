@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
 using ECommons.Configuration;
+using ECommons.Networking;
 
 namespace Messenger.Configuration;
 
@@ -124,4 +125,6 @@ public class Config : IEzConfig
     public bool UseAutoSave = true;
     public int AutoSaveInterval = 15;
     public List<AutoSavedMessage> AutoSavedMessages = [];
+
+    public ProxySettings ProxySettings = new();
 }

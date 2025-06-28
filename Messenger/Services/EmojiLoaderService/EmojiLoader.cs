@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ECommons.Networking;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Http;
@@ -8,10 +9,10 @@ namespace Messenger.Services.EmojiLoaderService;
 public sealed class EmojiLoader : IDisposable
 {
     public readonly Dictionary<string, ImageFile> Emoji = [];
-    private HttpClient Client = new()
+    private HttpClient Client = new HttpClient()
     {
-        Timeout = TimeSpan.FromSeconds(10)
-    };
+        Timeout = TimeSpan.FromSeconds(10),
+    }.ApplyProxySettings(C.ProxySettings);
     private HashSet<string> PastEmojiSearchRequests = [];
     private ConcurrentQueue<string> EmojiSearchRequests = [];
     public volatile bool DownloaderTaskRunning = false;
@@ -66,7 +67,7 @@ public sealed class EmojiLoader : IDisposable
                         {
                             PluginLog.Verbose($"  Request dequeued: {request}");
                             idle = 0;
-                            Client ??= new();
+                            Client ??= new HttpClient().ApplyProxySettings(C.ProxySettings);
                             var result = Client.GetStringAsync("https://api.betterttv.net/3/emotes/shared/search?query=" + request).Result;
                             PluginLog.Verbose($"  Result: {result}");
                             var emoji = JsonConvert.DeserializeObject<List<BetterTTWEmoji.EmoteData>>(result);
@@ -172,7 +173,7 @@ public sealed class EmojiLoader : IDisposable
             {
                 try
                 {
-                    Client ??= new();
+                    Client ??= new HttpClient().ApplyProxySettings(C.ProxySettings);
                     var result = Client.GetAsync("https://api.betterttv.net/3/emotes/shared/top?limit=100").Result;
                     result.EnsureSuccessStatusCode();
                     var data = JsonConvert.DeserializeObject<List<BetterTTWEmoji>>(result.Content.ReadAsStringAsync().Result);

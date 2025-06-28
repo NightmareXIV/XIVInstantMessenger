@@ -1,5 +1,6 @@
 ﻿using Dalamud.Memory;
 using ECommons.Interop;
+using ECommons.Throttlers;
 using Messenger.Services.EmojiLoaderService;
 using PInvoke;
 using System.Security.Cryptography;
@@ -29,6 +30,7 @@ public unsafe partial class PseudoMultilineInput
     private bool DoCursorLock = false;
     private int CursorLock = -1;
     private Vector2 MouseEmojiLock = Vector2.Zero;
+    private int StoredCursorPos = 0;
 
     private int MaxLines => C.PMLMaxLines;
     public bool IsMultiline => C.PMLEnable;
@@ -98,27 +100,27 @@ public unsafe partial class PseudoMultilineInput
 
     private int Callback(ImGuiInputTextCallbackData* data)
     {
-        if(data->EventFlag == ImGuiInputTextFlags.CallbackHistory)
+        if(C.EnableEmojiPicker)
         {
-            //DuoLog.Information($"{data->EventKey}");
-            if(data->EventKey == ImGuiKey.DownArrow || data->EventKey == ImGuiKey.UpArrow)
+            if(ImGui.IsKeyDown(ImGuiKey.UpArrow) || ImGui.IsKeyDown(ImGuiKey.DownArrow))
             {
+                data->CursorPos = StoredCursorPos;
                 EmojiKeyboardSelecting = true;
                 MouseEmojiLock = User32.GetCursorPos().AsVector2();
-                if(data->EventKey == ImGuiKey.UpArrow)
+                if(ImGui.IsKeyPressed(ImGuiKey.UpArrow))
                 {
                     EmojiKeyboardSelectorRow--;
                 }
-                if(data->EventKey == ImGuiKey.DownArrow)
+                if(ImGui.IsKeyPressed(ImGuiKey.DownArrow))
                 {
                     EmojiKeyboardSelectorRow++;
                 }
             }
-            if(DoCursorLock && CursorLock > -1)
+            else
             {
-                data->CursorPos = CursorLock;
+                EzThrottler.Reset("EmojiSel");
+                StoredCursorPos = data->CursorPos;
             }
-            return 1;
         }
         if(data->EventFlag == ImGuiInputTextFlags.CallbackCharFilter)
         {

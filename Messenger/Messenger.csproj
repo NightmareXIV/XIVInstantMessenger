@@ -30,6 +30,7 @@
 
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="12.0.0" />
+        <PackageReference Include="ECommons" Version="3.0.0" />
         <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
     </ItemGroup>
@@ -95,7 +96,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
         <ProjectReference Include="..\NightmareUI\NightmareUI\NightmareUI.csproj" />
     </ItemGroup>
 </Project>
