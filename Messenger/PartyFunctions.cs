@@ -1,4 +1,5 @@
-﻿using ECommons.GameHelpers;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 
 namespace Messenger;
@@ -28,6 +29,15 @@ internal sealed unsafe class PartyFunctions : IDisposable
         if(contentId != 0)
         {
             InfoProxyPartyInvite.Instance()->InviteToPartyContentId(contentId, world);
+        }
+    }
+
+    internal void InviteInInstance(ulong cid)
+    {
+        if(!Player.Available) return;
+        if(cid != 0)
+        {
+            InfoProxyPartyInvite.Instance()->InviteToPartyInInstanceByContentId(cid);
         }
     }
 }

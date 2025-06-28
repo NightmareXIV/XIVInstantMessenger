@@ -39,6 +39,7 @@ public unsafe class ChatWindow : Window
     private AddToBlacklistButton AddToBlacklistButton;
     private OpenLogButton OpenLogButton;
     private OpenCharaCardButton OpenCharaCardButton;
+    private TargetPlayerButton TargetPlayerButton;
 
     public ChatWindow(MessageHistory messageHistory) :
         base($"Chat with {messageHistory.HistoryPlayer.GetChannelName()}###Messenger - {messageHistory.HistoryPlayer.Name}{messageHistory.HistoryPlayer.HomeWorld}"
@@ -55,6 +56,7 @@ public unsafe class ChatWindow : Window
         AddToBlacklistButton = new(this);
         OpenLogButton = new(this);
         OpenCharaCardButton = new(this);
+        TargetPlayerButton = new(this);
     }
 
     public void UpdateTitleButtons(Window window)
@@ -65,6 +67,7 @@ public unsafe class ChatWindow : Window
         if(AddToBlacklistButton.ShouldDisplay()) window.TitleBarButtons.Add(AddToBlacklistButton.Button);
         if(OpenLogButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenLogButton.Button);
         if(OpenCharaCardButton.ShouldDisplay()) window.TitleBarButtons.Add(OpenCharaCardButton.Button);
+        if(TargetPlayerButton.ShouldDisplay()) window.TitleBarButtons.Add(TargetPlayerButton.Button);
     }
 
     internal void SetTransparency(bool isTransparent)

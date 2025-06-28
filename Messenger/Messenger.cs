@@ -3,9 +3,11 @@ using ECommons.Automation;
 using ECommons.CircularBuffers;
 using ECommons.Configuration;
 using ECommons.Events;
+using ECommons.ExcelServices;
 using ECommons.Funding;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.PartyFunctions;
 using ECommons.Singletons;
 using ECommons.Throttlers;
 using ECommons.WindowsFormsReflector;
@@ -420,20 +422,21 @@ public unsafe class Messenger : IDalamudPlugin
         {
             return "Cross-world parties are not supported";
         }
-        if(Svc.ClientState.LocalPlayer.CurrentWorld.Value.DataCenter.Value.RowId !=
-            Svc.Data.GetExcelSheet<World>().GetRow(player.HomeWorld).DataCenter.Value.RowId)
-        {
-            return "Target is located in different data center";
-        }
         if(TryGetAddonByName<FFXIVClientStructs.FFXIV.Component.GUI.AtkUnitBase>("ChatLog", out var addon) && addon->IsVisible)
         {
             var party = Svc.Party;
             var leader = (ulong?)party[(int)party.PartyLeaderIndex]?.ContentId;
             var isLeader = party.Length == 0 || Svc.ClientState.LocalContentId == leader;
-            Dalamud.Game.ClientState.Party.IPartyMember member = party.FirstOrDefault(member => member.Name.TextValue == player.Name && member.World.RowId == player.HomeWorld);
-            var isInParty = member != default;
+            var isInParty = UniversalParty.Members.Any(x => x.NameWithWorld == player.ToString());
             var inInstance = GameFunctions.IsInInstance();
-            //var inPartyInstance = Svc.Data.GetExcelSheet<TerritoryType>()!.GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse is (41 or 47 or 48 or 52 or 53);
+            var isValidInstanceForInvite = Player.TerritoryIntendedUse.EqualsAny(
+                TerritoryIntendedUseEnum.Eureka,
+                TerritoryIntendedUseEnum.Bozja,
+                TerritoryIntendedUseEnum.Occult_Crescent,
+                TerritoryIntendedUseEnum.Diadem_3,
+                TerritoryIntendedUseEnum.Large_Scale_Raid,
+                TerritoryIntendedUseEnum.Large_Scale_Savage_Raid
+                );
             if(isLeader)
             {
                 if(!isInParty)
@@ -466,9 +469,28 @@ public unsafe class Messenger : IDalamudPlugin
                             }
                         }
                     }
+                    else if(isValidInstanceForInvite)
+                    {
+                        if(cidOverride != null && cidOverride.Value != 0)
+                        {
+                            if(!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
+                            PartyFunctions.InviteInInstance(cidOverride.Value);
+                            return null;
+                        } 
+                        else if(S.MessageProcessor.TryFindCID(player, out var cid))
+                        {
+                            if(!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
+                            PartyFunctions.InviteInInstance(cid);
+                            return null;
+                        }
+                        else
+                        {
+                            return "Content ID is unknown; please have a chat with player before inviting them.";
+                        }
+                    }
                     else
                     {
-                        return "Can not invite while in instance";
+                        return "Unable to invite now.";
                     }
                 }
                 else

@@ -30,49 +30,21 @@ public class InviteToPartyButton : ChatWindowTitleButton
         }
         else
         {
-            var flSuccess = false;
-            foreach(var x in FriendList.Get())
+            if(S.MessageProcessor.TryFindCID(MessageHistory.HistoryPlayer, out _))
             {
-                if(flSuccess) break;
-                if(x.Name.ToString() == MessageHistory.HistoryPlayer.Name && x.HomeWorld == MessageHistory.HistoryPlayer.HomeWorld)
+                var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
+                if(result != null)
                 {
-                    flSuccess = true;
-                    if(x.IsOnline)
-                    {
-                        var sameWorld = Player.CurrentWorldId == x.CurrentWorld;
-                        var result = P.InviteToParty(MessageHistory.HistoryPlayer, sameWorld, x.ContentId);
-                        if(result != null)
-                        {
-                            Notify.Error(result);
-                        }
-                        else
-                        {
-                            Notify.Info($"Inviting through FrieldList ({(sameWorld ? "same world" : "different world")})");
-                        }
-                    }
-                    else if(S.MessageProcessor.TryFindCID(MessageHistory.HistoryPlayer, out _))
-                    {
-                        var result = P.InviteToParty(MessageHistory.HistoryPlayer, true);
-                        if(result != null)
-                        {
-                            Notify.Error(result);
-                        }
-                        else
-                        {
-                            Notify.Info($"Inviting through Chat History");
-                        }
-                    }
-                    else
-                    {
-                        Notify.Error("Target appears to be offline.");
-                    }
+                    Notify.Error(result);
+                }
+                else
+                {
+                    Notify.Info($"Inviting through Chat History");
                 }
             }
-            if(!flSuccess)
+            else
             {
-                {
-                    RequestOpenPopup = true;
-                }
+                Notify.Error("Could not invite this player");
             }
         }
     }

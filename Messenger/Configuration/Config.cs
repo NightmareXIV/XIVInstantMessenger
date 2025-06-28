@@ -66,6 +66,7 @@ public class Config : IEzConfig
     public bool ButtonBlack = true;
     public bool ButtonLog = true;
     public bool ButtonCharaCard = true;
+    public bool ButtonTargetPlayer = true;
 
     public bool LockWindowSize = true;
     public Vector2 DefaultSize = new(300, 200);

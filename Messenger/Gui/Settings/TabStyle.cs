@@ -94,6 +94,7 @@ internal class TabStyle
         //ImGui.Checkbox("Add to blacklist", ref C.ButtonBlack);
         ImGui.Checkbox("Open chat log", ref C.ButtonLog);
         ImGui.Checkbox("Open adventurer plate", ref C.ButtonCharaCard);
+        ImGui.Checkbox("Target the player", ref C.ButtonTargetPlayer);
         ImGui.Separator();
         ImGui.Checkbox("Enable multiline message input", ref C.PMLEnable);
         ImGui.Indent();
