@@ -10,9 +10,9 @@
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.0.0, )",
-        "resolved": "3.0.0",
-        "contentHash": "Frb4tiuV5ESubnpq4nG6g3QnJ/Il0I3ohzLh/XHyMCN5bnf9Gedrpleo5gr3A3LWHgGLTJT5H5W/CTDPRsmdJg=="
+        "requested": "[3.0.0.2, )",
+        "resolved": "3.0.0.2",
+        "contentHash": "YyEhpkbdhMEi/Us/xcTvzrRiVrmoOh3f8RgaVEzMWrfeoa5c361FrhmvhcEa7eYYtnuKG3zihS2Hnwd9vi99Ww=="
       },
       "SharpDX.Direct2D1": {
         "type": "Direct",
@@ -27,9 +27,9 @@
       },
       "SixLabors.ImageSharp": {
         "type": "Direct",
-        "requested": "[3.1.5, )",
-        "resolved": "3.1.5",
-        "contentHash": "lNtlq7dSI/QEbYey+A0xn48z5w4XHSffF8222cC4F4YwTXfEImuiBavQcWjr49LThT/pRmtWJRcqA/PlL+eJ6g=="
+        "requested": "[3.1.10, )",
+        "resolved": "3.1.10",
+        "contentHash": "R1HEPcqx3v+kvlOTPouP0g/Nzzud9pHtjlgGbFax3Ivaz8kkaGfS2EPfyDGpmfoTUQ3nQ5wxdhYyYa9fwYA9cw=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -949,7 +949,7 @@
       "nightmareui": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.0.0, )"
+          "ECommons": "[3.0.0.2, )"
         }
       }
     }

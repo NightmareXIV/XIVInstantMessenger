@@ -345,7 +345,7 @@ public unsafe class Messenger : IDalamudPlugin
             {
                 var c = $"/{destination} {message}";
                 PluginLog.Verbose($"Sending command generic: {c}");
-                Chat.Instance.SendMessage(c);
+                Chat.SendMessage(c);
             }
             else
             {
@@ -356,10 +356,23 @@ public unsafe class Messenger : IDalamudPlugin
                     Chat.Instance.SendMessage(c);
                 }
                 else*/
+                if(Utils.IsInForay())
+                {
+                    var parts = destination.Split("@");
+                    var world = ExcelWorldHelper.Get(parts[1]);
+                    PluginLog.Verbose($"Sending foray message to {destination}: {message}");
+                    var result = Utils.SendTellInForay(new(parts[0], world.Value.RowId), message);
+                    if(result != null)
+                    {
+                        Notify.Error(result);
+                        return result;
+                    }
+                }
+                else
                 {
                     var c = $"/tell {destination} {message}";
                     PluginLog.Verbose($"Sending command: {c}");
-                    Chat.Instance.SendMessage(c);
+                    Chat.SendMessage(c);
                 }
             }
             return null;

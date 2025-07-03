@@ -4,11 +4,15 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
+using ECommons.Automation;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using Lumina.Excel.Sheets;
 using Messenger.Configuration;
 using Messenger.Gui;
@@ -18,6 +22,7 @@ using PInvoke;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Action = System.Action;
 
 namespace Messenger;
@@ -27,6 +32,32 @@ internal static unsafe partial class Utils
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
     public const uint EngagementID = 1000000;
     public const uint SuperchannelID = 1000001;
+
+    public static bool IsInForay() => Player.TerritoryIntendedUse.EqualsAny(TerritoryIntendedUseEnum.Eureka, TerritoryIntendedUseEnum.Bozja, TerritoryIntendedUseEnum.Occult_Crescent);
+
+    public static string SendTellInForay(Sender destination, string message)
+    {
+        if(S.EurekaMonitor.CanSendMessage(destination.ToString(), out var cid))
+        {
+            var namePtr = Utf8String.FromString(destination.Name);
+            var worldNamePtr = Utf8String.FromString(ExcelWorldHelper.GetName(destination.HomeWorld));
+            var mes = Utf8String.FromString(message);
+
+            var type = RaptureShellModule.Instance()->ChatType;
+            RaptureShellModule.Instance()->SetTellTargetInForay(namePtr, worldNamePtr, (ushort)destination.HomeWorld, 0, cid, 0, false);
+            Chat.SendMessage(message);
+            RaptureShellModule.Instance()->ChangeChatChannel(type, 0, null, true);
+
+            namePtr->Dtor(true);
+            worldNamePtr->Dtor(true);
+            mes->Dtor(true);
+            return null;
+        }
+        else
+        {
+            return "Could not send message to this recipient";
+        }
+    }
 
     public static void AutoSaveMessage(ChatWindow window, bool bypassTimer)
     {

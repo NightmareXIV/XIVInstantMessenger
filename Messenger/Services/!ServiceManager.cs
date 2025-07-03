@@ -13,4 +13,5 @@ public static class ServiceManager
     public static IPCProvider IPCProvider { get; private set; }
     public static XIMIpcManager XIMIpcManager { get; private set; }
     public static XIMModalWindow XIMModalWindow { get; private set; }
+    public static EurekaMonitor EurekaMonitor { get; private set; }
 }

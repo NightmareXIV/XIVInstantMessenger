@@ -1,5 +1,6 @@
 ﻿using Dalamud.Memory;
 using ECommons.EzHookManager;
+using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 
 namespace Messenger.Services;
 public unsafe class Memory : IDisposable
@@ -9,6 +10,9 @@ public unsafe class Memory : IDisposable
     private delegate nint ResolveTextCommandPlaceholderDelegate(nint a1, byte* placeholderText, byte a3, byte a4);
     [EzHook("E8 ?? ?? ?? ?? 49 8D 4F 18 4C 8B E0")]
     private EzHook<ResolveTextCommandPlaceholderDelegate> ResolveTextCommandPlaceholderHook;
+
+    public delegate void ResetChatChannelDelegate(RaptureShellModule* module);
+    public ResetChatChannelDelegate ResetChatChannell = EzDelegate.Get<ResetChatChannelDelegate>("40 53 48 83 EC 20 83 B9 ?? ?? ?? ?? ?? 48 8B D9 0F 84 ?? ?? ?? ?? 48 8D 91");
 
     private Memory()
     {

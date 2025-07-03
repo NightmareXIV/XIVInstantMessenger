@@ -3,8 +3,10 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using Messenger.Configuration;
 using Messenger.FriendListManager;
+using Messenger.Services;
 using NightmareUI.ImGuiElements;
 using System.Threading;
 
@@ -23,6 +25,40 @@ internal unsafe class TabDebug
 
         try
         {
+            if(ImGui.CollapsingHeader("Eureka monitor"))
+            {
+                ImGuiEx.Text(S.EurekaMonitor.CIDMap.Select(x => $"{x.Key}: {x.Value}").Print("\n"));
+                ImGui.SameLine();
+                ImGuiEx.Text($"""
+                    TempAccountId {RaptureShellModule.Instance()->TempAccountId}
+                    TempChatCommand {RaptureShellModule.Instance()->TempChatCommand}
+                    TempChatType {RaptureShellModule.Instance()->TempChatType}
+                    TempContentId {RaptureShellModule.Instance()->TempContentId}
+                    TempTellName {RaptureShellModule.Instance()->TempTellName}
+                    TempTellReason {RaptureShellModule.Instance()->TempTellReason}
+                    TempTellWorld {RaptureShellModule.Instance()->TempTellWorld}
+                    TempTellWorldId {RaptureShellModule.Instance()->TempTellWorldId}
+
+                    ChatType: {RaptureShellModule.Instance()->ChatType}
+                    """);
+                ImGuiEx.Text($"From object table:");
+                ImGui.Indent();
+                var list = new List<EMD>();
+                S.EurekaMonitor.FillFromObjectTableAndParty(list);
+                ImGuiEx.Text(list.Print("\n"));
+                ImGuiEx.Text($"From log:");
+                list.Clear();
+                S.EurekaMonitor.FillFromLog(list);
+                ImGuiEx.Text(list.Print("\n"));
+                ImGuiEx.Text($"From chara search:");
+                list.Clear();
+                S.EurekaMonitor.FillFromCharaSearch(list);
+                ImGuiEx.Text(list.Print("\n"));
+                ImGui.Unindent();
+            }
+            ImGuiEx.TextCopy($"{(nint)(RaptureShellModule.Instance()):X16}");
+            ImGui.SameLine();
+            ImGui.Text(" RaptureShellModule");
             if(ImGui.CollapsingHeader("Auto-saved"))
             {
                 ref var when = ref Ref<int>.Get("AutoSavedDebug");
