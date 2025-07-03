@@ -67,7 +67,7 @@ internal static unsafe partial class Utils
                 {
                     try
                     {
-                        ushort reason = t.Reason switch
+                        ushort reason = t.GetReason() switch
                         {
                             1 => 2,
                             2 => 1,

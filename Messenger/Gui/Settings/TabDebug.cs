@@ -36,7 +36,7 @@ internal unsafe class TabDebug
                         {x.WorldId}
                         {x.ContentId}
                         {x.AccountId}
-                        {x.Reason}
+                        {x.GetReason()}
                         """);
                     ImGui.Separator();
                 }
