@@ -18,16 +18,18 @@ public unsafe class Memory : IDisposable
     private EzHook<AgentLookingForGroup_Tell> AgentLookingForGroup_TellHook;
     private nint AgentLookingForGroup_TellDetour(nint a1, nint a2)
     {
-        var value = ((AtkValue*)a2)->Int;
         try
         {
-            if(TryGetAddonMaster<AddonMaster.LookingForGroupDetail>(out var m) && m.IsAddonReady)
+            var value = ((AtkValue*)a2)->Int;
+            InternalLog.Information($"val: {value}");
+            if(value == 11 && TryGetAddonMaster<AddonMaster.LookingForGroupDetail>(out var m) && m.IsAddonReady)
             {
                 var reader = new ReaderAddonLookingForGroupDetail(m.Base);
                 if(reader.Recruiter != null && reader.RecruiterWorld != null)
                 {
-                    PluginLog.Debug($"Detected outgoing party finder tell");
-                    S.PartyFinderMonitor.OutgoingWhitelist[$"{reader.Recruiter}@{reader.RecruiterWorld}"] = DateTimeOffset.Now.ToUnixTimeSeconds();
+                    var nameWithWorld = $"{reader.Recruiter.GetText()}@{reader.RecruiterWorld.GetText()}";
+                    PluginLog.Debug($"Detected outgoing party finder tell {nameWithWorld}");
+                    S.PartyFinderMonitor.OutgoingWhitelist[nameWithWorld] = DateTimeOffset.Now.ToUnixTimeSeconds();
                 }
             }
         }

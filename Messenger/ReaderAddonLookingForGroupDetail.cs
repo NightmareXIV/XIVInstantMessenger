@@ -1,4 +1,5 @@
-﻿using ECommons.UIHelpers;
+﻿using Dalamud.Game.Text.SeStringHandling;
+using ECommons.UIHelpers;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,6 @@ public unsafe sealed class ReaderAddonLookingForGroupDetail : AtkReader
     {
     }
 
-    public string Recruiter => this.ReadString(11);
-    public string RecruiterWorld => this.ReadString(13);
+    public SeString Recruiter => this.ReadSeString(11);
+    public SeString RecruiterWorld => this.ReadSeString(13);
 }

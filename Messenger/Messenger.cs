@@ -364,7 +364,7 @@ public unsafe class Messenger : IDalamudPlugin
                 }
                 else
                 {
-                    string acqError = null;
+                    string acqError = string.Empty;
                     if(S.PartyFinderMonitor.CanSendMessage(destination))
                     {
                         acqError = Utils.SendReplyViaAcq(destSender, message);

@@ -50,7 +50,7 @@ public unsafe sealed class PartyFinderMonitor
     public bool CanSendMessage(string destination)
     {
         if(Svc.Objects.OfType<IPlayerCharacter>().Any(x => x.GetNameWithWorld() == destination)) return false;
-        if(OutgoingWhitelist.TryGetValue(destination, out var time) && time + 60 * 60 < DateTimeOffset.Now.ToUnixTimeSeconds())
+        if(OutgoingWhitelist.TryGetValue(destination, out var time) && time + 60 * 60 > DateTimeOffset.Now.ToUnixTimeSeconds())
         {
             return destination != Player.NameWithWorld;
         }
