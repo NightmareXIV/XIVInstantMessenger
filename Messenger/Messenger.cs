@@ -356,12 +356,22 @@ public unsafe class Messenger : IDalamudPlugin
                     Chat.Instance.SendMessage(c);
                 }
                 else*/
+                var parts = destination.Split("@");
+                var world = ExcelWorldHelper.Get(parts[1]);
                 if(Utils.IsInForay())
                 {
-                    var parts = destination.Split("@");
-                    var world = ExcelWorldHelper.Get(parts[1]);
                     PluginLog.Verbose($"Sending foray message to {destination}: {message}");
                     var result = Utils.SendTellInForay(new(parts[0], world.Value.RowId), message);
+                    if(result != null)
+                    {
+                        Notify.Error(result);
+                        return result;
+                    }
+                }
+                else if(Svc.Condition[ConditionFlag.UsingPartyFinder] && S.PartyFinderMonitor.CanSendMessage(destination, out _))
+                {
+                    PluginLog.Verbose($"Sending PF reply to {destination}: {message}");
+                    var result = Utils.SendTellInPartyFinder(new(parts[0], world.Value.RowId), message);
                     if(result != null)
                     {
                         Notify.Error(result);

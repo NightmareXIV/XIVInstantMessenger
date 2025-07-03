@@ -41,7 +41,6 @@ internal static unsafe partial class Utils
         {
             var namePtr = Utf8String.FromString(destination.Name);
             var worldNamePtr = Utf8String.FromString(ExcelWorldHelper.GetName(destination.HomeWorld));
-            var mes = Utf8String.FromString(message);
 
             var type = RaptureShellModule.Instance()->ChatType;
             RaptureShellModule.Instance()->SetTellTargetInForay(namePtr, worldNamePtr, (ushort)destination.HomeWorld, 0, cid, 0, false);
@@ -50,7 +49,28 @@ internal static unsafe partial class Utils
 
             namePtr->Dtor(true);
             worldNamePtr->Dtor(true);
-            mes->Dtor(true);
+            return null;
+        }
+        else
+        {
+            return "Could not send message to this recipient";
+        }
+    }
+
+    public static string SendTellInPartyFinder(Sender destination, string message)
+    {
+        if(S.PartyFinderMonitor.CanSendMessage(destination.ToString(), out var cid))
+        {
+            var namePtr = Utf8String.FromString(destination.Name);
+            var worldNamePtr = Utf8String.FromString(ExcelWorldHelper.GetName(destination.HomeWorld));
+
+            //var type = RaptureShellModule.Instance()->ChatType;
+            RaptureShellModule.Instance()->SetContextTellTargetInForay(namePtr, worldNamePtr, (ushort)destination.HomeWorld, 0, cid, 2); //function is correct
+            Chat.SendMessage(message);
+            //RaptureShellModule.Instance()->ChangeChatChannel(type, 0, null, true);
+
+            namePtr->Dtor(true);
+            worldNamePtr->Dtor(true);
             return null;
         }
         else

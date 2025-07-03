@@ -3,6 +3,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using Messenger.Configuration;
 using Messenger.FriendListManager;
@@ -25,6 +26,28 @@ internal unsafe class TabDebug
 
         try
         {
+            if(ImGui.CollapsingHeader("Tell history"))
+            {
+                var r = RaptureLogModule.Instance();
+                for(var i = 0; i < r->MsgSourceArrayLength; i++)
+                {
+                    var src = r->MsgSourceArray[i];
+                    var det = r->GetLogMessageDetail(src.LogMessageIndex, out var sender, out var message, out var logKind, out var casterKind, out var targetKind, out var timestamp);
+                    if(det)
+                    {
+                        ImGuiEx.Text($"""
+                            LogMessageIndex: {src.LogMessageIndex}
+                            sender: {SeString.Parse(sender)}
+                            message: {SeString.Parse(message)}
+                            logKind: {logKind}
+                            casterKind: {casterKind}
+                            targetKind: {targetKind}
+                            timestamp: {timestamp}
+                            """);
+                        ImGui.Separator();
+                    }
+                }
+            }
             if(ImGui.CollapsingHeader("Eureka monitor"))
             {
                 ImGuiEx.Text(S.EurekaMonitor.CIDMap.Select(x => $"{x.Key}: {x.Value}").Print("\n"));
