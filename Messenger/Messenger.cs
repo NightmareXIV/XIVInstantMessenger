@@ -349,29 +349,13 @@ public unsafe class Messenger : IDalamudPlugin
             }
             else
             {
-                /*if (destination == S.MessageProcessor.LastReceivedMessage.GetPlayerName())
-                {
-                    var c = $"/r {message}";
-                    PluginLog.Verbose($"Sending via reply: {c}");
-                    Chat.Instance.SendMessage(c);
-                }
-                else*/
                 var parts = destination.Split("@");
                 var world = ExcelWorldHelper.Get(parts[1]);
+                var destSender = new Sender(parts[0], world.Value.RowId);
                 if(Utils.IsInForay())
                 {
                     PluginLog.Verbose($"Sending foray message to {destination}: {message}");
-                    var result = Utils.SendTellInForay(new(parts[0], world.Value.RowId), message);
-                    if(result != null)
-                    {
-                        Notify.Error(result);
-                        return result;
-                    }
-                }
-                else if(Svc.Condition[ConditionFlag.UsingPartyFinder] && S.PartyFinderMonitor.CanSendMessage(destination, out _))
-                {
-                    PluginLog.Verbose($"Sending PF reply to {destination}: {message}");
-                    var result = Utils.SendTellInPartyFinder(new(parts[0], world.Value.RowId), message);
+                    var result = Utils.SendTellInForay(destSender, message);
                     if(result != null)
                     {
                         Notify.Error(result);
@@ -380,9 +364,17 @@ public unsafe class Messenger : IDalamudPlugin
                 }
                 else
                 {
-                    var c = $"/tell {destination} {message}";
-                    PluginLog.Verbose($"Sending command: {c}");
-                    Chat.SendMessage(c);
+                    string acqError = null;
+                    if(S.PartyFinderMonitor.CanSendMessage(destination))
+                    {
+                        acqError = Utils.SendReplyViaAcq(destSender, message);
+                    }
+                    if(acqError != null)
+                    {
+                        var c = $"/tell {destination} {message}";
+                        PluginLog.Verbose($"Sending command: {c}");
+                        Chat.SendMessage(c);
+                    }
                 }
             }
             return null;

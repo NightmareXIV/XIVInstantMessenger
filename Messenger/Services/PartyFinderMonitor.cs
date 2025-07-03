@@ -1,7 +1,13 @@
-﻿using Dalamud.Game.Text.SeStringHandling;
+﻿using Dalamud.Game.Addon.Events;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.GameHelpers;
 using ECommons.Throttlers;
+using ECommons.UIHelpers.AddonMasterImplementations;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace Messenger.Services;
@@ -9,6 +15,7 @@ public unsafe sealed class PartyFinderMonitor
 {
     public Dictionary<string, ulong> CIDMap = [];
     readonly List<EMD> EMDList = new(200);
+    public readonly Dictionary<string, long> OutgoingWhitelist = [];
     int MinimumTimestamp = 0;
     private PartyFinderMonitor()
     {
@@ -17,6 +24,12 @@ public unsafe sealed class PartyFinderMonitor
             Start();
         }
         Svc.Condition.ConditionChange += Condition_ConditionChange;
+        Svc.ClientState.Logout += ClientState_Logout;
+    }
+
+    private void ClientState_Logout(int type, int code)
+    {
+        OutgoingWhitelist.Clear();
     }
 
     private void Condition_ConditionChange(ConditionFlag flag, bool value)
@@ -34,10 +47,14 @@ public unsafe sealed class PartyFinderMonitor
         }
     }
 
-    public bool CanSendMessage(string destination, out ulong cid)
+    public bool CanSendMessage(string destination)
     {
-        cid = CIDMap.SafeSelect(destination);
-        return cid != 0 && destination != Player.NameWithWorld;
+        if(Svc.Objects.OfType<IPlayerCharacter>().Any(x => x.GetNameWithWorld() == destination)) return false;
+        if(OutgoingWhitelist.TryGetValue(destination, out var time) && time + 60 * 60 < DateTimeOffset.Now.ToUnixTimeSeconds())
+        {
+            return destination != Player.NameWithWorld;
+        }
+        return CIDMap.ContainsKey(destination);
     }
 
     public void Start()
@@ -102,6 +119,8 @@ public unsafe sealed class PartyFinderMonitor
 
     public void Dispose()
     {
+        Svc.Condition.ConditionChange -= Condition_ConditionChange;
+        Svc.ClientState.Logout -= ClientState_Logout;
         Stop();
     }
 }

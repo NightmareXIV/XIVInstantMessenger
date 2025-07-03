@@ -12,6 +12,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using Lumina.Excel.Sheets;
 using Messenger.Configuration;
@@ -45,10 +46,12 @@ internal static unsafe partial class Utils
             var type = RaptureShellModule.Instance()->ChatType;
             RaptureShellModule.Instance()->SetTellTargetInForay(namePtr, worldNamePtr, (ushort)destination.HomeWorld, 0, cid, 0, false);
             Chat.SendMessage(message);
-            RaptureShellModule.Instance()->ChangeChatChannel(type, 0, null, true);
+            var emptyString = Utf8String.CreateEmpty();
+            RaptureShellModule.Instance()->ChangeChatChannel(type, 0, emptyString, true);
 
             namePtr->Dtor(true);
             worldNamePtr->Dtor(true);
+            emptyString->Dtor(true);
             return null;
         }
         else
@@ -57,26 +60,48 @@ internal static unsafe partial class Utils
         }
     }
 
-    public static string SendTellInPartyFinder(Sender destination, string message)
+    public static string SendReplyViaAcq(Sender destination, string message)
     {
-        if(S.PartyFinderMonitor.CanSendMessage(destination.ToString(), out var cid))
+        if(destination.ToString() != Player.NameWithWorld
+            && !Svc.Objects.OfType<IPlayerCharacter>().Any(x => x.GetNameWithWorld() == destination.ToString())) 
         {
-            var namePtr = Utf8String.FromString(destination.Name);
-            var worldNamePtr = Utf8String.FromString(ExcelWorldHelper.GetName(destination.HomeWorld));
+            var tellHistory = AcquaintanceModule.Instance()->TellHistory;
+            foreach(ref var t in tellHistory)
+            {
+                if(t.Name.ToString() == destination.Name && t.WorldId == destination.HomeWorld && t.WorldName.ToString() == ExcelWorldHelper.GetName(destination.HomeWorld) && t.ContentId != 0)
+                {
+                    try
+                    {
+                        ushort reason = t.Reason switch
+                        {
+                            1 => 2,
+                            2 => 1,
+                            4 => 5,
+                            5 => 4,
+                            _ => 0,
+                        };
 
-            //var type = RaptureShellModule.Instance()->ChatType;
-            RaptureShellModule.Instance()->SetContextTellTargetInForay(namePtr, worldNamePtr, (ushort)destination.HomeWorld, 0, cid, 2); //function is correct
-            Chat.SendMessage(message);
-            //RaptureShellModule.Instance()->ChangeChatChannel(type, 0, null, true);
+                        if(reason == 0) continue;
 
-            namePtr->Dtor(true);
-            worldNamePtr->Dtor(true);
-            return null;
+                        var namePtr = Utf8String.FromString(destination.Name);
+                        var worldNamePtr = Utf8String.FromString(ExcelWorldHelper.GetName(destination.HomeWorld));
+                        var type = RaptureShellModule.Instance()->ChatType;
+                        RaptureShellModule.Instance()->SetContextTellTargetInForay(namePtr, worldNamePtr, (ushort)destination.HomeWorld, 0, t.ContentId, reason); //function is correct
+                        PluginLog.Debug($"Sending via acq: {namePtr->ToString()}/{worldNamePtr->ToString()}/{destination.HomeWorld}/{t.ContentId}/{reason}");
+                        Chat.SendMessage(message);
+
+                        namePtr->Dtor(true);
+                        worldNamePtr->Dtor(true);
+                    }
+                    catch(Exception e)
+                    {
+                        e.Log();
+                    }
+                    return null;
+                }
+            }
         }
-        else
-        {
-            return "Could not send message to this recipient";
-        }
+        return "Could not send message to this recipient";
     }
 
     public static void AutoSaveMessage(ChatWindow window, bool bypassTimer)

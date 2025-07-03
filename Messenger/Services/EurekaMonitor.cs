@@ -24,8 +24,10 @@ public unsafe sealed class EurekaMonitor : IDisposable
     {
         if(Svc.ClientState.IsLoggedIn)
         {
-            ClientState_TerritoryChanged((ushort)Player.Territory);
+            ClientState_Login();
         }
+        Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+        Svc.ClientState.Login += ClientState_Login;
     }
 
     public bool CanSendMessage(string destination, out ulong cid)
@@ -39,10 +41,8 @@ public unsafe sealed class EurekaMonitor : IDisposable
         PluginLog.Information($"Eureka monitoring started");
         Reinitialize();
         Svc.Framework.Update += Framework_Update;
-        Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
         Svc.Chat.ChatMessageHandled += Chat_ChatMessageHandled;
         Svc.Chat.ChatMessageUnhandled += Chat_ChatMessageHandled;
-        Svc.ClientState.Login += ClientState_Login;
     }
 
     private void ClientState_Login()
@@ -165,14 +165,14 @@ public unsafe sealed class EurekaMonitor : IDisposable
         PluginLog.Information($"Eureka monitoring stopped");
         CIDMap.Clear();
         Svc.Framework.Update -= Framework_Update;
-        Svc.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
         Svc.Chat.ChatMessageHandled -= Chat_ChatMessageHandled;
         Svc.Chat.ChatMessageUnhandled -= Chat_ChatMessageHandled;
-        Svc.ClientState.Login -= ClientState_Login;
     }
 
     public void Dispose()
     {
+        Svc.ClientState.Login -= ClientState_Login;
+        Svc.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
         Stop();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.UI.Info;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using System;
 using System.Collections.Generic;
@@ -9,5 +10,17 @@ using System.Threading.Tasks;
 namespace Messenger;
 public unsafe static class CSExtensions
 {
-    
+    extension(ref AcquaintanceModule.Acquaintance obj)
+    {
+        public byte Reason
+        {
+            get
+            {
+                fixed(void* ptr = &obj)
+                {
+                    return *(byte*)((nint)ptr + 210);
+                }
+            }
+        }
+    }
 }

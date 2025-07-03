@@ -1,6 +1,8 @@
 ﻿using Dalamud.Memory;
 using ECommons.EzHookManager;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace Messenger.Services;
 public unsafe class Memory : IDisposable
@@ -11,8 +13,30 @@ public unsafe class Memory : IDisposable
     [EzHook("E8 ?? ?? ?? ?? 49 8D 4F 18 4C 8B E0")]
     private EzHook<ResolveTextCommandPlaceholderDelegate> ResolveTextCommandPlaceholderHook;
 
-    public delegate void ResetChatChannelDelegate(RaptureShellModule* module);
-    public ResetChatChannelDelegate ResetChatChannell = EzDelegate.Get<ResetChatChannelDelegate>("40 53 48 83 EC 20 83 B9 ?? ?? ?? ?? ?? 48 8B D9 0F 84 ?? ?? ?? ?? 48 8D 91");
+    private delegate nint AgentLookingForGroup_Tell(nint a1, nint a2);
+    [EzHook("40 55 53 56 57 41 54 41 55 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 60")]
+    private EzHook<AgentLookingForGroup_Tell> AgentLookingForGroup_TellHook;
+    private nint AgentLookingForGroup_TellDetour(nint a1, nint a2)
+    {
+        var value = ((AtkValue*)a2)->Int;
+        try
+        {
+            if(TryGetAddonMaster<AddonMaster.LookingForGroupDetail>(out var m) && m.IsAddonReady)
+            {
+                var reader = new ReaderAddonLookingForGroupDetail(m.Base);
+                if(reader.Recruiter != null && reader.RecruiterWorld != null)
+                {
+                    PluginLog.Debug($"Detected outgoing party finder tell");
+                    S.PartyFinderMonitor.OutgoingWhitelist[$"{reader.Recruiter}@{reader.RecruiterWorld}"] = DateTimeOffset.Now.ToUnixTimeSeconds();
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            e.Log();
+        }
+        return AgentLookingForGroup_TellHook.Original(a1, a2);
+    }
 
     private Memory()
     {

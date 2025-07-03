@@ -28,6 +28,22 @@ internal unsafe class TabDebug
         {
             if(ImGui.CollapsingHeader("Tell history"))
             {
+                var tellHistory = AcquaintanceModule.Instance()->TellHistory;
+                foreach(ref var x in tellHistory)
+                {
+                    ImGuiEx.Text($"""
+                        {x.Name}
+                        {x.WorldName}
+                        {x.WorldId}
+                        {x.ContentId}
+                        {x.AccountId}
+                        {x.Reason}
+                        """);
+                    ImGui.Separator();
+                }
+            }
+            if(ImGui.CollapsingHeader("Log history"))
+            {
                 var r = RaptureLogModule.Instance();
                 for(var i = 0; i < r->MsgSourceArrayLength; i++)
                 {
