@@ -7,7 +7,6 @@ using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using Messenger.Configuration;
 using Messenger.FriendListManager;
-using Messenger.Services;
 using NightmareUI.ImGuiElements;
 using System.Threading;
 
@@ -284,7 +283,7 @@ internal unsafe class TabDebug
             }
             if(ImGui.Button("Fire logout event"))
             {
-                P.ClientState_Logout(0,0);
+                P.ClientState_Logout(0, 0);
             }
             ImGuiEx.Text($"a1[48]: {*(byte*)((nint)AgentCharaCard.Instance() + 48)}");
         }

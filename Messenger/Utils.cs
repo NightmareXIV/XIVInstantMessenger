@@ -1,5 +1,4 @@
-﻿using Dalamud.Game.ClientState.JobGauge.Enums;
-using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -10,7 +9,6 @@ using ECommons.GameHelpers;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.String;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
@@ -18,12 +16,9 @@ using Lumina.Excel.Sheets;
 using Messenger.Configuration;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
-using Newtonsoft.Json;
 using PInvoke;
 using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using Action = System.Action;
 
 namespace Messenger;
@@ -63,7 +58,7 @@ internal static unsafe partial class Utils
     public static string SendReplyViaAcq(Sender destination, string message)
     {
         if(destination.ToString() != Player.NameWithWorld
-            && !Svc.Objects.OfType<IPlayerCharacter>().Any(x => x.GetNameWithWorld() == destination.ToString())) 
+            && !Svc.Objects.OfType<IPlayerCharacter>().Any(x => x.GetNameWithWorld() == destination.ToString()))
         {
             var tellHistory = AcquaintanceModule.Instance()->TellHistory;
             foreach(ref var t in tellHistory)
@@ -109,7 +104,7 @@ internal static unsafe partial class Utils
         if(bypassTimer || EzThrottler.Throttle("MessageAutoSave", C.AutoSaveInterval * 1000))
         {
             if(window.Input.SinglelineText.Length < 15) return;
-                for(int i = 0; i < C.AutoSavedMessages.Count; i++)
+            for(var i = 0; i < C.AutoSavedMessages.Count; i++)
             {
                 var m = C.AutoSavedMessages[i];
                 if(m.Target == window.MessageHistory.HistoryPlayer && m.Message == window.Input.SinglelineText)

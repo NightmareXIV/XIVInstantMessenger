@@ -1,5 +1,4 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using ECommons.GameHelpers;
+﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 
 namespace Messenger;

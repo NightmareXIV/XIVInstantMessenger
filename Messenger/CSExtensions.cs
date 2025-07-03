@@ -1,14 +1,7 @@
-﻿using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using FFXIVClientStructs.FFXIV.Client.UI.Shell;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace Messenger;
-public unsafe static class CSExtensions
+public static unsafe class CSExtensions
 {
     extension(ref AcquaintanceModule.Acquaintance obj)
     {

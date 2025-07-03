@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.GameHelpers;
-using Messenger.FriendListManager;
 
 namespace Messenger.Gui.TitleButtons;
 public class InviteToPartyButton : ChatWindowTitleButton

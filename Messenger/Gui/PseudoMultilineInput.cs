@@ -3,7 +3,6 @@ using ECommons.Interop;
 using ECommons.Throttlers;
 using Messenger.Services.EmojiLoaderService;
 using PInvoke;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace Messenger.Gui;

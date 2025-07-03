@@ -10,17 +10,16 @@ using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using FFXIVClientStructs.STD;
 using Lumina.Excel.Sheets;
 
 namespace Messenger.Services;
-public unsafe sealed class EurekaMonitor : IDisposable
+public sealed unsafe class EurekaMonitor : IDisposable
 {
     public Dictionary<string, ulong> CIDMap = [];
-    readonly List<EMD> EMDList = new(200);
-    int MinimumTimestamp = 0;
-    EzThrottler<int> Throttler = new();
-    private EurekaMonitor() 
+    private readonly List<EMD> EMDList = new(200);
+    private int MinimumTimestamp = 0;
+    private EzThrottler<int> Throttler = new();
+    private EurekaMonitor()
     {
         if(Svc.ClientState.IsLoggedIn)
         {
@@ -159,7 +158,7 @@ public unsafe sealed class EurekaMonitor : IDisposable
             }
         }
     }
-    
+
     public void Stop()
     {
         PluginLog.Information($"Eureka monitoring stopped");

@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.GameHelpers;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 namespace Messenger.Gui.TitleButtons;
 public unsafe class TargetPlayerButton : ChatWindowTitleButton

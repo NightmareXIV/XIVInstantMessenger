@@ -1,6 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Component.GUI;
 using Messenger.Configuration;
-using static FFXIVClientStructs.FFXIV.Common.Component.BGCollision.Collider.Delegates;
 
 namespace Messenger.Gui;
 

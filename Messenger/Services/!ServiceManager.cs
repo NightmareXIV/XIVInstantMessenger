@@ -14,5 +14,5 @@ public static class ServiceManager
     public static XIMIpcManager XIMIpcManager;
     public static XIMModalWindow XIMModalWindow;
     public static EurekaMonitor EurekaMonitor;
-    public static PartyFinderMonitor PartyFinderMonitor;   
+    public static PartyFinderMonitor PartyFinderMonitor;
 }

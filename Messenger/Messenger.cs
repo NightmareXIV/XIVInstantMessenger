@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.Automation;
-using ECommons.CircularBuffers;
 using ECommons.Configuration;
 using ECommons.Events;
 using ECommons.ExcelServices;
@@ -10,7 +9,6 @@ using ECommons.GameHelpers;
 using ECommons.PartyFunctions;
 using ECommons.Singletons;
 using ECommons.Throttlers;
-using ECommons.WindowsFormsReflector;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Lumina.Excel.Sheets;
 using Messenger.Configuration;
@@ -364,7 +362,7 @@ public unsafe class Messenger : IDalamudPlugin
                 }
                 else
                 {
-                    string acqError = string.Empty;
+                    var acqError = string.Empty;
                     if(S.PartyFinderMonitor.CanSendMessage(destination))
                     {
                         acqError = Utils.SendReplyViaAcq(destSender, message);
@@ -491,7 +489,7 @@ public unsafe class Messenger : IDalamudPlugin
                             if(!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";
                             PartyFunctions.InviteInInstance(cidOverride.Value);
                             return null;
-                        } 
+                        }
                         else if(S.MessageProcessor.TryFindCID(player, out var cid))
                         {
                             if(!EzThrottler.Throttle($"Invite{player.GetPlayerName()}", 2000)) return "Please wait before attempting to invite this player again";

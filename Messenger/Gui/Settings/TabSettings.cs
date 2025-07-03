@@ -263,7 +263,7 @@ internal class TabSettings
                 ImGuiEx.HelpMarker($"Choose delay big enough to not get throttled by the server in channels that you're mostly using.");
                 ImGui.Unindent();
             }, null, true)
-            ,("Proxy", C.ProxySettings.ImGuiDrawNoCollapsingHeader, null, true)
+            , ("Proxy", C.ProxySettings.ImGuiDrawNoCollapsingHeader, null, true)
         );
     }
 }

@@ -1,9 +1,7 @@
 ﻿using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Game.Text;
-using ECommons.ChatMethods;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
-using Messenger.Configuration;
 using Sender = Messenger.Configuration.Sender;
 
 namespace Messenger.Services;

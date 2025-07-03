@@ -1,11 +1,4 @@
-﻿using Newtonsoft.Json.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Messenger.Gui.Settings;
+﻿namespace Messenger.Gui.Settings;
 public class TabRecent
 {
     public static void Draw()
@@ -26,7 +19,7 @@ public class TabRecent
                 ImGui.TableSetupColumn("##control");
                 ImGui.TableHeadersRow();
 
-                int i = 0;
+                var i = 0;
                 foreach(var x in C.AutoSavedMessages)
                 {
                     ImGui.PushID($"Msg{i++}");
@@ -45,7 +38,7 @@ public class TabRecent
                     {
                         ImGuiEx.Text($"{diff / 60}m");
                     }
-                    else if(diff < 60*60*24)
+                    else if(diff < 60 * 60 * 24)
                     {
                         ImGuiEx.Text($"{diff / 60 / 60}h");
                     }

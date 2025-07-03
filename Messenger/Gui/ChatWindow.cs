@@ -3,7 +3,6 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using ECommons.Automation;
 using ECommons.Throttlers;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Lumina.Excel.Sheets;
 using Messenger.Configuration;
 using Messenger.Gui.Settings;

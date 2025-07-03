@@ -1,7 +1,6 @@
 ﻿using Dalamud.Memory;
 using ECommons.EzHookManager;
 using ECommons.UIHelpers.AddonMasterImplementations;
-using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace Messenger.Services;

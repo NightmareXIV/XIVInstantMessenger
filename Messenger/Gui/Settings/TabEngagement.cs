@@ -2,7 +2,6 @@
 using ECommons.GameHelpers;
 using ECommons.PartyFunctions;
 using Messenger.Configuration;
-using NightmareUI;
 using NightmareUI.ImGuiElements;
 using System.IO;
 
@@ -260,7 +259,7 @@ public static class TabEngagement
         ImGui.Checkbox("Play sound on incoming message", ref e.PlaySound);
         if(ImGui.BeginTable("##editMemListTable", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.NoSavedSettings))
         {
-            ImGui.TableSetupColumn("##name", widthStretch?ImGuiTableColumnFlags.WidthStretch:default);
+            ImGui.TableSetupColumn("##name", widthStretch ? ImGuiTableColumnFlags.WidthStretch : default);
             ImGui.TableSetupColumn("##ctrl1");
             ImGui.TableSetupColumn("##ctrl2");
 

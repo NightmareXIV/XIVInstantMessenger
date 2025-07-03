@@ -1,6 +1,4 @@
-﻿using ECommons.SimpleGui;
-
-namespace Messenger.Gui;
+﻿namespace Messenger.Gui;
 
 public unsafe class XIMModalWindow : EzOverlayWindow
 {

@@ -1,22 +1,16 @@
-﻿using Dalamud.Game.Addon.Events;
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.GameHelpers;
-using ECommons.Throttlers;
-using ECommons.UIHelpers.AddonMasterImplementations;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace Messenger.Services;
-public unsafe sealed class PartyFinderMonitor
+public sealed unsafe class PartyFinderMonitor
 {
     public Dictionary<string, ulong> CIDMap = [];
-    readonly List<EMD> EMDList = new(200);
+    private readonly List<EMD> EMDList = new(200);
     public readonly Dictionary<string, long> OutgoingWhitelist = [];
-    int MinimumTimestamp = 0;
+    private int MinimumTimestamp = 0;
     private PartyFinderMonitor()
     {
         if(Svc.Condition[ConditionFlag.UsingPartyFinder])
