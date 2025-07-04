@@ -52,6 +52,7 @@ public partial class MessageHistory
 
         var subject = HistoryPlayer.GetPlayerName();
         var currentPlayer = Player.NameWithWorld;
+        var lastMessageTime = C.LastMessageTime.SafeSelect(this.HistoryPlayer.ToString());
         S.ThreadPool.Run(delegate
         {
             Safe(delegate
@@ -79,7 +80,7 @@ public partial class MessageHistory
                             {
                                 var name = matches[2].ToString() + "@" + matches[3].ToString();
                                 PluginLog.Verbose($"name: {name}, subject: {subject}");
-                                LoadedMessages.Insert(0, new()
+                                SavedMessage item = new()
                                 {
                                     IsIncoming = name != currentPlayer,
                                     Message = matches[4].ToString(),
@@ -87,7 +88,9 @@ public partial class MessageHistory
                                     OverrideName = name,
                                     IgnoreTranslation = true,
                                     ParsedMessage = new(matches[4].ToString().ReplaceLineEndings("")),
-                                });
+                                };
+                                LoadedMessages.Insert(0, item);
+                                lastMessageTime = Math.Max(lastMessageTime, item.Time);
                             }
                         }, PluginLog.Warning);
                     }
@@ -103,7 +106,7 @@ public partial class MessageHistory
                             if(matches.Length == 3)
                             {
                                 PluginLog.Verbose($"subject: {subject}");
-                                LoadedMessages.Insert(0, new()
+                                SavedMessage item = new()
                                 {
                                     IsIncoming = false,
                                     Message = matches[2].ToString().ReplaceLineEndings(""),
@@ -111,7 +114,9 @@ public partial class MessageHistory
                                     IsSystem = true,
                                     IgnoreTranslation = true,
                                     ParsedMessage = new(matches[2].ToString())
-                                });
+                                };
+                                lastMessageTime = Math.Max(lastMessageTime, item.Time);
+                                LoadedMessages.Insert(0, item);
                             }
                         }, PluginLog.Warning);
                     }
@@ -129,6 +134,7 @@ public partial class MessageHistory
                 });
                 reader2.Dispose();
                 reader.Dispose();
+                new TickScheduler(() => this.HistoryPlayer.UpdateLastMessageTime(lastMessageTime));
             });
             LogLoaded = true;
         });

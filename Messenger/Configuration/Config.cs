@@ -128,4 +128,6 @@ public class Config : IEzConfig
     public List<AutoSavedMessage> AutoSavedMessages = [];
 
     public ProxySettings ProxySettings = new();
+    public Dictionary<string, long> LastMessageTime = [];
+    public Dictionary<string, Dictionary<string, long>> LastMessageTimePerChara = [];
 }

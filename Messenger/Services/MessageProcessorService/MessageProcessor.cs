@@ -41,14 +41,16 @@ public unsafe class MessageProcessor : IDisposable
                     "Your message was not heard. You must wait before using /tell, /say, /yell, or /shout again."
                     ) && Chats.TryGetValue(RecentReceiver.Value, out var history))
                 {
-                    history.Messages.Add(new()
+                    SavedMessage item = new()
                     {
                         IsIncoming = false,
                         Message = message.ToString(),
                         IsSystem = true,
                         IgnoreTranslation = true,
                         ParsedMessage = new(message),
-                    });
+                    };
+                    history.Messages.Add(item);
+                    Utils.UpdateLastMessageTime(history.HistoryPlayer, item.Time);
                     history.Scroll();
                     P.Logger.Log(new()
                     {
@@ -183,6 +185,7 @@ public unsafe class MessageProcessor : IDisposable
             )
             );
         Chats[messageHistoryOwner].Messages.Add(addedMessage);
+        Utils.UpdateLastMessageTime(messageHistoryOwner, addedMessage.Time);
         Chats[messageHistoryOwner].Scroll();
         if(!incoming)
         {
@@ -227,6 +230,7 @@ public unsafe class MessageProcessor : IDisposable
             )
             );
         Chats[messageHistoryOwner].Messages.Add(addedMessage);
+        Utils.UpdateLastMessageTime(messageHistoryOwner, addedMessage.Time);
         P.lastHistory = Chats[messageHistoryOwner];
         Chats[messageHistoryOwner].Scroll();
         if(type == XivChatType.TellOutgoing)

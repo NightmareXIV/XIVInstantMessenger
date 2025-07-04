@@ -591,6 +591,10 @@ internal static unsafe partial class Utils
         {
             return t.GetName();
         }
+        else if(s.HomeWorld == Utils.EngagementID)
+        {
+            return s.Name;
+        }
         else
         {
             if(includeWorld)
@@ -779,6 +783,34 @@ internal static unsafe partial class Utils
             e.Log();
         }
         return baseFolder;
+    }
+
+    public static void UpdateLastMessageTime(this Sender s, long time)
+    {
+        C.LastMessageTime[s.ToString()] = time;
+        if(Player.Available)
+        {
+            C.LastMessageTimePerChara.GetOrCreate(Player.NameWithWorld)[s.ToString()] = time;
+        }
+    }
+
+    public static long GetLastMessageTime(this Sender s)
+    {
+        if(C.SplitLogging)
+        {
+            if(Player.Available)
+            {
+                return C.LastMessageTimePerChara.SafeSelect(Player.NameWithWorld)?.SafeSelect(s.ToString()) ?? 0;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            return C.LastMessageTime.SafeSelect(s.ToString());
+        }
     }
 
     [GeneratedRegex(@"\/(t|tell)\s+(.+)@([a-z]+)\s", RegexOptions.IgnoreCase, "en-US")]

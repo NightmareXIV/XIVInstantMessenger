@@ -1,5 +1,6 @@
 ﻿using ECommons.Configuration;
 using ECommons.Funding;
+using ECommons.Reflection;
 
 namespace Messenger.Gui.Settings;
 
@@ -12,7 +13,7 @@ internal class GuiSettings : Window
     internal readonly TabIndividual TabIndividual = new();
     internal readonly TabDebug TabDebug = new();
 
-    public GuiSettings() : base($"{P.Name} settings")
+    public GuiSettings() : base($"{P.Name} v{Svc.PluginInterface.Manifest.AssemblyVersion}")
     {
         SizeConstraints = new()
         {
@@ -23,10 +24,6 @@ internal class GuiSettings : Window
 
     public override void Draw()
     {
-        //ImGuiEx.Text(EColor.OrangeBright, $"\"The Storyteller Update 1\" - alpha version.");
-        //ImGui.SameLine();
-        //if(ImGui.SmallButton("Bug/Feedback")) ShellStart("https://github.com/NightmareXIV/XIVInstantMessenger/issues/new");
-        //ImGuiEx.HelpMarker("Please actively monitor XIM operation as you use it and report all bugs and inconsistencies you will find. Keep in mind that this is testing version and issues may occur!", EColor.OrangeBright, FontAwesomeIcon.ExclamationTriangle.ToIconString());
         PatreonBanner.DrawRight();
         ImGuiEx.EzTabBar("MessengerBar", PatreonBanner.Text,
             ("History", TabHistory.Draw, null, true),
