@@ -29,7 +29,7 @@ internal static unsafe partial class Utils
     public const uint EngagementID = 1000000;
     public const uint SuperchannelID = 1000001;
 
-    public static bool IsInForay() => Player.TerritoryIntendedUse.EqualsAny(TerritoryIntendedUseEnum.Eureka, TerritoryIntendedUseEnum.Bozja, TerritoryIntendedUseEnum.Occult_Crescent);
+    public static bool IsInForay() => Player.TerritoryIntendedUse.EqualsAny(TerritoryIntendedUseEnum.Eureka, TerritoryIntendedUseEnum.Bozja, TerritoryIntendedUseEnum.Large_Scale_Raid, TerritoryIntendedUseEnum.Large_Scale_Savage_Raid, TerritoryIntendedUseEnum.Occult_Crescent);
 
     public static string SendTellInForay(Sender destination, string message)
     {
