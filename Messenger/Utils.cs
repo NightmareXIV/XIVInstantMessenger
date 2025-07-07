@@ -57,14 +57,18 @@ internal static unsafe partial class Utils
 
     public static string SendReplyViaAcq(Sender destination, string message)
     {
+        if(!(destination.ToString() != Player.NameWithWorld)) InternalLog.Warning($"acq failed because sender == destination");
+        if(!(!Svc.Objects.OfType<IPlayerCharacter>().Any(x => x.GetNameWithWorld() == destination.ToString()))) InternalLog.Warning($"acq failed because sender and destination located in the same area");
         if(destination.ToString() != Player.NameWithWorld
             && !Svc.Objects.OfType<IPlayerCharacter>().Any(x => x.GetNameWithWorld() == destination.ToString()))
         {
             var tellHistory = AcquaintanceModule.Instance()->TellHistory;
             foreach(ref var t in tellHistory)
             {
+                InternalLog.Warning($"acq check: {t.Name.ToString()} == {destination.Name} && {t.WorldId} == {destination.HomeWorld} && {t.WorldName.ToString()} == {ExcelWorldHelper.GetName(destination.HomeWorld)} && {t.ContentId} != 0");
                 if(t.Name.ToString() == destination.Name && t.WorldId == destination.HomeWorld && t.WorldName.ToString() == ExcelWorldHelper.GetName(destination.HomeWorld) && t.ContentId != 0)
                 {
+                    InternalLog.Warning($"acq success, reason = {t.GetReason()}");
                     try
                     {
                         ushort reason = t.GetReason() switch
@@ -75,6 +79,7 @@ internal static unsafe partial class Utils
                             5 => 4,
                             _ => 0,
                         };
+                        InternalLog.Warning($"reply reason = {t.GetReason()}");
 
                         if(reason == 0) continue;
 
@@ -95,6 +100,7 @@ internal static unsafe partial class Utils
                     return null;
                 }
             }
+            InternalLog.Warning($"acq failed because no tell history entry is found");
         }
         return "Could not send message to this recipient";
     }

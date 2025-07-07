@@ -367,6 +367,10 @@ public unsafe class Messenger : IDalamudPlugin
                     {
                         acqError = Utils.SendReplyViaAcq(destSender, message);
                     }
+                    else
+                    {
+                        InternalLog.Warning($"Could not send reply via acq");
+                    }
                     if(acqError != null)
                     {
                         var c = $"/tell {destination} {message}";
