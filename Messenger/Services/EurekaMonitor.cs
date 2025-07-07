@@ -78,7 +78,7 @@ public sealed unsafe class EurekaMonitor : IDisposable
     private void ClientState_TerritoryChanged(ushort obj)
     {
         Stop();
-        if(Svc.Data.GetExcelSheet<TerritoryType>().TryGetRow(obj, out var t) && t.GetTerritoryIntendedUse().EqualsAny(TerritoryIntendedUseEnum.Eureka, TerritoryIntendedUseEnum.Bozja, TerritoryIntendedUseEnum.Occult_Crescent))
+        if(Svc.Data.GetExcelSheet<TerritoryType>().TryGetRow(obj, out var t) && t.GetTerritoryIntendedUse().EqualsAny(TerritoryIntendedUseEnum.Eureka, TerritoryIntendedUseEnum.Bozja, TerritoryIntendedUseEnum.Large_Scale_Raid, TerritoryIntendedUseEnum.Large_Scale_Savage_Raid, TerritoryIntendedUseEnum.Occult_Crescent))
         {
             Start();
         }
