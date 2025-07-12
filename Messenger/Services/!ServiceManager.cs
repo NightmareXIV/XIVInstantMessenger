@@ -17,4 +17,5 @@ public static class ServiceManager
     public static EurekaMonitor EurekaMonitor;
     public static PartyFinderMonitor PartyFinderMonitor;
     public static LocalLibretranslateTranslator LocalLibretranslateTranslator;
+    public static LibreTranslateRunner LibreTranslateRunner;
 }

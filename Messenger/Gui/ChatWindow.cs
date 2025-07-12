@@ -789,6 +789,34 @@ public unsafe class ChatWindow : Window
                         x.TranslatedMessage = null;
                         x.RequestTranslationIfPossible();
                     }
+                    if(ImGui.Selectable(ImGuiEx.Shift?"Translate all recipient's messages":$"Translate all recipient's messages below selected"))
+                    {
+                        foreach(var m in this.MessageHistory.Messages)
+                        {
+                            if((m.Time >= x.Time || ImGuiEx.Shift) && m.IsIncoming)
+                            {
+                                m.TranslatedMessage = null;
+                                m.RequestTranslationIfPossible();
+                            }
+                        }
+                        x.TranslatedMessage = null;
+                        x.RequestTranslationIfPossible();
+                    }
+                    ImGuiEx.Tooltip("Hold SHIFT and click to translate entire window");
+                }
+            }
+            if(x.TranslatedMessage != null)
+            {
+                if(ImGui.Selectable("Untranslate"))
+                {
+                    x.TranslatedMessage = null;
+                }
+            }
+            if(ImGui.Selectable("Untranslate all messages"))
+            {
+                foreach(var m in this.MessageHistory.Messages)
+                {
+                    m.TranslatedMessage = null;
                 }
             }
             //this.SetTransparency(false);

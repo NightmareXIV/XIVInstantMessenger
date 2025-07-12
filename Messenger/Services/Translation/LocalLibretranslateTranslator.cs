@@ -12,28 +12,11 @@ namespace Messenger.Services.Translation;
 /// <summary>
 /// This class serves as an example on how to register as a translation service for XIVInstantMessenger. Built-in translation is intentionally done via IPC for it to be an example. 
 /// </summary>
-public unsafe sealed class LocalLibretranslateTranslator : IDisposable
+public unsafe sealed class LocalLibretranslateTranslator 
 {
-    private HttpClient TranslationClient
-    {
-        get
-        {
-            field ??= new HttpClient()
-            {
-                Timeout = TimeSpan.FromSeconds(10)
-            }.ApplyProxySettings(C.ProxySettings);
-            return field;
-        }
-    }
-
     private LocalLibretranslateTranslator()
     {
         EzIPC.Init(this, "Messenger");
-    }
-
-    public void Dispose()
-    {
-        TranslationClient?.Dispose();
     }
 
     private static string Name = "Built-In - Self-Hosted LibreTranslate";
@@ -59,26 +42,7 @@ public unsafe sealed class LocalLibretranslateTranslator : IDisposable
     private void OnMessageTranslationRequest(string pluginName, Guid guid, string message)
     {
         if(pluginName != Name) return;
-        S.ThreadPool.Run(() =>
-        {
-            try
-            {
-                var stringContent = new StringContent(JsonConvert.SerializeObject(new TranslationRequest(message)), Encoding.UTF8, "application/json");
-                var result = TranslationClient.PostAsync("http://127.0.0.1:5000/translate", stringContent).Result;
-                var content = result.Content.ReadAsStringAsync().Result;
-                InternalLog.Information($"Content: {content}");
-                var response = JsonConvert.DeserializeObject<TranslationResponse>(content);
-                if(response.DetectedLanguage.Language != C.LibreTarget)
-                {
-                    DeliverTranslatedMessage(guid, response.TranslatedText);
-                    return;
-                }
-            }
-            catch(Exception e)
-            {
-                e.Log();
-            }
-        });
+        S.LibreTranslateRunner.EnqueueTask(guid, message);
     }
 
     /// <summary>
