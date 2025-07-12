@@ -33,6 +33,7 @@ internal class GuiSettings : Window
             ("Fonts", TabFonts.Draw, null, true),
             ("Recent", TabRecent.Draw, null, true),
             ("Generic channels", TabIndividual.Draw, null, true),
+            ("Translation", TabTranslation.Draw, null, true),
             ("Log", InternalLog.PrintImgui, ImGuiColors.DalamudGrey3, false),
             ("Debug", TabDebug.Draw, ImGuiColors.DalamudGrey3, true)
             );

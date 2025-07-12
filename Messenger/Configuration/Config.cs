@@ -130,4 +130,10 @@ public class Config : IEzConfig
     public ProxySettings ProxySettings = new();
     public Dictionary<string, long> LastMessageTime = [];
     public Dictionary<string, Dictionary<string, long>> LastMessageTimePerChara = [];
+
+    public string TranslationProvider = null;
+    public bool TranslateAuto = false;
+    public bool TranslateHistory = false;
+
+    public string LibreTarget = "en";
 }

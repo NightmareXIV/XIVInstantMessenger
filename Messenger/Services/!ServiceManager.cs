@@ -1,6 +1,7 @@
 ﻿using Messenger.Gui;
 using Messenger.Services.EmojiLoaderService;
 using Messenger.Services.MessageProcessorService;
+using Messenger.Services.Translation;
 
 namespace Messenger.Services;
 public static class ServiceManager
@@ -15,4 +16,5 @@ public static class ServiceManager
     public static XIMModalWindow XIMModalWindow;
     public static EurekaMonitor EurekaMonitor;
     public static PartyFinderMonitor PartyFinderMonitor;
+    public static LocalLibretranslateTranslator LocalLibretranslateTranslator;
 }

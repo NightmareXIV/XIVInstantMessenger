@@ -16,12 +16,11 @@ internal class SavedMessage
     public ItemPayload Item = null;
 
     public string TranslatedMessage = null;
-    public bool IgnoreTranslation = false;
-    public bool AwaitingTranslation = false;
 
     public XivChatType? XivChatType;
 
-    internal string GUID = Guid.NewGuid().ToString();
+    internal Guid GUID = Guid.NewGuid();
+    internal string ID => GUID.ToString();
 
     public SavedMessage Clone()
     {
@@ -36,17 +35,15 @@ internal class SavedMessage
             MapPayload = MapPayload,
             Item = Item,
             TranslatedMessage = TranslatedMessage,
-            IgnoreTranslation = IgnoreTranslation,
-            AwaitingTranslation = AwaitingTranslation,
             XivChatType = XivChatType
         };
     }
 
     public void Draw(string prefix = "", string suffix = "", Action? postMessageAction = null)
     {
-        if(ParsedMessage == null)
+        if(ParsedMessage == null || TranslatedMessage != null)
         {
-            Utils.DrawWrappedText($"{prefix}{Message}{suffix}", postMessageAction);
+            Utils.DrawWrappedText($"{prefix}{(TranslatedMessage ?? Message)}{suffix}", postMessageAction);
         }
         else
         {

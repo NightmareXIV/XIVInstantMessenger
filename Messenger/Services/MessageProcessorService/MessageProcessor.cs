@@ -46,7 +46,6 @@ public unsafe class MessageProcessor : IDisposable
                         IsIncoming = false,
                         Message = message.ToString(),
                         IsSystem = true,
-                        IgnoreTranslation = true,
                         ParsedMessage = new(message),
                     };
                     history.Messages.Add(item);
@@ -84,6 +83,10 @@ public unsafe class MessageProcessor : IDisposable
                         ParsedMessage = new(message),
                         XivChatType = type,
                     };
+                    if(addedMessage.IsIncoming && C.TranslateAuto)
+                    {
+                        addedMessage.RequestTranslationIfPossible();
+                    }
                     foreach(var payload in message.Payloads)
                     {
                         if(payload.Type == PayloadType.MapLink)
@@ -129,6 +132,10 @@ public unsafe class MessageProcessor : IDisposable
                         ParsedMessage = new(message),
                         XivChatType = type,
                     };
+                    if(addedMessage.IsIncoming && C.TranslateAuto)
+                    {
+                        addedMessage.RequestTranslationIfPossible();
+                    }
                     foreach(var payload in message.Payloads)
                     {
                         if(payload.Type == PayloadType.MapLink)

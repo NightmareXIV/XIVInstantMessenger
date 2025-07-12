@@ -59,4 +59,44 @@ public class IPCProvider
         }
         return 0;
     }
+
+    [EzIPCEvent]
+    public Action<HashSet<string>> OnAvailableTranslatorsRequest;
+
+    [EzIPCEvent]
+    public Action<string, Guid, string> OnMessageTranslationRequest;
+
+    [EzIPCEvent]
+    public Action<string> OnTranslatorSettingsDraw;
+
+    [EzIPC]
+    public void DeliverTranslatedMessage(Guid guid, string translatedMessage)
+    {
+        void action()
+        {
+            InternalLog.Information($"Received translated message {guid}");
+            if(Utils.TranslationLinks.TryGetValue(guid, out var link))
+            {
+                InternalLog.Information($"Link found for {guid}");
+                if(link.TryGetTarget(out var message))
+                {
+                    InternalLog.Information($"Reference retrieved {guid}");
+                    if(message.TranslatedMessage == null)
+                    {
+                        message.TranslatedMessage = translatedMessage;
+                        InternalLog.Information($"Assigned translated message {guid} = {message.TranslatedMessage}");
+                    }
+                }
+            }
+            Utils.TranslationLinks.Remove(guid);
+        }
+        if(Svc.Framework.IsInFrameworkUpdateThread)
+        {
+            action();
+        }
+        else
+        {
+            Svc.Framework.RunOnFrameworkThread(action);
+        }
+    }
 }

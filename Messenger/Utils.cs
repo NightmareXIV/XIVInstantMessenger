@@ -26,8 +26,22 @@ namespace Messenger;
 internal static unsafe partial class Utils
 {
     private static readonly char[] WrapSymbols = [' ', '-', ',', '.'];
-    public const uint EngagementID = 1000000;
-    public const uint SuperchannelID = 1000001;
+    public static readonly uint EngagementID = 1000000;
+    public static readonly uint SuperchannelID = 1000001;
+    public static Dictionary<Guid, WeakReference<SavedMessage>> TranslationLinks = [];
+
+    public static void RequestTranslationIfPossible(this SavedMessage message)
+    {
+        if(C.TranslationProvider == null) return;
+        HashSet<string> providers = [];
+        S.IPCProvider.OnAvailableTranslatorsRequest(providers);
+        if(providers.Contains(C.TranslationProvider))
+        {
+            InternalLog.Information($"Sending translation {message.GUID}");
+            TranslationLinks[message.GUID] = new(message);
+            S.IPCProvider.OnMessageTranslationRequest(C.TranslationProvider, message.GUID, message.Message);
+        }
+    }
 
     public static bool IsInForay() => Player.TerritoryIntendedUse.EqualsAny(TerritoryIntendedUseEnum.Eureka, TerritoryIntendedUseEnum.Bozja, TerritoryIntendedUseEnum.Large_Scale_Raid, TerritoryIntendedUseEnum.Large_Scale_Savage_Raid, TerritoryIntendedUseEnum.Occult_Crescent);
 

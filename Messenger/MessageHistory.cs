@@ -86,7 +86,6 @@ public partial class MessageHistory
                                     Message = matches[4].ToString(),
                                     Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
                                     OverrideName = name,
-                                    IgnoreTranslation = true,
                                     ParsedMessage = new(matches[4].ToString().ReplaceLineEndings("")),
                                 };
                                 LoadedMessages.Insert(0, item);
@@ -112,7 +111,6 @@ public partial class MessageHistory
                                     Message = matches[2].ToString().ReplaceLineEndings(""),
                                     Time = DateTimeOffset.ParseExact(matches[1].ToString(), "yyyy.MM.dd HH:mm:ss zzz", null).ToUnixTimeMilliseconds(),
                                     IsSystem = true,
-                                    IgnoreTranslation = true,
                                     ParsedMessage = new(matches[2].ToString())
                                 };
                                 lastMessageTime = Math.Max(lastMessageTime, item.Time);
@@ -130,11 +128,20 @@ public partial class MessageHistory
                 {
                     IsSystem = true,
                     Message = $"Loaded {LoadedMessages.Count} messages from history.",
-                    IgnoreTranslation = true
                 });
                 reader2.Dispose();
                 reader.Dispose();
-                new TickScheduler(() => this.HistoryPlayer.UpdateLastMessageTime(lastMessageTime));
+                new TickScheduler(() => 
+                {
+                    this.HistoryPlayer.UpdateLastMessageTime(lastMessageTime);
+                    foreach(var x in LoadedMessages)
+                    {
+                        if(x.IsIncoming && C.TranslateHistory && !x.IsSystem)
+                        {
+                            x.RequestTranslationIfPossible();
+                        }
+                    }
+                });
             });
             LogLoaded = true;
         });

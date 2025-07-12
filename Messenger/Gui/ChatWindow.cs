@@ -769,15 +769,28 @@ public unsafe class ChatWindow : Window
         }
         if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
         {
-            ImGui.OpenPopup($"MessageDetail{x.GUID}");
+            ImGui.OpenPopup($"MessageDetail{x.ID}");
         }
     }
 
     private void PostMessageFunctions(SavedMessage x)
     {
-        if(ImGui.BeginPopup($"MessageDetail{x.GUID}"))
+        if(ImGui.BeginPopup($"MessageDetail{x.ID}"))
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Cust.ColorGeneric);
+            if(C.TranslationProvider != null)
+            {
+                HashSet<string> t = [];
+                S.IPCProvider.OnAvailableTranslatorsRequest(t);
+                if(t.Contains(C.TranslationProvider))
+                {
+                    if(ImGui.Selectable($"Translate"))
+                    {
+                        x.TranslatedMessage = null;
+                        x.RequestTranslationIfPossible();
+                    }
+                }
+            }
             //this.SetTransparency(false);
             ImGui.SetNextItemWidth(400f);
             var msg = x.Message;

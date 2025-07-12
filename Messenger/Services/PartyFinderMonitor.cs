@@ -57,16 +57,25 @@ public sealed unsafe class PartyFinderMonitor
         Reinitialize();
         Svc.Chat.ChatMessageHandled += Chat_ChatMessageHandled;
         Svc.Chat.ChatMessageUnhandled += Chat_ChatMessageHandled;
+        Svc.Chat.ChatMessage += Chat_ChatMessage;
+    }
+
+    private void Chat_ChatMessage(Dalamud.Game.Text.XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
+    {
+        Chat_ChatMessageHandled(type, timestamp, sender, message);
     }
 
     private void Chat_ChatMessageHandled(Dalamud.Game.Text.XivChatType type, int timestamp, SeString sender, SeString message)
     {
-        EMDList.Clear();
-        FillFromLog(EMDList);
-        foreach(var x in EMDList)
+        new TickScheduler(() =>
         {
-            CIDMap[x.Name] = x.CID;
-        }
+            EMDList.Clear();
+            FillFromLog(EMDList);
+            foreach(var x in EMDList)
+            {
+                CIDMap[x.Name] = x.CID;
+            }
+        });
     }
 
     private void Reinitialize()
