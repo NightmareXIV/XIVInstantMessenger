@@ -52,7 +52,7 @@ public partial class MessageHistory
 
         var subject = HistoryPlayer.GetPlayerName();
         var currentPlayer = Player.NameWithWorld;
-        var lastMessageTime = C.LastMessageTime.SafeSelect(this.HistoryPlayer.ToString());
+        var lastMessageTime = C.LastMessageTime.SafeSelect(HistoryPlayer.ToString());
         S.ThreadPool.Run(delegate
         {
             Safe(delegate
@@ -131,9 +131,9 @@ public partial class MessageHistory
                 });
                 reader2.Dispose();
                 reader.Dispose();
-                new TickScheduler(() => 
+                new TickScheduler(() =>
                 {
-                    this.HistoryPlayer.UpdateLastMessageTime(lastMessageTime);
+                    HistoryPlayer.UpdateLastMessageTime(lastMessageTime);
                     foreach(var x in LoadedMessages)
                     {
                         if(x.IsIncoming && C.TranslateHistory && !x.IsSystem)

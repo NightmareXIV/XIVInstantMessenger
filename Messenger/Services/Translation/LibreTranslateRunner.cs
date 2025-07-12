@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using ThreadPool = ECommons.Schedulers.ThreadPool;
 
 namespace Messenger.Services.Translation;
-public unsafe sealed class LibreTranslateRunner : IDisposable
+public sealed unsafe class LibreTranslateRunner : IDisposable
 {
     private Process TranslatorProcess;
     public ThreadPool LibreTranslateThreadPool = new(1);
@@ -62,7 +62,7 @@ public unsafe sealed class LibreTranslateRunner : IDisposable
 
     public void EnqueueTask(Guid guid, string message)
     {
-        LibreTranslateThreadPool.Run(() => 
+        LibreTranslateThreadPool.Run(() =>
         {
             if(TranslatorProcess == null || TranslatorProcess.HasExited)
             {
@@ -78,7 +78,7 @@ public unsafe sealed class LibreTranslateRunner : IDisposable
                     return;
                 }
                 Thread.Sleep(1000);
-                for(int i = 0; i < 20; i++)
+                for(var i = 0; i < 20; i++)
                 {
                     try
                     {

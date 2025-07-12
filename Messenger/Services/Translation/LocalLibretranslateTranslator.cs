@@ -1,6 +1,7 @@
 ﻿using ECommons.EzIpcManager;
 using ECommons.Networking;
 using Newtonsoft.Json;
+using NightmareUI.PrimaryUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Messenger.Services.Translation;
 /// <summary>
 /// This class serves as an example on how to register as a translation service for XIVInstantMessenger. Built-in translation is intentionally done via IPC for it to be an example. 
 /// </summary>
-public unsafe sealed class LocalLibretranslateTranslator 
+public sealed unsafe class LocalLibretranslateTranslator
 {
     private LocalLibretranslateTranslator()
     {
@@ -59,6 +60,33 @@ public unsafe sealed class LocalLibretranslateTranslator
     private void OnTranslatorSettingsDraw(string pluginName)
     {
         if(pluginName != Name) return;
+        new NuiBuilder().Section("Installation Instructions (Windows)").Widget(() =>
+        {
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudViolet, $"""
+            How to begin using this translator (Windows instruction):
+            """);
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudViolet, $"""
+            1. Download and install Python 3.10. Make sure to enable "Add Python.exe to PATH" checkbox. Click here to download.
+            """);
+            if(ImGuiEx.HoveredAndClicked())
+            {
+                ShellStart("https://www.python.org/downloads/release/python-31011/");
+            }
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudViolet, $"""
+            2. Open command line and type "pip install libretranslate" or click the button below. 
+            """);
+            if(ImGui.SmallButton("Install Libretranslate now"))
+            {
+                LibreTranslationUtils.RunInstallCommandAsAdmin("pip install libretranslate");
+            }
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudViolet, $"""
+            3. Open command line and type "libretranslate" or click the button below. Wait until all language packages are downloaded. Close the window. You are now ready to use translator!
+            """);
+            if(ImGui.SmallButton("Run Libretranslate now"))
+            {
+                LibreTranslationUtils.RunInstallCommandAsAdmin("libretranslate");
+            }
+        }).Draw();
         ImGui.SetNextItemWidth(150f.Scale());
         if(ImGui.BeginCombo("Select language to translate to", LibreTranslationUtils.Languages.FindKeysByValue(C.LibreTarget).FirstOrDefault() ?? "- Not Selected -"))
         {

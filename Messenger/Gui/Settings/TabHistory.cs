@@ -92,7 +92,7 @@ public sealed unsafe class TabHistory
 
         if(first.Count > 0 || second.Count > 0)
         {
-            ImGuiEx.TreeNodeCollapsingHeader(id+"##header", () =>
+            ImGuiEx.TreeNodeCollapsingHeader(id + "##header", () =>
             {
                 if(ImGuiEx.BeginDefaultTable(id, ["~Name", "State", "Last Message"], extraFlags: ImGuiTableFlags.Sortable | ImGuiTableFlags.SortTristate))
                 {
@@ -131,7 +131,7 @@ public sealed unsafe class TabHistory
         ImGui.TableNextColumn();
         ImGuiEx.Text(data.State);
         ImGui.TableNextColumn();
-        ImGuiEx.Text(data.LastMessage == 0?"No data":DateTimeOffset.FromUnixTimeMilliseconds(data.LastMessage).ToLocalTime().ToString());
+        ImGuiEx.Text(data.LastMessage == 0 ? "No data" : DateTimeOffset.FromUnixTimeMilliseconds(data.LastMessage).ToLocalTime().ToString());
     }
 
     private Dictionary<string, SortData> SortDatas = [];

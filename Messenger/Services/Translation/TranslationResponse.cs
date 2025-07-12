@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Messenger.Services.Translation;
-public unsafe sealed class TranslationResponse
+public sealed unsafe class TranslationResponse
 {
     [JsonProperty("alternatives")]
     public List<string> Alternatives;

@@ -7,8 +7,31 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Messenger.Services.Translation;
-public unsafe static class LibreTranslationUtils
+public static unsafe class LibreTranslationUtils
 {
+    public static bool RunInstallCommandAsAdmin(string cmd)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = "/k " + cmd,
+                Verb = "runas",
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Normal
+            };
+
+            Process.Start(psi);
+            return true;
+        }
+        catch(Exception ex)
+        {
+            PluginLog.Error($"Failed to start elevated process: {ex.Message}");
+            return false;
+        }
+    }
+
     public static readonly Dictionary<string, string> Languages = new()
     {
         {"English", "en"},
@@ -46,15 +69,15 @@ public unsafe static class LibreTranslationUtils
     {
         try
         {
-            string? pythonFullPath = LocateExecutable(pythonPath);
+            var pythonFullPath = LocateExecutable(pythonPath);
             if(pythonFullPath == null)
             {
                 PluginLog.Warning("python.exe not found.");
                 return null;
             }
 
-            string scriptsDir = Path.Combine(Path.GetDirectoryName(pythonFullPath)!, "Scripts");
-            string libreExePath = Path.Combine(scriptsDir, "libretranslate.exe");
+            var scriptsDir = Path.Combine(Path.GetDirectoryName(pythonFullPath)!, "Scripts");
+            var libreExePath = Path.Combine(scriptsDir, "libretranslate.exe");
 
             if(!File.Exists(libreExePath))
                 libreExePath = LocateExecutable("libretranslate.exe");
@@ -100,7 +123,7 @@ public unsafe static class LibreTranslationUtils
         {
             try
             {
-                string fullPath = Path.Combine(dir.Trim(), exeName);
+                var fullPath = Path.Combine(dir.Trim(), exeName);
                 if(File.Exists(fullPath))
                     return Path.GetFullPath(fullPath);
             }

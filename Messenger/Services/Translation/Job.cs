@@ -3,16 +3,18 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-public class Job : IDisposable
+namespace Messenger.Services.Translation;
+
+public sealed class Job : IDisposable
 {
-    private IntPtr _handle;
+    private nint _handle;
     private bool _disposed;
 
     public Job()
     {
-        _handle = CreateJobObject(IntPtr.Zero, null);
+        _handle = CreateJobObject(nint.Zero, null);
 
-        if(_handle == IntPtr.Zero)
+        if(_handle == nint.Zero)
             throw new Win32Exception(Marshal.GetLastWin32Error());
 
         var info = new JOBOBJECT_BASIC_LIMIT_INFORMATION
@@ -25,8 +27,8 @@ public class Job : IDisposable
             BasicLimitInformation = info
         };
 
-        int length = Marshal.SizeOf(typeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
-        IntPtr extendedInfoPtr = Marshal.AllocHGlobal(length);
+        var length = Marshal.SizeOf(typeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+        var extendedInfoPtr = Marshal.AllocHGlobal(length);
         try
         {
             Marshal.StructureToPtr(extendedInfo, extendedInfoPtr, false);
@@ -60,13 +62,13 @@ public class Job : IDisposable
     private const int JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000;
 
     [StructLayout(LayoutKind.Sequential)]
-    struct JOBOBJECT_BASIC_LIMIT_INFORMATION
+    private struct JOBOBJECT_BASIC_LIMIT_INFORMATION
     {
         public long PerProcessUserTimeLimit;
         public long PerJobUserTimeLimit;
         public int LimitFlags;
-        public UIntPtr MinimumWorkingSetSize;
-        public UIntPtr MaximumWorkingSetSize;
+        public nuint MinimumWorkingSetSize;
+        public nuint MaximumWorkingSetSize;
         public int ActiveProcessLimit;
         public long Affinity;
         public int PriorityClass;
@@ -74,7 +76,7 @@ public class Job : IDisposable
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct IO_COUNTERS
+    private struct IO_COUNTERS
     {
         public ulong ReadOperationCount;
         public ulong WriteOperationCount;
@@ -85,17 +87,17 @@ public class Job : IDisposable
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+    private struct JOBOBJECT_EXTENDED_LIMIT_INFORMATION
     {
         public JOBOBJECT_BASIC_LIMIT_INFORMATION BasicLimitInformation;
         public IO_COUNTERS IoInfo;
-        public UIntPtr ProcessMemoryLimit;
-        public UIntPtr JobMemoryLimit;
-        public UIntPtr PeakProcessMemoryUsed;
-        public UIntPtr PeakJobMemoryUsed;
+        public nuint ProcessMemoryLimit;
+        public nuint JobMemoryLimit;
+        public nuint PeakProcessMemoryUsed;
+        public nuint PeakJobMemoryUsed;
     }
 
-    enum JobObjectInfoType
+    private enum JobObjectInfoType
     {
         AssociateCompletionPortInformation = 7,
         BasicLimitInformation = 2,
@@ -107,16 +109,16 @@ public class Job : IDisposable
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    static extern IntPtr CreateJobObject(IntPtr lpJobAttributes, string? lpName);
+    private static extern nint CreateJobObject(nint lpJobAttributes, string lpName);
 
     [DllImport("kernel32.dll", SetLastError = true)]
-    static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoType infoType, IntPtr lpJobObjectInfo, uint cbJobObjectInfoLength);
+    private static extern bool SetInformationJobObject(nint hJob, JobObjectInfoType infoType, nint lpJobObjectInfo, uint cbJobObjectInfoLength);
 
     [DllImport("kernel32.dll", SetLastError = true)]
-    static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+    private static extern bool AssignProcessToJobObject(nint job, nint process);
 
     [DllImport("kernel32.dll", SetLastError = true)]
-    static extern bool CloseHandle(IntPtr handle);
+    private static extern bool CloseHandle(nint handle);
 
     #endregion
 }

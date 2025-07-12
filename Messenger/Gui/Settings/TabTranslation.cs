@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Messenger.Gui.Settings;
-public unsafe static class TabTranslation
+public static unsafe class TabTranslation
 {
     public static void Draw()
     {

@@ -789,9 +789,9 @@ public unsafe class ChatWindow : Window
                         x.TranslatedMessage = null;
                         x.RequestTranslationIfPossible();
                     }
-                    if(ImGui.Selectable(ImGuiEx.Shift?"Translate all recipient's messages":$"Translate all recipient's messages below selected"))
+                    if(ImGui.Selectable(ImGuiEx.Shift ? "Translate all recipient's messages" : $"Translate all recipient's messages below selected"))
                     {
-                        foreach(var m in this.MessageHistory.Messages)
+                        foreach(var m in MessageHistory.Messages)
                         {
                             if((m.Time >= x.Time || ImGuiEx.Shift) && m.IsIncoming)
                             {
@@ -814,7 +814,7 @@ public unsafe class ChatWindow : Window
             }
             if(ImGui.Selectable("Untranslate all messages"))
             {
-                foreach(var m in this.MessageHistory.Messages)
+                foreach(var m in MessageHistory.Messages)
                 {
                     m.TranslatedMessage = null;
                 }
