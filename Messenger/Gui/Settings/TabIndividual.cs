@@ -33,6 +33,7 @@ internal class TabIndividual
         XivChatType.FreeCompany,
         XivChatType.NoviceNetwork,
         XivChatType.CustomEmote,
+        XivChatType.Echo,
     ];
 
     public static readonly string[] Names =
@@ -61,7 +62,8 @@ internal class TabIndividual
         "Cross-world linkshell 8",
         "Free company",
         "Novice network",
-        "Custom emote"
+        "Custom emote",
+        "Echo"
     ];
 
     internal XivChatType Selected = XivChatType.None;

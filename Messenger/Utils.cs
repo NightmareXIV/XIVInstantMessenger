@@ -602,6 +602,7 @@ internal static unsafe partial class Utils
         if(type == XivChatType.FreeCompany) return "fc";
         if(type == XivChatType.NoviceNetwork) return "novice";
         if(type == XivChatType.CustomEmote) return "emote";
+        if(type == XivChatType.Echo) return "echo";
         return null;
     }
 

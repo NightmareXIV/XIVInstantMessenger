@@ -66,6 +66,22 @@ public sealed unsafe class TabHistory
             DisplayChats("Private Messages", x => !x.HomeWorld.EqualsAny(0u, Utils.EngagementID));
             DisplayChats("Engagements", x => x.HomeWorld == Utils.EngagementID);
             DisplayChats("Generic Channels", x => x.HomeWorld == 0);
+
+            ImGuiEx.LineCentered("Hist1", () =>
+            {
+                if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Download, "Load All Chats"))
+                {
+                    foreach(var x in fileChatList)
+                    {
+                        P.OpenMessenger(x, false);
+                    }
+                }
+                ImGui.SameLine();
+                if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Upload, "Unload All Chats"))
+                {
+                    Utils.UnloadAllChat();
+                }
+            });
         }
     }
 
@@ -78,7 +94,7 @@ public sealed unsafe class TabHistory
         {
             if(!shouldDisplay(x.Key)) continue;
             if(Search.Length > 0 && !x.Key.GetChannelName().Contains(Search, StringComparison.OrdinalIgnoreCase)) continue;
-            first.Add((x.Key, $"{x.Value.Messages.Count(x => !x.IsSystem)} messages", x.Key.GetLastMessageTime(), false));
+            first.Add((x.Key, $"{x.Value.Messages.Count(x => !x.IsSystem) + x.Value.LoadedMessages.Count(x => !x.IsSystem)} messages", x.Key.GetLastMessageTime(), false));
 
         }
         foreach(var x in fileChatList)
