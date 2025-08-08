@@ -2,14 +2,14 @@
 using ECommons.Interop;
 using ECommons.Throttlers;
 using Messenger.Services.EmojiLoaderService;
-using PInvoke;
 using System.Text.RegularExpressions;
+using TerraFX.Interop.Windows;
 
 namespace Messenger.Gui;
 public unsafe partial class PseudoMultilineInput
 {
     private string Label = "PML";
-    private uint MaxLength = 15000;
+    private int MaxLength = 15000;
     private string Text = "";
     private float TextWidth = 0f;
     public float? Width = null;
@@ -97,157 +97,162 @@ public unsafe partial class PseudoMultilineInput
         DrawEmojiPopup();
     }
 
-    private int Callback(ImGuiInputTextCallbackData* data)
+    private int Callback(ref ImGuiInputTextCallbackData dataPtr)
     {
-        if(C.EnableEmojiPicker)
+        fixed(ImGuiInputTextCallbackData* data = &dataPtr)
         {
-            if(ImGui.IsKeyDown(ImGuiKey.UpArrow) || ImGui.IsKeyDown(ImGuiKey.DownArrow))
+            if(C.EnableEmojiPicker)
             {
-                data->CursorPos = StoredCursorPos;
-                EmojiKeyboardSelecting = true;
-                MouseEmojiLock = User32.GetCursorPos().AsVector2();
-                if(ImGui.IsKeyPressed(ImGuiKey.UpArrow))
+                if(ImGui.IsKeyDown(ImGuiKey.UpArrow) || ImGui.IsKeyDown(ImGuiKey.DownArrow))
                 {
-                    EmojiKeyboardSelectorRow--;
-                }
-                if(ImGui.IsKeyPressed(ImGuiKey.DownArrow))
-                {
-                    EmojiKeyboardSelectorRow++;
-                }
-            }
-            else
-            {
-                EzThrottler.Reset("EmojiSel");
-                StoredCursorPos = data->CursorPos;
-            }
-        }
-        if(data->EventFlag == ImGuiInputTextFlags.CallbackCharFilter)
-        {
-            FrameCharsProcessed++;
-            if(FrameCharsProcessed > 1) EnterPress = null;
-            if(data->EventChar == '\n')
-            {
-                if(FrameCharsProcessed == 1)
-                {
-                    EnterPress = ImGui.GetFrameCount();
-                    return 1;
-                }
-            }
-            return 0;
-        }
-        if(data->EventFlag == ImGuiInputTextFlags.CallbackAlways)
-        {
-            if(SetFocusAt > -1)
-            {
-                if(SetFocusAt <= data->BufTextLen)
-                {
-                    data->CursorPos = SetFocusAt;
-                }
-                SetFocusAt = -1;
-            }
-            if(DoCursorLock)
-            {
-                if(CursorLock != -1 && GenericHelpers.IsAnyKeyPressed([LimitedKeys.Up, LimitedKeys.Down]))
-                {
-                    data->CursorPos = CursorLock;
+                    data->CursorPos = StoredCursorPos;
+                    EmojiKeyboardSelecting = true;
+                    POINT point;
+                    Utils.GetCursorPos(&point);
+                    MouseEmojiLock = point.AsVector2();
+                    if(ImGui.IsKeyPressed(ImGuiKey.UpArrow))
+                    {
+                        EmojiKeyboardSelectorRow--;
+                    }
+                    if(ImGui.IsKeyPressed(ImGuiKey.DownArrow))
+                    {
+                        EmojiKeyboardSelectorRow++;
+                    }
                 }
                 else
                 {
-                    CursorLock = data->CursorPos;
+                    EzThrottler.Reset("EmojiSel");
+                    StoredCursorPos = data->CursorPos;
                 }
             }
-            else
+            if(data->EventFlag == ImGuiInputTextFlags.CallbackCharFilter)
             {
-                if(CursorLock != -1)
+                FrameCharsProcessed++;
+                if(FrameCharsProcessed > 1) EnterPress = null;
+                if(data->EventChar == '\n')
                 {
-                    CursorLock = -1;
+                    if(FrameCharsProcessed == 1)
+                    {
+                        EnterPress = ImGui.GetFrameCount();
+                        return 1;
+                    }
                 }
+                return 0;
             }
-            EmojiEndCursor = data->CursorPos;
-            IsSelectingEmoji = false;
-            if(C.EnableEmoji && C.EnableEmojiPicker)
+            if(data->EventFlag == ImGuiInputTextFlags.CallbackAlways)
             {
-                for(var i = 0; i < EmojiEndCursor; i++)
+                if(SetFocusAt > -1)
                 {
-                    if(data->Buf[i] == ':')
+                    if(SetFocusAt <= data->BufTextLen)
                     {
-                        IsSelectingEmoji = !IsSelectingEmoji;
-                        EmojiStartCursor = i;
+                        data->CursorPos = SetFocusAt;
                     }
-                    else if(!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
+                    SetFocusAt = -1;
+                }
+                if(DoCursorLock)
+                {
+                    if(CursorLock != -1 && GenericHelpers.IsAnyKeyPressed([LimitedKeys.Up, LimitedKeys.Down]))
                     {
-                        IsSelectingEmoji = false;
+                        data->CursorPos = CursorLock;
+                    }
+                    else
+                    {
+                        CursorLock = data->CursorPos;
                     }
                 }
-                if(IsSelectingEmoji)
+                else
                 {
-                    if(EmojiEndCursor - EmojiStartCursor < 3) IsSelectingEmoji = false;
+                    if(CursorLock != -1)
+                    {
+                        CursorLock = -1;
+                    }
                 }
-                if(IsSelectingEmoji)
+                EmojiEndCursor = data->CursorPos;
+                IsSelectingEmoji = false;
+                if(C.EnableEmoji && C.EnableEmojiPicker)
                 {
-                    for(var i = EmojiEndCursor; i < data->BufTextLen; i++)
+                    for(var i = 0; i < EmojiEndCursor; i++)
                     {
                         if(data->Buf[i] == ':')
                         {
+                            IsSelectingEmoji = !IsSelectingEmoji;
+                            EmojiStartCursor = i;
+                        }
+                        else if(!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString()))
+                        {
                             IsSelectingEmoji = false;
                         }
-                        if(!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
                     }
-                }
-                if(IsSelectingEmoji)
-                {
-                    EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
-                    EmojiListMode = true;
-                }
-            }
-
-
-            var space = ImGui.CalcTextSize(" ").X;
-            var numNewlines = 0;
-            void Process()
-            {
-                for(var i = 0; i < data->BufTextLen; i++)
-                {
-                    var symbol = data->Buf[i];
-                    if(symbol == '\n')
+                    if(IsSelectingEmoji)
                     {
-                        data->Buf[i] = (byte)' ';
+                        if(EmojiEndCursor - EmojiStartCursor < 3) IsSelectingEmoji = false;
                     }
-                }
-                var cursor = 0;
-                var width = TextWidth;
-                var prevSpaceIndex = -1;
-                while(cursor < data->BufTextLen)
-                {
-                    var word = ReadUntilSpace(data->Buf, data->BufTextLen, cursor, out var spaceIndex);
-                    var wordWidth = ImGui.CalcTextSize(word).X;
+                    if(IsSelectingEmoji)
                     {
-                        width -= wordWidth + (spaceIndex == -1 ? 0 : space);
-                        if(width < 0 && prevSpaceIndex > -1)
+                        for(var i = EmojiEndCursor; i < data->BufTextLen; i++)
                         {
-                            data->Buf[prevSpaceIndex] = (byte)'\n';
-                            numNewlines++;
-                            width = TextWidth - wordWidth - (spaceIndex == -1 ? 0 : space);
+                            if(data->Buf[i] == ':')
+                            {
+                                IsSelectingEmoji = false;
+                            }
+                            if(!EmojiWhitelistedSymbols().IsMatch(((char)data->Buf[i]).ToString())) break;
                         }
                     }
-                    cursor = spaceIndex == -1 ? data->BufTextLen : spaceIndex + 1;
-                    prevSpaceIndex = spaceIndex;
+                    if(IsSelectingEmoji)
+                    {
+                        EmojiSearch = MemoryHelper.ReadString(((nint)data->Buf) + EmojiStartCursor, EmojiEndCursor - EmojiStartCursor)[1..];
+                        EmojiListMode = true;
+                    }
                 }
-            }
-            var old = MemoryHelper.ReadRaw((nint)data->Buf, data->BufTextLen);
-            Process();
-            if(numNewlines >= MaxLines)
-            {
-                TextWidth -= ImGui.GetStyle().ScrollbarSize;
-                Process();
-            }
-            if(!MemoryHelper.ReadRaw((nint)data->Buf, data->BufTextLen).SequenceEqual(old))
-            {
-                data->BufDirty = 1;
+
+
+                var space = ImGui.CalcTextSize(" ").X;
+                var numNewlines = 0;
+                void Process(ImGuiInputTextCallbackData* data)
+                {
+                    for(var i = 0; i < data->BufTextLen; i++)
+                    {
+                        var symbol = data->Buf[i];
+                        if(symbol == '\n')
+                        {
+                            data->Buf[i] = (byte)' ';
+                        }
+                    }
+                    var cursor = 0;
+                    var width = TextWidth;
+                    var prevSpaceIndex = -1;
+                    while(cursor < data->BufTextLen)
+                    {
+                        var word = ReadUntilSpace(data->Buf, data->BufTextLen, cursor, out var spaceIndex);
+                        var wordWidth = ImGui.CalcTextSize(word).X;
+                        {
+                            width -= wordWidth + (spaceIndex == -1 ? 0 : space);
+                            if(width < 0 && prevSpaceIndex > -1)
+                            {
+                                data->Buf[prevSpaceIndex] = (byte)'\n';
+                                numNewlines++;
+                                width = TextWidth - wordWidth - (spaceIndex == -1 ? 0 : space);
+                            }
+                        }
+                        cursor = spaceIndex == -1 ? data->BufTextLen : spaceIndex + 1;
+                        prevSpaceIndex = spaceIndex;
+                    }
+                }
+                var old = MemoryHelper.ReadRaw((nint)data->Buf, data->BufTextLen);
+                Process(data);
+                if(numNewlines >= MaxLines)
+                {
+                    TextWidth -= ImGui.GetStyle().ScrollbarSize;
+                    Process(data);
+                }
+                if(!MemoryHelper.ReadRaw((nint)data->Buf, data->BufTextLen).SequenceEqual(old))
+                {
+                    data->BufDirty = 1;
+                }
+                return 0;
             }
             return 0;
         }
-        return 0;
     }
 
     private void DrawEmojiPopup()
@@ -279,7 +284,7 @@ public unsafe partial class PseudoMultilineInput
             if(CloseEmojiPopup)
             {
                 CloseEmojiPopup = false;
-                ImGui.SetWindowFocus();
+                ImGui.SetWindowFocus(ImU8String.Empty);
             }
             if(!IsSelectingEmoji) ImGui.CloseCurrentPopup();
             if(!EmojiListMode)
@@ -317,7 +322,7 @@ public unsafe partial class PseudoMultilineInput
                         internalCnt++;
                         if(em.Value.GetTextureWrap() != null)
                         {
-                            ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(emojiSize));
+                            ImGui.Image(em.Value.GetTextureWrap().Handle, new(emojiSize));
                             ImGuiEx.Tooltip($":{em.Key}:");
                             HandleEmojiRightClick(em, -1);
                         }
@@ -344,9 +349,11 @@ public unsafe partial class PseudoMultilineInput
                     EmojiKeyboardSelectorRow = -1;
                     EmojiKeyboardSelecting = false;
                 }
-                if(MouseEmojiLock != User32.GetCursorPos().AsVector2() && ImGui.IsWindowHovered())
+                POINT point;
+                Utils.GetCursorPos(&point);
+                if(MouseEmojiLock != point.AsVector2() && ImGui.IsWindowHovered())
                 {
-                    MouseEmojiLock = User32.GetCursorPos().AsVector2();
+                    MouseEmojiLock = point.AsVector2();
                     EmojiKeyboardSelectorRow = -1;
                     EmojiKeyboardSelecting = false;
                 }
@@ -398,7 +405,7 @@ public unsafe partial class PseudoMultilineInput
 
                             if(em.Value.GetTextureWrap() != null)
                             {
-                                ImGui.Image(em.Value.GetTextureWrap().ImGuiHandle, new(emojiSize));
+                                ImGui.Image(em.Value.GetTextureWrap().Handle, new(emojiSize));
                             }
                             else
                             {
@@ -435,7 +442,7 @@ public unsafe partial class PseudoMultilineInput
                 ImGui.SetScrollHereY();
                 if(IsKeyPressed(LimitedKeys.Tab))
                 {
-                    ImGui.SetWindowFocus(null);
+                    ImGui.SetWindowFocus(ImU8String.Empty);
                     Insert(em.Key);
                 }
             }

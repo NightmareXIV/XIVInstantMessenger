@@ -395,7 +395,7 @@ public unsafe class ChatWindow : Window
                     var wasSent = SendMessage(tellTarget);
                     if(wasSent && Input.IsMultiline)
                     {
-                        ImGui.SetWindowFocus(null);
+                        ImGui.SetWindowFocus(ImU8String.Empty);
                         ImGui.SetWindowFocus(WindowName);
                     }
                 }

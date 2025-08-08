@@ -156,7 +156,7 @@ public sealed unsafe class TabHistory
         if(ImGui.TableGetSortSpecs().SpecsDirty)
         {
             var d = SortDatas.GetOrCreate(id);
-            if(ImGui.TableGetSortSpecs().Specs.NativePtr == null || ImGui.TableGetSortSpecs().Specs.SortDirection == ImGuiSortDirection.None)
+            if(ImGui.TableGetSortSpecs().Specs.Handle == null || ImGui.TableGetSortSpecs().Specs.SortDirection == ImGuiSortDirection.None)
             {
                 d.SortColumn = 0;
                 d.RequestedSortDirection = ImGuiSortDirection.None;

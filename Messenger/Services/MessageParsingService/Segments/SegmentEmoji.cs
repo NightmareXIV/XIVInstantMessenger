@@ -28,7 +28,7 @@ public class SegmentEmoji : ISegment
         var tex = S.EmojiLoader.GetEmoji(Emoji)?.GetTextureWrap();
         if(tex != null)
         {
-            ImGui.Image(tex.ImGuiHandle, size * sizeMult);
+            ImGui.Image(tex.Handle, size * sizeMult);
             postMessageAction?.Invoke();
             ImGuiEx.Tooltip(Emoji);
         }
@@ -38,7 +38,7 @@ public class SegmentEmoji : ISegment
             {
                 if(S.EmojiLoader.Loading.GetTextureWrap() != null)
                 {
-                    ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().ImGuiHandle, size * sizeMult);
+                    ImGui.Image(S.EmojiLoader.Loading.GetTextureWrap().Handle, size * sizeMult);
                     postMessageAction?.Invoke();
                 }
                 else
@@ -51,7 +51,7 @@ public class SegmentEmoji : ISegment
             {
                 if(S.EmojiLoader.Error.GetTextureWrap() != null)
                 {
-                    ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().ImGuiHandle, size * sizeMult);
+                    ImGui.Image(S.EmojiLoader.Error.GetTextureWrap().Handle, size * sizeMult);
                     postMessageAction?.Invoke();
                 }
                 else

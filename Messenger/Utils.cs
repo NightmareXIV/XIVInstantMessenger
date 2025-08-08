@@ -16,9 +16,9 @@ using Lumina.Excel.Sheets;
 using Messenger.Configuration;
 using Messenger.Gui;
 using Messenger.Gui.Settings;
-using PInvoke;
 using System.IO;
 using System.Text.RegularExpressions;
+using TerraFX.Interop.Windows;
 using Action = System.Action;
 
 namespace Messenger;
@@ -452,6 +452,9 @@ internal static unsafe partial class Utils
     {
         return new(point.x, point.y);
     }
+
+    [LibraryImport("user32.dll", EntryPoint = "GetCursorPos")]
+    public static partial BOOL GetCursorPos(POINT* lpPoint);
 
     public static void DrawWrappedText(string str, Action? postMessageFunctions = null)
     {

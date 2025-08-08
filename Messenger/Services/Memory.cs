@@ -9,11 +9,11 @@ public unsafe class Memory : IDisposable
     private nint PlaceholderNamePtr = Marshal.AllocHGlobal(128);
     public readonly string Placeholder = $"<XIM_{Random.Shared.Next():X8}>";
     private delegate nint ResolveTextCommandPlaceholderDelegate(nint a1, byte* placeholderText, byte a3, byte a4);
-    [EzHook("E8 ?? ?? ?? ?? 49 8D 4F 18 4C 8B E0")]
+    [EzHook("E8 ?? ?? ?? ?? 49 8D 4D 18 4C 8B F0")]
     private EzHook<ResolveTextCommandPlaceholderDelegate> ResolveTextCommandPlaceholderHook;
 
     private delegate nint AgentLookingForGroup_Tell(nint a1, nint a2);
-    [EzHook("40 55 53 56 57 41 54 41 55 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 60")]
+    [EzHook("48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 60 4C 8B F9")]
     private EzHook<AgentLookingForGroup_Tell> AgentLookingForGroup_TellHook;
     private nint AgentLookingForGroup_TellDetour(nint a1, nint a2)
     {

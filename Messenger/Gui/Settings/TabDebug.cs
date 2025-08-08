@@ -203,7 +203,7 @@ internal unsafe class TabDebug
                     var w = x.Value.GetTextureWrap();
                     if(w != null)
                     {
-                        ImGui.Image(w.ImGuiHandle, new Vector2(24f));
+                        ImGui.Image(w.Handle, new Vector2(24f));
                         ImGui.SameLine();
                     }
                     ImGuiEx.Text($"{x.Key}\n{x.Value.IsReady}");
