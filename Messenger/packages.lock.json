@@ -4,15 +4,15 @@
     "net9.0-windows7.0": {
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[12.0.0, )",
-        "resolved": "12.0.0",
-        "contentHash": "J5TJLV3f16T/E2H2P17ClWjtfEBPpq3yxvqW46eN36JCm6wR+EaoaYkqG9Rm5sHqs3/nK/vKjWWyvEs/jhKoXw=="
+        "requested": "[13.0.0, )",
+        "resolved": "13.0.0",
+        "contentHash": "Mb3cUDSK/vDPQ8gQIeuCw03EMYrej1B4J44a1AvIJ9C759p9XeqdU9Hg4WgOmlnlPe0G7ILTD32PKSUpkQNa8w=="
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.0.0.2, )",
-        "resolved": "3.0.0.2",
-        "contentHash": "YyEhpkbdhMEi/Us/xcTvzrRiVrmoOh3f8RgaVEzMWrfeoa5c361FrhmvhcEa7eYYtnuKG3zihS2Hnwd9vi99Ww=="
+        "requested": "[3.0.1.3, )",
+        "resolved": "3.0.1.3",
+        "contentHash": "EmI3VUDSR8BOPFTCiEm0s/N3iSHg3u9iolyOys/lsJF0b3OtI3NvqxLLbrSlACOrtSSohOVVf7FnXupKKNLN/Q=="
       },
       "SharpDX.Direct2D1": {
         "type": "Direct",
@@ -27,9 +27,9 @@
       },
       "SixLabors.ImageSharp": {
         "type": "Direct",
-        "requested": "[3.1.10, )",
-        "resolved": "3.1.10",
-        "contentHash": "R1HEPcqx3v+kvlOTPouP0g/Nzzud9pHtjlgGbFax3Ivaz8kkaGfS2EPfyDGpmfoTUQ3nQ5wxdhYyYa9fwYA9cw=="
+        "requested": "[3.1.11, )",
+        "resolved": "3.1.11",
+        "contentHash": "JfPLyigLthuE50yi6tMt7Amrenr/fA31t2CvJyhy/kQmfulIBAqo5T/YFUSRHtuYPXRSaUHygFeh6Qd933EoSw=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -949,7 +949,7 @@
       "nightmareui": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.0.0.2, )"
+          "ECommons": "[3.0.1.3, )"
         }
       }
     }
