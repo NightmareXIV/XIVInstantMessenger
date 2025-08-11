@@ -21,3 +21,4 @@ global using System.Threading.Tasks;
 global using static ECommons.GenericHelpers;
 global using static Messenger.Messenger;
 global using S = Messenger.Services.ServiceManager;
+global using FXWindows = TerraFX.Interop.Windows.Windows;

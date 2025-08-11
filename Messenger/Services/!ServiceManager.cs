@@ -6,7 +6,7 @@ using Messenger.Services.Translation;
 namespace Messenger.Services;
 public static class ServiceManager
 {
-    public static ThreadPool ThreadPool;
+    public static XIMThreadPool ThreadPool;
     public static Memory Memory;
     public static EmojiLoader EmojiLoader;
     public static ContextMenuManager ContextMenuManager;

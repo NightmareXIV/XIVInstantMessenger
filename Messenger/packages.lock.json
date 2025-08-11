@@ -10,9 +10,9 @@
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.0.1.3, )",
-        "resolved": "3.0.1.3",
-        "contentHash": "EmI3VUDSR8BOPFTCiEm0s/N3iSHg3u9iolyOys/lsJF0b3OtI3NvqxLLbrSlACOrtSSohOVVf7FnXupKKNLN/Q=="
+        "requested": "[3.0.1.6, )",
+        "resolved": "3.0.1.6",
+        "contentHash": "WuUOhEoBAok5NVU2CPnnioQUd7ofjIEC8SMNOhWy9+rFPo11JcnlD2LpJi+n2z5PqXKpK7CaiURg2oPgi1Ci0A=="
       },
       "SharpDX.Direct2D1": {
         "type": "Direct",
@@ -949,7 +949,7 @@
       "nightmareui": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.0.1.3, )"
+          "ECommons": "[3.0.1.6, )"
         }
       }
     }

@@ -108,7 +108,7 @@ public unsafe partial class PseudoMultilineInput
                     data->CursorPos = StoredCursorPos;
                     EmojiKeyboardSelecting = true;
                     POINT point;
-                    Utils.GetCursorPos(&point);
+                    FXWindows.GetCursorPos(&point);
                     MouseEmojiLock = point.AsVector2();
                     if(ImGui.IsKeyPressed(ImGuiKey.UpArrow))
                     {
@@ -350,7 +350,7 @@ public unsafe partial class PseudoMultilineInput
                     EmojiKeyboardSelecting = false;
                 }
                 POINT point;
-                Utils.GetCursorPos(&point);
+                FXWindows.GetCursorPos(&point);
                 if(MouseEmojiLock != point.AsVector2() && ImGui.IsWindowHovered())
                 {
                     MouseEmojiLock = point.AsVector2();

@@ -56,7 +56,7 @@ public unsafe class MessageProcessor : IDisposable
                         History = history,
                         Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {message.ToString()}"
                     });
-                    if(C.DefaultChannelCustomization.SuppressDMs)
+                    if(C.DefaultChannelCustomization.SuppressDMs && !Utils.IsChatBubblesEnabled)
                     {
                         isHandled = true;
                     }
@@ -218,7 +218,7 @@ public unsafe class MessageProcessor : IDisposable
             History = Chats[messageHistoryOwner],
             Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {messageSender.GetPlayerName()}: {message.ToString()}"
         });
-        if(messageHistoryOwner.GetCustomization().SuppressDMs)
+        if(messageHistoryOwner.GetCustomization().SuppressDMs && !Utils.IsChatBubblesEnabled)
         {
             isHandled = true;
         }
@@ -259,7 +259,7 @@ public unsafe class MessageProcessor : IDisposable
             History = Chats[messageHistoryOwner],
             Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] From {(type == XivChatType.TellIncoming ? messageSender.GetPlayerName() : Svc.ClientState.LocalPlayer?.GetPlayerName())}: {message.ToString()}"
         });
-        if(messageHistoryOwner.GetCustomization().SuppressDMs)
+        if(messageHistoryOwner.GetCustomization().SuppressDMs && !Utils.IsChatBubblesEnabled)
         {
             isHandled = true;
         }

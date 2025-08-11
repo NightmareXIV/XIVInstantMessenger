@@ -74,7 +74,7 @@ public unsafe class ChatWindow : Window
         Transparency = !isTransparent ? C.TransMax : C.TransMin;
     }
 
-    internal bool HideByCombat => !KeepInCombat && ((Svc.Condition[ConditionFlag.InCombat] && C.AutoHideCombat) || (Svc.Condition[ConditionFlag.BoundByDuty56] && C.AutoHideDuty));
+    internal bool HideByCombat => !KeepInCombat && ((Svc.Condition[ConditionFlag.InCombat] && C.AutoHideCombat) || (Svc.Condition[ConditionFlag.BoundByDuty56] && C.AutoHideDuty && !Utils.IsInForay()));
 
     public override bool DrawConditions()
     {

@@ -30,6 +30,8 @@ internal static unsafe partial class Utils
     public static readonly uint SuperchannelID = 1000001;
     public static Dictionary<Guid, WeakReference<SavedMessage>> TranslationLinks = [];
 
+    public static bool IsChatBubblesEnabled => Svc.GameConfig.UiConfig.GetUInt("LogChatBubbleEnableChatBubble") != 0;
+
     public static void RequestTranslationIfPossible(this SavedMessage message)
     {
         if(C.TranslationProvider == null) return;
@@ -452,9 +454,6 @@ internal static unsafe partial class Utils
     {
         return new(point.x, point.y);
     }
-
-    [LibraryImport("user32.dll", EntryPoint = "GetCursorPos")]
-    public static partial BOOL GetCursorPos(POINT* lpPoint);
 
     public static void DrawWrappedText(string str, Action? postMessageFunctions = null)
     {

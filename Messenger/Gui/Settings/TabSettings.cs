@@ -78,8 +78,17 @@ internal class TabSettings
                     ImGui.Checkbox("Automatically activate text input after opening window on outgoing tell", ref C.DefaultChannelCustomization.AutoFocusTellOutgoing);
                 }
                 ImGui.Checkbox("Hide DMs from in-game chat", ref C.DefaultChannelCustomization.SuppressDMs);
+                if(Utils.IsChatBubblesEnabled)
+                {
+                    ImGui.Indent();
+                    ImGuiEx.TextWrapped(EColor.RedBright, """
+                        While chat bubbles are enabled this option will have no effect. Hide desired message types from in-game log using game's own functions (Chat log settings - Log Filters). You may keep this option enabled to re-activate it automatically once hiding chat messages will be made possible while keeping bubbles intact.
+                        """);
+                    ImGui.Unindent();
+                }
                 ImGui.Checkbox("Auto-hide chat windows in combat", ref C.AutoHideCombat);
                 ImGui.Checkbox("Auto-hide chat windows in duty", ref C.AutoHideDuty);
+                ImGuiEx.HelpMarker("Except field operations");
                 ImGui.Checkbox("Open chat window after combat if received message during it", ref C.AutoReopenAfterCombat);
                 ImGui.Checkbox("Command passthrough", ref C.CommandPassthrough);
                 if(C.CommandPassthrough)
