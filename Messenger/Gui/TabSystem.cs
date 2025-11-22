@@ -142,19 +142,18 @@ internal class TabSystem : Window
         else
         {
             ApplyVerticalTabAutoSelection();
-            var windowsArray = Windows.ToArray();
-            ImGui.Columns(2);
-            if(ImGui.BeginChild(
-                    "##MessengerVerticalTabs",
-                    default,
-                    true,
-                    ImGuiWindowFlags.None))
+            if(ImGui.BeginTable("##MessengerVerticalTabsLayout", 2, ImGuiTableFlags.Resizable))
             {
-                if(ImGui.BeginTable("##MessengerVerticalTabsTable", 2))
+                float initialTabListColWidth = ImGui.GetContentRegionAvail().X * 0.2f;
+                float initialTabContentColWidth = ImGui.GetContentRegionAvail().X * 0.8f;
+                ImGui.TableSetupColumn("TabList", ImGuiTableColumnFlags.None, initialTabListColWidth);
+                ImGui.TableSetupColumn("TabContent", ImGuiTableColumnFlags.None, initialTabContentColWidth);
+                ImGui.TableNextColumn();
+                if(ImGui.BeginTable("##MessengerVerticalTabList", 2))
                 {
                     ImGui.TableSetupColumn("User");
                     ImGui.TableSetupColumn("Close", ImGuiTableColumnFlags.WidthFixed, 26);
-                    foreach(var w in windowsArray)
+                    foreach(var w in Windows.ToArray())
                     {
                         ImGui.PushID(w.WindowName);
                         if(w.IsOpen)
@@ -196,15 +195,14 @@ internal class TabSystem : Window
                     }
                     ImGui.EndTable();
                 }
-                ImGui.EndChild();
+                ApplyVerticalTabAutoSelection();
+                ImGui.TableNextColumn();
+                if(SelectedWindowforVerticalTabs != null)
+                {
+                    DrawInnerWindow(SelectedWindowforVerticalTabs);
+                }
+                ImGui.EndTable();
             }
-            ApplyVerticalTabAutoSelection();
-            ImGui.NextColumn();
-            if(SelectedWindowforVerticalTabs != null)
-            {
-                DrawInnerWindow(SelectedWindowforVerticalTabs);
-            }
-            ImGui.Columns(1);
         }
     }
 
