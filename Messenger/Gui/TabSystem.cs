@@ -7,6 +7,7 @@ internal class TabSystem : Window
     private bool IsTitleColored = false;
     internal string Name = null;
     internal IEnumerable<ChatWindow> Windows => P.WindowSystemChat.Windows.Cast<ChatWindow>().Where(x => (Name == null && !C.TabWindows.Contains(x.OwningTab)) || x.OwningTab == Name);
+    internal ChatWindow SelectedWindowforVerticalTabs = null;
 
     public TabSystem(string name) : base($"XIV Instant Messenger - {name ?? "Default Window"}", ImGuiWindowFlags.NoScrollbar)
     {
@@ -91,36 +92,12 @@ internal class TabSystem : Window
                 Transparency = Math.Max(C.TransMin, Transparency - C.TransDelta);
             }
         }
-        if(ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
+        if(!C.VerticalTabs)
         {
-            foreach(var w in Windows.ToArray())
+            if(ImGui.BeginTabBar("##MessengerTabs", ImGuiTabBarFlags.FittingPolicyScroll | ImGuiTabBarFlags.Reorderable))
             {
+                foreach(var w in Windows.ToArray())
                 {
-                    void Associate()
-                    {
-                        if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                        {
-                            ImGui.OpenPopup($"Associate{w.MessageHistory.HistoryPlayer}");
-                        }
-                        if(ImGui.BeginPopup($"Associate{w.MessageHistory.HistoryPlayer}"))
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-                            if(ImGui.Selectable("Default window"))
-                            {
-                                C.TabWindowAssociations.Remove(w.MessageHistory.HistoryPlayer.ToString());
-                            }
-                            ImGui.PopStyleColor();
-                            foreach(var x in C.TabWindows)
-                            {
-                                if(ImGui.Selectable(x))
-                                {
-                                    C.TabWindowAssociations[w.MessageHistory.HistoryPlayer.ToString()] = x;
-                                }
-                            }
-                            ImGui.EndPopup();
-                        }
-                    }
-
                     var isOpen = w.IsOpen;
                     var flags = ImGuiTabItemFlags.None;
                     if(w.MessageHistory.ShouldSetFocus())
@@ -137,23 +114,17 @@ internal class TabSystem : Window
                     }
                     if(isOpen && ImGui.BeginTabItem(w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld) + $"###{w.WindowName}", ref isOpen, flags))
                     {
-                        Associate();
+                        Associate(w);
                         if(titleColored)
                         {
                             ImGui.PopStyleColor(3);
                         }
-                        w.BringToFront = false;
-                        w.SetPosition = false;
-                        w.UpdateLastFrame();
-                        if(C.FontNoTabs) P.FontManager.PushFont();
-                        w.Draw();
-                        TitleBarButtons = w.TitleBarButtons;
-                        if(C.FontNoTabs) P.FontManager.PopFont();
+                        DrawInnerWindow(w);
                         ImGui.EndTabItem();
                     }
                     else
                     {
-                        Associate();
+                        Associate(w);
                         if(ImGui.IsItemClicked())
                         {
                             w.MessageHistory.SetFocusAtNextFrame();
@@ -165,8 +136,73 @@ internal class TabSystem : Window
                     }
                     w.IsOpen = isOpen;
                 }
+                ImGui.EndTabBar();
             }
-            ImGui.EndTabBar();
+        }
+        else
+        {
+            ApplyVerticalTabAutoSelection();
+            if(ImGui.BeginTable("##MessengerVerticalTabsLayout", 2, ImGuiTableFlags.Resizable))
+            {
+                float initialTabListColWidth = ImGui.GetContentRegionAvail().X * 0.2f;
+                float initialTabContentColWidth = ImGui.GetContentRegionAvail().X * 0.8f;
+                ImGui.TableSetupColumn("TabList", ImGuiTableColumnFlags.None, initialTabListColWidth);
+                ImGui.TableSetupColumn("TabContent", ImGuiTableColumnFlags.None, initialTabContentColWidth);
+                ImGui.TableNextColumn();
+                if(ImGui.BeginTable("##MessengerVerticalTabList", 2))
+                {
+                    ImGui.TableSetupColumn("User");
+                    ImGui.TableSetupColumn("Close", ImGuiTableColumnFlags.WidthFixed, 26);
+                    foreach(var w in Windows.ToArray())
+                    {
+                        ImGui.PushID(w.WindowName);
+                        if(w.IsOpen)
+                        {
+                            if(w.MessageHistory.ShouldSetFocus())
+                            {
+                                SelectedWindowforVerticalTabs = w;
+                            }
+                            ImGui.TableNextRow();
+                            if(SelectedWindowforVerticalTabs == w)
+                            {
+                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive].ToUint());
+                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive].ToUint());
+                            }
+                            else if(w.Unread)
+                            {
+                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGuiCol.TableRowBg.GetFlashColor(w.Cust).ToUint());
+                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGuiCol.TableRowBg.GetFlashColor(w.Cust).ToUint());
+                            }
+                            ImGui.TableNextColumn();
+                            var channelName = w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld);
+                            if(ImGui.Selectable(channelName))
+                            {
+                                SelectedWindowforVerticalTabs = w;
+                            }
+                            ImGuiEx.Tooltip(channelName);
+                            Associate(w);
+                            ImGui.TableNextColumn();
+                            if(ImGuiEx.IconButton(FontAwesomeIcon.WindowClose))
+                            {
+                                w.IsOpen = false;
+                                if(SelectedWindowforVerticalTabs == w)
+                                {
+                                    SelectedWindowforVerticalTabs = null;
+                                }
+                            }
+                        }
+                        ImGui.PopID();
+                    }
+                    ImGui.EndTable();
+                }
+                ApplyVerticalTabAutoSelection();
+                ImGui.TableNextColumn();
+                if(SelectedWindowforVerticalTabs != null)
+                {
+                    DrawInnerWindow(SelectedWindowforVerticalTabs);
+                }
+                ImGui.EndTable();
+            }
         }
     }
 
@@ -185,6 +221,62 @@ internal class TabSystem : Window
         {
             ImGui.PopStyleColor(3);
             IsTitleColored = false;
+        }
+    }
+
+    private void Associate(ChatWindow w)
+    {
+        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+        {
+            ImGui.OpenPopup($"Associate{w.MessageHistory.HistoryPlayer}");
+        }
+        if (ImGui.BeginPopup($"Associate{w.MessageHistory.HistoryPlayer}"))
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
+            if (ImGui.Selectable("Default window"))
+            {
+                C.TabWindowAssociations.Remove(w.MessageHistory.HistoryPlayer.ToString());
+            }
+            ImGui.PopStyleColor();
+            foreach (var x in C.TabWindows)
+            {
+                if (ImGui.Selectable(x))
+                {
+                    C.TabWindowAssociations[w.MessageHistory.HistoryPlayer.ToString()] = x;
+                }
+            }
+            ImGui.EndPopup();
+        }
+    }
+
+    private void DrawInnerWindow(ChatWindow w)
+    {
+        w.BringToFront = false;
+        w.SetPosition = false;
+        w.UpdateLastFrame();
+        if(C.FontNoTabs) P.FontManager.PushFont();
+        w.Draw();
+        TitleBarButtons = w.TitleBarButtons;
+        if(C.FontNoTabs) P.FontManager.PopFont();
+    }
+
+    private void ApplyVerticalTabAutoSelection()
+    {
+        if (SelectedWindowforVerticalTabs != null && !SelectedWindowforVerticalTabs.IsOpen)
+        {
+            SelectedWindowforVerticalTabs = null;
+        }
+        // if we have no selected tab. Select the first open tab.
+        if (SelectedWindowforVerticalTabs == null)
+        {
+            foreach (var w in Windows.ToArray())
+            {
+                if (w.IsOpen)
+                {
+                    SelectedWindowforVerticalTabs = w;
+                    break;
+                }
+            }
         }
     }
 }

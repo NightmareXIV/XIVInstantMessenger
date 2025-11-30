@@ -59,6 +59,7 @@ public class Config : IEzConfig
     public bool QuickOpenButtonOnTop = true;
     public bool Tabs = false;
     public bool ColorTitleFlashTab = true;
+    public bool VerticalTabs = false;
 
     public bool ButtonSend = true;
     public bool ButtonInvite = true;
