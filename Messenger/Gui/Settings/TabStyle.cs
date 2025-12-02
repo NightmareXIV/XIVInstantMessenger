@@ -9,7 +9,6 @@ internal class TabStyle
     {
         TabIndividual.DrawCustomization(C.DefaultChannelCustomization, true);
         ImGui.Checkbox("Flash title in addition to tab when using tabbed mode", ref C.ColorTitleFlashTab);
-        ImGui.Checkbox("Use vertical tabs when using tabbed mode", ref C.VerticalTabs);
         ImGui.Checkbox("IRC-style chat", ref C.IRCStyle);
         ImGui.Checkbox("Print date when new day of messages starts", ref C.PrintDate);
         ImGui.Separator();

@@ -1,4 +1,6 @@
-﻿namespace Messenger.Gui;
+﻿using Messenger.Configuration;
+
+namespace Messenger.Gui;
 
 internal class TabSystem : Window
 {
@@ -69,6 +71,8 @@ internal class TabSystem : Window
             ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ImGuiCol.TitleBgCollapsed.GetFlashColor(C.DefaultChannelCustomization));
         }
     }
+
+    HashSet<Sender> HoveredChannels = [];
 
     public override void Draw()
     {
@@ -149,10 +153,9 @@ internal class TabSystem : Window
                 ImGui.TableSetupColumn("TabList", ImGuiTableColumnFlags.None, initialTabListColWidth);
                 ImGui.TableSetupColumn("TabContent", ImGuiTableColumnFlags.None, initialTabContentColWidth);
                 ImGui.TableNextColumn();
-                if(ImGui.BeginTable("##MessengerVerticalTabList", 2))
+                if(ImGui.BeginTable("##MessengerVerticalTabList", 1))
                 {
                     ImGui.TableSetupColumn("User");
-                    ImGui.TableSetupColumn("Close", ImGuiTableColumnFlags.WidthFixed, 26);
                     foreach(var w in Windows.ToArray())
                     {
                         ImGui.PushID(w.WindowName);
@@ -174,21 +177,57 @@ internal class TabSystem : Window
                                 ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGuiCol.TableRowBg.GetFlashColor(w.Cust).ToUint());
                             }
                             ImGui.TableNextColumn();
-                            var channelName = w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld);
-                            if(ImGui.Selectable(channelName))
-                            {
-                                SelectedWindowforVerticalTabs = w;
-                            }
-                            ImGuiEx.Tooltip(channelName);
-                            Associate(w);
-                            ImGui.TableNextColumn();
-                            if(ImGuiEx.IconButton(FontAwesomeIcon.WindowClose))
+
+
+                            var size = ImGuiHelpers.GetButtonSize(FontAwesomeIcon.Times.ToIconString());
+                            var storeCurPos = ImGui.GetCursorPos();
+                            ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - size.X + ImGui.GetStyle().CellPadding.X);
+                            var transparent = !HoveredChannels.Contains(w.MessageHistory.HistoryPlayer);
+                            var hovered = false;
+                            var buttonCurPos = ImGui.GetCursorPos();
+                            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0f);
+                            if(ImGuiEx.SmallIconButton(FontAwesomeIcon.Times))
                             {
                                 w.IsOpen = false;
                                 if(SelectedWindowforVerticalTabs == w)
                                 {
                                     SelectedWindowforVerticalTabs = null;
                                 }
+                            }
+                            ImGui.PopStyleVar();
+                            if(ImGui.IsItemHovered()) hovered = true;
+                            ImGui.SameLine(0, 0);
+                            ImGui.SetCursorPos(storeCurPos);
+
+                            var channelName = w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld);
+                            if(ImGui.Selectable(channelName))
+                            {
+                                SelectedWindowforVerticalTabs = w;
+                            }
+                            ImGuiEx.Tooltip(channelName);
+                            if(ImGui.IsItemHovered()) hovered = true;
+                            if(!transparent)
+                            {
+                                ImGui.SameLine(0, 0);
+                                var curPos = ImGui.GetCursorPos();
+                                ImGui.SetCursorPos(buttonCurPos);
+                                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
+                                var col = ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
+                                ImGui.PushStyleColor(ImGuiCol.Button, col);
+                                ImGui.PushStyleColor(ImGuiCol.ButtonActive, col);
+                                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, col);
+                                ImGuiEx.SmallIconButton(FontAwesomeIcon.Times);
+                                ImGui.PopStyleColor(4);
+                                ImGui.SetCursorPos(curPos);
+                            }
+                            Associate(w);
+                            if(hovered)
+                            {
+                                HoveredChannels.Add(w.MessageHistory.HistoryPlayer);
+                            }
+                            else
+                            {
+                                HoveredChannels.Remove(w.MessageHistory.HistoryPlayer);
                             }
                         }
                         ImGui.PopID();

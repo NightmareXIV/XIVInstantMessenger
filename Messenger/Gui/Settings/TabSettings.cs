@@ -23,6 +23,7 @@ internal class TabSettings
                 {
                     P.Tabs(C.Tabs);
                 }
+                ImGui.Checkbox("Vertical tabs", ref C.VerticalTabs);
                 ImGuiEx.Spacing();
                 ImGui.Checkbox("Do not display world in tab header", ref C.TabsNoWorld);
                 if(C.Tabs)
