@@ -204,6 +204,7 @@ internal class TabSystem : Window
                             {
                                 SelectedWindowforVerticalTabs = w;
                             }
+                            Associate(w);
                             ImGuiEx.Tooltip(channelName);
                             if(ImGui.IsItemHovered()) hovered = true;
                             if(!transparent)
@@ -220,7 +221,6 @@ internal class TabSystem : Window
                                 ImGui.PopStyleColor(4);
                                 ImGui.SetCursorPos(curPos);
                             }
-                            Associate(w);
                             if(hovered)
                             {
                                 HoveredChannels.Add(w.MessageHistory.HistoryPlayer);
