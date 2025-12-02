@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Authors>NightmareXIV</Authors>
-        <Version>1.5.0.13</Version>
+        <Version>1.5.0.14</Version>
         <Configurations>Debug;Release</Configurations>
     </PropertyGroup>
 
