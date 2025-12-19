@@ -147,7 +147,7 @@ public partial class MessageHistory
         });
     }
 
-    [GeneratedRegex("^\\[(.+)\\] From (.+)@([a-zA-Z]+): (.+)$")]
+    [GeneratedRegex("^\\[(.+)\\] From (.+)@([a-zA-Z\\u4e00-\\u9fa5]+): (.+)$")]
     private static partial Regex MessageRegex();
     [GeneratedRegex("^\\[(.+)\\] System: (.+)$")]
     private static partial Regex SystemMessageRegex();
