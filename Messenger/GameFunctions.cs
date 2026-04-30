@@ -31,7 +31,7 @@ internal unsafe class GameFunctions : IDisposable
         if(ExcelWorldHelper.Get(world) != null && EzThrottler.Throttle("AddToFriendlist"))
         {
             S.Memory.ReplaceName = $"{name}@{ExcelWorldHelper.GetName(world)}";
-            Chat.Instance.ExecuteCommand($"/friendlist add {S.Memory.Placeholder}");
+            Chat.ExecuteCommand($"/friendlist add {S.Memory.Placeholder}");
         }
     }
 
@@ -40,7 +40,7 @@ internal unsafe class GameFunctions : IDisposable
         if(ExcelWorldHelper.Get(world) != null && EzThrottler.Throttle("AddToFriendlist"))
         {
             S.Memory.ReplaceName = $"{name}@{ExcelWorldHelper.GetName(world)}";
-            Chat.Instance.ExecuteCommand($"/blacklist add {S.Memory.Placeholder}");
+            Chat.ExecuteCommand($"/blacklist add {S.Memory.Placeholder}");
         }
     }
 }

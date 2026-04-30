@@ -1,13 +1,15 @@
-﻿using Dalamud.Game.Text;
+﻿using Dalamud.Game.Chat;
+using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
+using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
+using Lumina.Text.ReadOnly;
 using Messenger.Configuration;
 using Messenger.FriendListManager;
-using Messenger.Miscellaneous;
 using NightmareUI.ImGuiElements;
 using System.Threading;
 
@@ -237,8 +239,8 @@ internal unsafe class TabDebug
                     s = new SeStringBuilder().Add(new PlayerPayload(MName, (uint)MWorld)).Build();
                 }
                 var m = new SeStringBuilder().AddText(MMessage).Build();
-                var cm = new MockChatMessage();
-                cm.SetData(MType, default, default, s, m, default);
+                var cm = Activator.CreateInstance(Svc.Chat.GetType().Assembly.GetType("Dalamud.Game.Chat.ChatMessage")) as IHandleableChatMessage;
+                cm.Call("SetData", [MType, default, default, new ReadOnlySeString(s.Encode()), new ReadOnlySeString(m.Encode()), default]);
                 S.MessageProcessor.OnChatMessage(cm);
             }
             ImGui.Separator();
