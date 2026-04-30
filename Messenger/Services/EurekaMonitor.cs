@@ -1,4 +1,5 @@
 ﻿global using EMD = (string Name, ulong CID);
+using Dalamud.Game.Chat;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -49,7 +50,7 @@ public sealed unsafe class EurekaMonitor : IDisposable
         ClientState_TerritoryChanged((ushort)Player.Territory);
     }
 
-    private void Chat_ChatMessageHandled(Dalamud.Game.Text.XivChatType type, int timestamp, SeString sender, SeString message)
+    private void Chat_ChatMessageHandled(IChatMessage cm)
     {
         EMDList.Clear();
         FillFromLog(EMDList);
@@ -75,7 +76,7 @@ public sealed unsafe class EurekaMonitor : IDisposable
         }
     }
 
-    private void ClientState_TerritoryChanged(ushort obj)
+    private void ClientState_TerritoryChanged(uint obj)
     {
         Stop();
         if(Svc.Data.GetExcelSheet<TerritoryType>().TryGetRow(obj, out var t) && t.GetTerritoryIntendedUse().EqualsAny(TerritoryIntendedUseEnum.Eureka, TerritoryIntendedUseEnum.Bozja, TerritoryIntendedUseEnum.Large_Scale_Raid, TerritoryIntendedUseEnum.Large_Scale_Savage_Raid, TerritoryIntendedUseEnum.Occult_Crescent))

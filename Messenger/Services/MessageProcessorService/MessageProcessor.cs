@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.Chat;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -28,14 +29,14 @@ public unsafe class MessageProcessor : IDisposable
     {
         Svc.Chat.ChatMessage -= OnChatMessage;
     }
-    public void OnChatMessage(XivChatType type, int a2, ref SeString sender, ref SeString message, ref bool isHandled)
+    public void OnChatMessage(IHandleableChatMessage cm)
     {
         try
         {
-            if(type == XivChatType.ErrorMessage && RecentReceiver != null)
+            if(cm.LogKind == XivChatType.ErrorMessage && RecentReceiver != null)
             {
                 var pattern = $"Message to {RecentReceiver.Value.Name} could not be sent.";
-                if(message.ToString().EqualsAny(
+                if(cm.Message.ToString().EqualsAny(
                     pattern,
                     "Unable to send /tell. Recipient is in a restricted area.",
                     "Your message was not heard. You must wait before using /tell, /say, /yell, or /shout again."
@@ -44,9 +45,9 @@ public unsafe class MessageProcessor : IDisposable
                     SavedMessage item = new()
                     {
                         IsIncoming = false,
-                        Message = message.ToString(),
+                        Message = cm.Message.ToString(),
                         IsSystem = true,
-                        ParsedMessage = new(message),
+                        ParsedMessage = new(cm.Message),
                     };
                     history.Messages.Add(item);
                     Utils.UpdateLastMessageTime(history.HistoryPlayer, item.Time);
@@ -54,18 +55,18 @@ public unsafe class MessageProcessor : IDisposable
                     P.Logger.Log(new()
                     {
                         History = history,
-                        Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {message.ToString()}"
+                        Line = $"[{DateTimeOffset.Now:yyyy.MM.dd HH:mm:ss zzz}] System: {cm.Message.ToString()}"
                     });
                     if(C.DefaultChannelCustomization.SuppressDMs && !Utils.IsChatBubblesEnabled)
                     {
-                        isHandled = true;
+                        cm.PreventOriginal();
                     }
                 }
                 RecentReceiver = null;
             }
-            if(Utils.DecodeSender(sender, type, out var s))
+            if(Utils.DecodeSender(cm.Sender, cm.LogKind, out var s))
             {
-                if(type == XivChatType.TellIncoming || type == XivChatType.TellOutgoing)
+                if(cm.LogKind == XivChatType.TellIncoming || cm.LogKind == XivChatType.TellOutgoing)
                 {
                     if(s.Name.StartsWith("Gm "))
                     {
@@ -77,17 +78,17 @@ public unsafe class MessageProcessor : IDisposable
                     //process tell
                     SavedMessage addedMessage = new()
                     {
-                        IsIncoming = type == XivChatType.TellIncoming,
-                        Message = message.ToString(),
-                        OverrideName = type == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
-                        ParsedMessage = new(message),
-                        XivChatType = type,
+                        IsIncoming = cm.LogKind == XivChatType.TellIncoming,
+                        Message = cm.Message.ToString(),
+                        OverrideName = cm.LogKind == XivChatType.TellOutgoing ? Svc.ClientState.LocalPlayer.GetPlayerName() : null,
+                        ParsedMessage = new(cm.Message),
+                        XivChatType = cm.LogKind,
                     };
                     if(addedMessage.IsIncoming && C.TranslateAuto)
                     {
                         addedMessage.RequestTranslationIfPossible();
                     }
-                    foreach(var payload in message.Payloads)
+                    foreach(var payload in cm.Message.Payloads)
                     {
                         if(payload.Type == PayloadType.MapLink)
                         {
@@ -110,33 +111,41 @@ public unsafe class MessageProcessor : IDisposable
                         {
                             PluginLog.Verbose($"Processing tell for engagement {x.Name}");
                             x.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                            isEngagementOpen = ProcessOpenOnTell(x.GetSender(), s, type, ref message, ref isHandled, addedMessageCopy, false);
+                            isEngagementOpen = ProcessOpenOnTell(x.GetSender(), s, cm.LogKind, cm.Message, out var isHandled, addedMessageCopy, false);
+                            if(isHandled)
+                            {
+                                cm.PreventOriginal();
+                            }
                         }
                     }
-                    ProcessOpenOnTell(s, s, type, ref message, ref isHandled, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);
-                    if(type == XivChatType.TellIncoming && C.IncomingTellSound != Sounds.None)
+                    ProcessOpenOnTell(s, s, cm.LogKind, cm.Message, out var isHandledM, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);
+                    if(isHandledM)
+                    {
+                        cm.PreventOriginal();
+                    }
+                    if(cm.LogKind == XivChatType.TellIncoming && C.IncomingTellSound != Sounds.None)
                     {
                         P.GameFunctions.PlaySound(C.IncomingTellSound);
                     }
                 }
-                else if(type.GetCommand() != null)
+                else if(cm.LogKind.GetCommand() != null)
                 {
                     //generic
                     var incoming = s.GetPlayerName() != Svc.ClientState.LocalPlayer?.GetPlayerName();
-                    Sender genericSender = new(type.ToString(), 0);
+                    Sender genericSender = new(cm.LogKind.ToString(), 0);
                     SavedMessage addedMessage = new()
                     {
                         IsIncoming = incoming,
-                        Message = message.ToString(),
+                        Message = cm.Message.ToString(),
                         OverrideName = s.GetPlayerName(),
-                        ParsedMessage = new(message),
-                        XivChatType = type,
+                        ParsedMessage = new(cm.Message),
+                        XivChatType = cm.LogKind,
                     };
                     if(addedMessage.IsIncoming && C.TranslateAuto)
                     {
                         addedMessage.RequestTranslationIfPossible();
                     }
-                    foreach(var payload in message.Payloads)
+                    foreach(var payload in cm.Message.Payloads)
                     {
                         if(payload.Type == PayloadType.MapLink)
                         {
@@ -154,7 +163,7 @@ public unsafe class MessageProcessor : IDisposable
                         {
                             PluginLog.Verbose($"Processing generic message for engagement {engagement.Name}");
                             engagement.LastUpdated = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                            isEngagementOpen = ProcessOpenOnGeneric(engagement.GetSender(), genericSender, s, incoming, type, ref message, ref isHandled, addedMessage, false);
+                            isEngagementOpen = ProcessOpenOnGeneric(engagement.GetSender(), genericSender, s, incoming, cm.LogKind, cm.Message, out var isHandled, addedMessage, false);
 
                             if(incoming && C.IncomingTellSound != Sounds.None && engagement.PlaySound && FrameThrottler.Throttle("PlayEngagementSound", 1))
                             {
@@ -162,9 +171,13 @@ public unsafe class MessageProcessor : IDisposable
                             }
                         }
                     }
-                    if(C.Channels.Contains(type))
+                    if(C.Channels.Contains(cm.LogKind))
                     {
-                        ProcessOpenOnGeneric(genericSender, genericSender, s, incoming, type, ref message, ref isHandled, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);
+                        ProcessOpenOnGeneric(genericSender, genericSender, s, incoming, cm.LogKind, cm.Message, out var isHandled, addedMessage, C.EngagementPreventsIndi && isEngagementOpen);
+                        if(isHandled)
+                        {
+                            cm.PreventOriginal();
+                        }
                     }
                     /*if (C.IncomingTellSound != Sounds.None)
                     {
@@ -180,8 +193,9 @@ public unsafe class MessageProcessor : IDisposable
         }
     }
 
-    internal bool ProcessOpenOnGeneric(Sender messageHistoryOwner, Sender genericSender, Sender messageSender, bool incoming, XivChatType type, ref SeString message, ref bool isHandled, SavedMessage addedMessage, bool forceHide)
+    internal bool ProcessOpenOnGeneric(Sender messageHistoryOwner, Sender genericSender, Sender messageSender, bool incoming, XivChatType type, SeString message, out bool isHandled, SavedMessage addedMessage, bool forceHide)
     {
+        isHandled = false;
         var isOpen = Chats.TryGetValue(messageHistoryOwner, out var sHist) && sHist.ChatWindow.IsOpen;
         P.OpenMessenger(messageHistoryOwner,
             !forceHide &&
@@ -225,8 +239,9 @@ public unsafe class MessageProcessor : IDisposable
         return true;
     }
 
-    internal bool ProcessOpenOnTell(Sender messageHistoryOwner, Sender messageSender, XivChatType type, ref SeString message, ref bool isHandled, SavedMessage addedMessage, bool forceHide)
+    internal bool ProcessOpenOnTell(Sender messageHistoryOwner, Sender messageSender, XivChatType type, SeString message, out bool isHandled, SavedMessage addedMessage, bool forceHide)
     {
+        isHandled = false;
         var isOpen = Chats.TryGetValue(messageHistoryOwner, out var sHist) && sHist.ChatWindow.IsOpen;
         P.OpenMessenger(messageHistoryOwner,
             !forceHide &&

@@ -7,6 +7,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 using Messenger.Configuration;
 using Messenger.FriendListManager;
+using Messenger.Miscellaneous;
 using NightmareUI.ImGuiElements;
 using System.Threading;
 
@@ -235,9 +236,10 @@ internal unsafe class TabDebug
                 {
                     s = new SeStringBuilder().Add(new PlayerPayload(MName, (uint)MWorld)).Build();
                 }
-                var n = false;
                 var m = new SeStringBuilder().AddText(MMessage).Build();
-                S.MessageProcessor.OnChatMessage(MType, 0, ref s, ref m, ref n);
+                var cm = new MockChatMessage();
+                cm.SetData(MType, default, default, s, m, default);
+                S.MessageProcessor.OnChatMessage(cm);
             }
             ImGui.Separator();
             ImGuiEx.Text($"Is in instance: {P.GameFunctions.IsInInstance()}");

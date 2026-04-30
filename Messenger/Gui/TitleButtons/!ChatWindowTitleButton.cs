@@ -27,7 +27,7 @@ public abstract class ChatWindowTitleButton
         };
     }
 
-    public Window.TitleBarButton Button { get; private set; }
+    public TitleBarButton Button { get; private set; }
     public abstract void OnLeftClick();
     public virtual void OnCtrlLeftClick() { }
     public abstract bool ShouldDisplay();

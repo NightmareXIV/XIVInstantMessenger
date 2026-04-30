@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.Chat;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.GameHelpers;
@@ -60,12 +61,12 @@ public sealed unsafe class PartyFinderMonitor
         Svc.Chat.ChatMessage += Chat_ChatMessage;
     }
 
-    private void Chat_ChatMessage(Dalamud.Game.Text.XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
+    private void Chat_ChatMessage(IHandleableChatMessage cm)
     {
-        Chat_ChatMessageHandled(type, timestamp, sender, message);
+        Chat_ChatMessageHandled(cm);
     }
 
-    private void Chat_ChatMessageHandled(Dalamud.Game.Text.XivChatType type, int timestamp, SeString sender, SeString message)
+    private void Chat_ChatMessageHandled(IChatMessage cm)
     {
         new TickScheduler(() =>
         {
