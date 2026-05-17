@@ -153,86 +153,90 @@ internal class TabSystem : Window
                 ImGui.TableSetupColumn("TabList", ImGuiTableColumnFlags.None, initialTabListColWidth);
                 ImGui.TableSetupColumn("TabContent", ImGuiTableColumnFlags.None, initialTabContentColWidth);
                 ImGui.TableNextColumn();
-                if(ImGui.BeginTable("##MessengerVerticalTabList", 1))
+                if(ImGui.BeginChild("##MessengerVerticalTabListChild"))
                 {
-                    ImGui.TableSetupColumn("User");
-                    foreach(var w in Windows.ToArray())
+                    if(ImGui.BeginTable("##MessengerVerticalTabList", 1))
                     {
-                        ImGui.PushID(w.WindowName);
-                        if(w.IsOpen)
+                        ImGui.TableSetupColumn("User");
+                        foreach(var w in Windows.ToArray())
                         {
-                            if(w.MessageHistory.ShouldSetFocus())
+                            ImGui.PushID(w.WindowName);
+                            if(w.IsOpen)
                             {
-                                SelectedWindowforVerticalTabs = w;
-                            }
-                            ImGui.TableNextRow();
-                            if(SelectedWindowforVerticalTabs == w)
-                            {
-                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive].ToUint());
-                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive].ToUint());
-                            }
-                            else if(w.Unread)
-                            {
-                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGuiCol.TableRowBg.GetFlashColor(w.Cust).ToUint());
-                                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGuiCol.TableRowBg.GetFlashColor(w.Cust).ToUint());
-                            }
-                            ImGui.TableNextColumn();
-
-
-                            var size = ImGuiHelpers.GetButtonSize(FontAwesomeIcon.Times.ToIconString());
-                            var storeCurPos = ImGui.GetCursorPos();
-                            ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - size.X + ImGui.GetStyle().CellPadding.X);
-                            var transparent = !HoveredChannels.Contains(w.MessageHistory.HistoryPlayer);
-                            var hovered = false;
-                            var buttonCurPos = ImGui.GetCursorPos();
-                            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0f);
-                            if(ImGuiEx.SmallIconButton(FontAwesomeIcon.Times))
-                            {
-                                w.IsOpen = false;
+                                if(w.MessageHistory.ShouldSetFocus())
+                                {
+                                    SelectedWindowforVerticalTabs = w;
+                                }
+                                ImGui.TableNextRow();
                                 if(SelectedWindowforVerticalTabs == w)
                                 {
-                                    SelectedWindowforVerticalTabs = null;
+                                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive].ToUint());
+                                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGui.GetStyle().Colors[(int)ImGuiCol.TabActive].ToUint());
+                                }
+                                else if(w.Unread)
+                                {
+                                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, ImGuiCol.TableRowBg.GetFlashColor(w.Cust).ToUint());
+                                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGuiCol.TableRowBg.GetFlashColor(w.Cust).ToUint());
+                                }
+                                ImGui.TableNextColumn();
+
+
+                                var size = ImGuiHelpers.GetButtonSize(FontAwesomeIcon.Times.ToIconString());
+                                var storeCurPos = ImGui.GetCursorPos();
+                                ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - size.X + ImGui.GetStyle().CellPadding.X);
+                                var transparent = !HoveredChannels.Contains(w.MessageHistory.HistoryPlayer);
+                                var hovered = false;
+                                var buttonCurPos = ImGui.GetCursorPos();
+                                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0f);
+                                if(ImGuiEx.SmallIconButton(FontAwesomeIcon.Times))
+                                {
+                                    w.IsOpen = false;
+                                    if(SelectedWindowforVerticalTabs == w)
+                                    {
+                                        SelectedWindowforVerticalTabs = null;
+                                    }
+                                }
+                                ImGui.PopStyleVar();
+                                if(ImGui.IsItemHovered()) hovered = true;
+                                ImGui.SameLine(0, 0);
+                                ImGui.SetCursorPos(storeCurPos);
+
+                                var channelName = w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld);
+                                if(ImGui.Selectable(channelName))
+                                {
+                                    SelectedWindowforVerticalTabs = w;
+                                }
+                                Associate(w);
+                                ImGuiEx.Tooltip(channelName);
+                                if(ImGui.IsItemHovered()) hovered = true;
+                                if(!transparent)
+                                {
+                                    ImGui.SameLine(0, 0);
+                                    var curPos = ImGui.GetCursorPos();
+                                    ImGui.SetCursorPos(buttonCurPos);
+                                    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
+                                    var col = ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
+                                    ImGui.PushStyleColor(ImGuiCol.Button, col);
+                                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, col);
+                                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, col);
+                                    ImGuiEx.SmallIconButton(FontAwesomeIcon.Times);
+                                    ImGui.PopStyleColor(4);
+                                    ImGui.SetCursorPos(curPos);
+                                }
+                                if(hovered)
+                                {
+                                    HoveredChannels.Add(w.MessageHistory.HistoryPlayer);
+                                }
+                                else
+                                {
+                                    HoveredChannels.Remove(w.MessageHistory.HistoryPlayer);
                                 }
                             }
-                            ImGui.PopStyleVar();
-                            if(ImGui.IsItemHovered()) hovered = true;
-                            ImGui.SameLine(0, 0);
-                            ImGui.SetCursorPos(storeCurPos);
-
-                            var channelName = w.MessageHistory.HistoryPlayer.GetChannelName(!C.TabsNoWorld);
-                            if(ImGui.Selectable(channelName))
-                            {
-                                SelectedWindowforVerticalTabs = w;
-                            }
-                            Associate(w);
-                            ImGuiEx.Tooltip(channelName);
-                            if(ImGui.IsItemHovered()) hovered = true;
-                            if(!transparent)
-                            {
-                                ImGui.SameLine(0, 0);
-                                var curPos = ImGui.GetCursorPos();
-                                ImGui.SetCursorPos(buttonCurPos);
-                                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
-                                var col = ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
-                                ImGui.PushStyleColor(ImGuiCol.Button, col);
-                                ImGui.PushStyleColor(ImGuiCol.ButtonActive, col);
-                                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, col);
-                                ImGuiEx.SmallIconButton(FontAwesomeIcon.Times);
-                                ImGui.PopStyleColor(4);
-                                ImGui.SetCursorPos(curPos);
-                            }
-                            if(hovered)
-                            {
-                                HoveredChannels.Add(w.MessageHistory.HistoryPlayer);
-                            }
-                            else
-                            {
-                                HoveredChannels.Remove(w.MessageHistory.HistoryPlayer);
-                            }
+                            ImGui.PopID();
                         }
-                        ImGui.PopID();
+                        ImGui.EndTable();
                     }
-                    ImGui.EndTable();
+                    ImGui.EndChild();
                 }
                 ApplyVerticalTabAutoSelection();
                 ImGui.TableNextColumn();
