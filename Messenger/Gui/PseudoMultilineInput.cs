@@ -440,7 +440,7 @@ public unsafe partial class PseudoMultilineInput
             {
                 EmojiSelectorRow = index;
                 ImGui.SetScrollHereY();
-                if(IsKeyPressed(LimitedKeys.Tab))
+                if(IsKeyPressed(LimitedKeys.Tab) || (C.EnableEmojiSelectionUsingEnterKey && IsKeyPressed(LimitedKeys.Enter)))
                 {
                     ImGui.SetWindowFocus(ImU8String.Empty);
                     Insert(em.Key);

@@ -388,7 +388,7 @@ public unsafe class ChatWindow : Window
             string remainder = null;
             var split = C.SplitterEnable ? Utils.SplitMessage(Input.SinglelineText, tellTarget, out firstMessage, out remainder) : null;
             var isSplit = split != null && split.Count > 1 && firstMessage != null && remainder != null;
-            if(Input.EnterWasPressed() && EzThrottler.Check("SendMessage"))
+            if(Input.EnterWasPressed() && EzThrottler.Check("SendMessage") && (!C.EnableEmojiSelectionUsingEnterKey || !ImGui.IsPopupOpen("XIMEmojiSelect")))
             {
                 if(!C.DoubleEnterSend || !EzThrottler.Check("DoubleEnter"))
                 {
