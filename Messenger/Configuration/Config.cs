@@ -102,6 +102,7 @@ public class Config : IEzConfig
 
     public bool EnableEmoji = true;
     public bool EnableEmojiPicker = true;
+    public bool EnableEmojiSelectionUsingEnterKey = false;
     public bool EnableBetterTTV = true;
     public bool DownloadUnknownEmoji = true;
     public long LastStaticBetterTTVUpdate = 0;

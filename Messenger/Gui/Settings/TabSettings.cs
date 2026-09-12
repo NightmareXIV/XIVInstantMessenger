@@ -234,6 +234,7 @@ internal class TabSettings
             {
                 if(ImGui.Checkbox("Enable Emoji support", ref C.EnableEmoji)) S.EmojiLoader.Initialize();
                 ImGui.Checkbox("Enable Emoji picker", ref C.EnableEmojiPicker);
+                ImGui.Checkbox("Enable Emoji selection using Enter key", ref C.EnableEmojiSelectionUsingEnterKey);
                 if(ImGui.Checkbox("Enable BetterTTV Emoji support", ref C.EnableBetterTTV)) S.EmojiLoader.Initialize();
                 ImGui.Checkbox("Attempt to search for unknown emoji on BetterTTV", ref C.DownloadUnknownEmoji);
                 ImGuiEx.TextWrapped("""
